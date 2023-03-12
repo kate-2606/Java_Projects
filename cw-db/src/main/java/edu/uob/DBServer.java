@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /** This class implements the DB server. */
 public class DBServer {
@@ -44,30 +45,30 @@ public class DBServer {
 
     }
 
-    //changer this exception?
+    //change this exception?
     //how to test a private method -- this should be private:
-    public static ArrayList<String> readFile(String fileName) throws FileNotFoundException {
+    public Table readFile(String fileName) throws FileNotFoundException {
+
+
+
         try {
+            Table readTable = null;
+
         File fileToOpen = new File(storageFolderPath + File.separator + fileName);
-        FileReader reader = new FileReader(fileToOpen);
 
-        ArrayList<String> readFile = new ArrayList<>();
-        //IO exception and check is not a directory
-        BufferedReader buffReader = new BufferedReader(reader);
-
-        String line = null;
-        while ((line = buffReader.readLine()) != null){
-            readFile.add(line);
-
+        if (!(fileToOpen.isDirectory())){
+            FileReader reader = new FileReader(fileToOpen);
+            BufferedReader buffReader = new BufferedReader(reader);
+            readTable = new Table(fileName, buffReader);
         }
-        buffReader.close();
 
-        return readFile;
+            return readTable;
 
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
             throw new FileNotFoundException();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
 
     }
 
