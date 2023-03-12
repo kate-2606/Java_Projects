@@ -22,4 +22,12 @@ public class Row {
     public void addCellData(int position, String dataStr) {
         row.add(position, dataStr);
     }
+
+    public String rowToString(int numberOfColumns){
+        String rowStr=getCellDataByNumber(0);
+        for (int j = 1; j < numberOfColumns; j++) {
+            rowStr = rowStr.concat("\t" + getCellDataByNumber(j));
+        }
+        return rowStr;
+    }
 }

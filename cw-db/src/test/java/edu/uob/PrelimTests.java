@@ -22,14 +22,30 @@ public class PrelimTests {
 
     @Test
     public void testFileReading() throws FileNotFoundException {
+        setup();
         String fileName = "Tests/people.tab";
         Table tesTable = server.readFile(fileName);
 
         assertEquals(tesTable.getTableName(), "people");
-        assertEquals(tesTable.getNumberOfAttributes(), 4);
-        assertEquals(tesTable.getNumberOfDataRows(), 3);
-        assertEquals(tesTable.getCellDataByNumber(2, 2), "42");
-        assertEquals(tesTable.getCellDataByNumber(0, 1), "Bob");
+        assertEquals(4, tesTable.getNumberOfAttributes());
+        assertEquals(3, tesTable.getNumberOfDataRows());
+        assertEquals("42", tesTable.getCellDataByNumber(2, 2));
+        assertEquals("Bob", tesTable.getCellDataByNumber(1, 0));
+
+
+        String fileLocation = "/home/kate/CS_Java/Java_CW/cw-db/databases/Tests/Out/people.txt";
+        server.exportTable(fileLocation, tesTable);
 
     }
+
+    @Test
+    public void testTokenizer() {
+        setup();
+        Tokenizer tok = new Tokenizer();
+        tok.tokenizer(" INSERT USE DELETE UPDATE");
+        assertEquals("INSERT", tok.getToken(0));
+        assertEquals("USE", tok.getToken(1));
+        assertEquals("DELETE", tok.getToken(2));
+    }
+
 }

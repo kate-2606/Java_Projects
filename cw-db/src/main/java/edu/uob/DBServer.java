@@ -50,24 +50,45 @@ public class DBServer {
     public Table readFile(String fileName) throws FileNotFoundException {
 
 
-
-        try {
-            Table readTable = null;
+        Table readTable = null;
 
         File fileToOpen = new File(storageFolderPath + File.separator + fileName);
 
-        if (!(fileToOpen.isDirectory())){
-            FileReader reader = new FileReader(fileToOpen);
-            BufferedReader buffReader = new BufferedReader(reader);
-            readTable = new Table(fileName, buffReader);
+        if (!(fileToOpen.isDirectory())) {
+            try {
+                FileReader reader = new FileReader(fileToOpen);
+                BufferedReader buffReader = new BufferedReader(reader);
+                readTable = new Table(fileName, buffReader);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return readTable;
 
-            return readTable;
+    }
 
-        } catch (FileNotFoundException e) {
-            throw new FileNotFoundException();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+    public void exportTable(String fileLocation, Table tableToExport) {
+        File fileToOpen = new File(fileLocation);
+
+        if (!(fileToOpen.isDirectory() && fileToOpen.exists())) {
+            try {
+                FileWriter writer = new FileWriter(fileToOpen);
+                BufferedWriter buffWriter = new BufferedWriter(writer);
+
+                int numberOfRows = tableToExport.getNumberOfDataRows();
+                int numberOfColumns = tableToExport.getNumberOfAttributes();
+
+                buffWriter.write(tableToExport.attributesToString() + "\n");
+
+                for (int i = 0; i < numberOfRows; i++) {
+                    buffWriter.write(tableToExport.rowToString(i) + "\n");
+                }
+                buffWriter.flush();
+                buffWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }

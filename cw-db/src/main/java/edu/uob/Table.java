@@ -1,7 +1,6 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 
@@ -9,8 +8,8 @@ public class Table {
 //use file separator instead
     public Table(String fileName, BufferedReader buffReader) throws IOException{
 
-        if(fileName.lastIndexOf("/")!=-1){
-            this.tableName = fileName.substring(fileName.lastIndexOf("/")+1, fileName.lastIndexOf("."));
+        if(fileName.lastIndexOf(File.separator)!=-1){
+            this.tableName = fileName.substring(fileName.lastIndexOf(File.separator)+1, fileName.lastIndexOf("."));
         }
         else {
             this.tableName = fileName.substring(0, fileName.lastIndexOf("."));
@@ -26,7 +25,7 @@ public class Table {
                 this.tableData.add(dataRow);
                 i++;
             }
-            this.tablePrimaryKey = new PrimaryKey(this);
+            primaryKey();
 
         }catch (IOException e) {
             throw new IOException();
@@ -38,7 +37,6 @@ public class Table {
 
     private ArrayList<Row> tableData;
 
-    private PrimaryKey tablePrimaryKey;
 
     private String tableName;
 
@@ -46,7 +44,6 @@ public class Table {
 
     public String getCellDataByNumber(int columnNumber, int rowNumber){
         Row currRow = tableData.get(rowNumber);
-        System.out.println(currRow);
         return currRow.getCellDataByNumber(columnNumber);
     }
 
@@ -63,6 +60,21 @@ public class Table {
         tableData.get(rowNumber).addCellData(position, dataStr);
     }
 
+    public void primaryKey(){
+        this.addAttribute(0, "id");
+        for(int i=0; i<this.getNumberOfDataRows(); i++){
+            this.addCellData(i, 0, Integer.toString(i+1));
+        }
+    }
 
+
+    public String rowToString(int rowNumber){
+        int numberOfColumns = getNumberOfAttributes();
+        String rowStr=tableData.get(rowNumber).rowToString(numberOfColumns);
+
+        return rowStr;
+    }
+
+    public String attributesToString(){ return tableAttributes.attributesToString(); }
 
 }
