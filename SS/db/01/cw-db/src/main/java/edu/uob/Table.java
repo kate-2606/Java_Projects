@@ -37,6 +37,7 @@ public class Table {
 
     private ArrayList<Row> tableData;
 
+
     private String tableName;
 
     public String getTableName(){ return tableName; }
