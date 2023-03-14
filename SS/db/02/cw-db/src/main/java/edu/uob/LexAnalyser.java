@@ -2,9 +2,14 @@ package edu.uob;
 
 import java.util.*;
 
-public class LexicalAnalyser {
+public class LexAnalyser {
 
-    String query = null;
+    public void LexAnalyser(String inpCommand){
+        setCommand(command);
+        setup();;
+    }
+
+    String command = null;
     String[] specialCharacters = {"(",")",",",";"};
 
     ArrayList<String> words = new ArrayList<>();
@@ -17,20 +22,23 @@ public class LexicalAnalyser {
         return words.get(tokenNumber);
     }
 
-    public void setQuery(String inpQuery){
+    public void setCommand(String inpCommand){
         words.clear();
         tokens.clear();
-        query=inpQuery;
-        tokenNumber=0;
-
+        command=inpCommand;
+        tokenNumber=-1;
     }
+
+    public Token getCurrentToken() {return tokens.get(tokenNumber); }
 
     private String[] tokenTypeStrings =
             {"USE", "CREATE", "DROP", "ALTER", "INSERT", "SELECT", "JOIN", "DATABASE",
                     "TABLE", "VALUES", "INTO", "UPDATE", "FROM", "SET", "WHERE", "ON",
-                    "ADD", "(", ")", ",", " ", ";", "NULL"};
+                    "ADD", "(", ")", ",", " ", ";", "NULL", "*"};
 
     public Token getNextToken (){
+
+        tokenNumber++;
 
         Token curToken = new Token();
         int i;
@@ -39,86 +47,77 @@ public class LexicalAnalyser {
 
         for (i=0; i<tokenTypeStrings.length; i++ ){
             if(Objects.equals(word,tokenTypeStrings[i])){
-                curToken.setTokenType(i);
+                curToken.setType(i);
                 tokens.add(curToken);
-                tokenNumber++;
                 return curToken;
             }
         }
+
         if (isTokenComparator(word)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word);
+            curToken.setType(i+increment);
+            curToken.setValue(word);
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
         increment ++;
 
         if (isTokenBoolOp(word)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word);
+            curToken.setType(i+increment);
+            curToken.setValue(word);
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
         increment ++;
         if (isTokenStringLit(word)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word.substring(0,word.length()-1));
+            curToken.setType(i+increment);
+            curToken.setValue(word.substring(0,word.length()-1));
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
         increment ++;
         if (isTokenBoolLit(word)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word);
+            curToken.setType(i+increment);
+            curToken.setValue(word);
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
         increment ++;
         if (isTokenFloatOrIntLit(word, false)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word);
+            curToken.setType(i+increment);
+            curToken.setValue(word);
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
         increment ++;
         if (isTokenFloatOrIntLit(word, true)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word);
+            curToken.setType(i+increment);
+            curToken.setValue(word);
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
         increment ++;
         if (isTokenPlainText(word)){
-            curToken.setTokenType(i+increment);
-            curToken.setTokenValue(word);
+            curToken.setType(i+increment);
+            curToken.setValue(word);
             tokens.add(curToken);
-            tokenNumber++;
             return curToken;
         }
-        increment ++;
-        if ((word.length()==1) && (word.charAt(0)=='*')){
-            curToken.setTokenType(i+increment);
-            tokens.add(curToken);
-            tokenNumber++;
-            return curToken;
-        }
-
         return null;
     }
 
 
-    private Boolean isTokenComparator(String token){
-        String[] comparators = new String[] { "==", ">", "<", ">=", "<=", "!=", "LIKE"};
-        for(int i=0; i<comparators.length; i++){
-            if (token == comparators[i]){
-                return true;
-            }
+    private Boolean isTokenComparator(String word){
+        switch (word) {
+            case "==":
+            case ">":
+            case "<":
+            case ">=":
+            case "<=":
+            case "!=":
+            case "LIKE":
+                break;
+            default:
+                return false;
         }
         return false;
     }
@@ -161,17 +160,41 @@ public class LexicalAnalyser {
     }
 
     private Boolean isCharSymbol (Character symbol){
-        Character[] comparators = new Character[] { '!', '#', '$', '%',
-            '&', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '>',
-            '=', '<', '?', '@', '[', '\\', ']', '^', '`', '{', '}', '~'
-        };
 
-        for(int i=0; i<comparators.length; i++){
-            if (symbol==comparators[i]){
-              return true;
-            }
+        switch (symbol) {
+            case '!':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '-':
+            case '.':
+            case '/':
+            case ':':
+            case ';':
+            case '>':
+            case '=':
+            case '<':
+            case '?':
+            case '@':
+            case '[':
+            case '\\':
+            case ']':
+            case '^':
+            case '`':
+            case '{':
+            case '}':
+            case '~':
+            break;
+            default:
+                return false;
         }
-    return false;
+        return true;
     }
 
     private Boolean isCharLetterOrDigit (Character c) {
@@ -215,8 +238,8 @@ public class LexicalAnalyser {
 
     void setup()
     {
-        query = query.trim();
-        String[] fragments = query.split("'");
+        command = command.trim();
+        String[] fragments = command.split("'");
         for (int i=0; i<fragments.length; i++) {
             if (i%2 != 0) words.add("'" + fragments[i] + "'");
             else {

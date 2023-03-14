@@ -16,9 +16,7 @@ public class Token {
 
     public void setValue(String inpValue){ value = inpValue; }
 
-    public String getValue(){ return value; }
-
-    public Parser.TokenType getType(){ return type; }
+    public String getTokenValue(){ return value; }
 
     public String typeToString(){
         return type.toString();

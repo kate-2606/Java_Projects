@@ -16,13 +16,13 @@ public class Table {
         }
 
         try {
-            this.attributes = new Attributes(buffReader.readLine());
-            this.data = new ArrayList<Row>();
+            this.tableAttributes = new Attributes(buffReader.readLine());
+            this.tableData = new ArrayList<Row>();
             String data = null;
             int i=1;
             while ((data = buffReader.readLine()) != null) {
                 Row dataRow = new Row(data);
-                this.data.add(dataRow);
+                this.tableData.add(dataRow);
                 i++;
             }
             primaryKey();
@@ -30,32 +30,33 @@ public class Table {
         }catch (IOException e) {
             throw new IOException();
         }
+
     }
 
-    private Attributes attributes;
+    private Attributes tableAttributes;
 
-    private ArrayList<Row> data;
+    private ArrayList<Row> tableData;
 
     private String tableName;
 
     public String getTableName(){ return tableName; }
 
     public String getCellDataByNumber(int columnNumber, int rowNumber){
-        Row currRow = data.get(rowNumber);
+        Row currRow = tableData.get(rowNumber);
         return currRow.getCellDataByNumber(columnNumber);
     }
 
-    public String getAttributeByNumber(int column){ return attributes.getAttributeByNumber(column); }
+    public String getAttributeByNumber(int column){ return tableAttributes.getAttributeByNumber(column); }
 
-    public int getNumberOfDataRows() { return data.size(); }
+    public int getNumberOfDataRows() { return tableData.size(); }
 
-    public int getNumberOfAttributes() { return attributes.getNumberOfAttributes(); }
+    public int getNumberOfAttributes() { return tableAttributes.getNumberOfAttributes(); }
 
     public void addAttribute(int position, String attributeName) {
-        attributes.addAttribute(position, attributeName);
+        tableAttributes.addAttribute(position, attributeName);
     }
     public void addCellData(int rowNumber, int position, String dataStr) {
-        data.get(rowNumber).addCellData(position, dataStr);
+        tableData.get(rowNumber).addCellData(position, dataStr);
     }
 
     public void primaryKey(){
@@ -68,11 +69,11 @@ public class Table {
 
     public String rowToString(int rowNumber){
         int numberOfColumns = getNumberOfAttributes();
-        String rowStr=data.get(rowNumber).rowToString(numberOfColumns);
+        String rowStr=tableData.get(rowNumber).rowToString(numberOfColumns);
 
         return rowStr;
     }
 
-    public String attributesToString(){ return attributes.attributesToString(); }
+    public String attributesToString(){ return tableAttributes.attributesToString(); }
 
 }

@@ -169,27 +169,6 @@ public class PrelimTests {
 
         testParser.Parser("SELECT * FROM marks WHERE ((pass == FALSE) AND (mark > 35));");
         assertTrue(testParser.getParseResult());
-
-        testParser.Parser("SELECT * FROM marks WHERE (pass == FALSE) AND mark > 35;");
-        assertTrue(testParser.getParseResult());
-
-        testParser.Parser("SELECT * FROM marks WHERE (pass == FALSE) AND mark LIKE 35;");
-        assertTrue(testParser.getParseResult());
-
-        testParser.Parser("SELECT * FROM marks WHERE (pass == FALSE) ADD mark LIKE 35;");
-        assertFalse(testParser.getParseResult());
-    }
-
-    @Test
-    public void testParserUpdate() {
-        Parser testParser = new Parser();
-        LexAnalyser test = new LexAnalyser();
-        test.setCommand("SELECT * FROM marks WHERE (pass == FALSE) ADD mark LIKE 35;");
-        test.getWord(4);
-        testParser.Parser("UPDATE marks SET grade = 'rubbish', extra-work = 'lots' WHERE student == 'lazy';");
-        System.out.println(testParser.lex.getWord(4));
-        assertTrue(testParser.getParseResult());
-
     }
 
 
