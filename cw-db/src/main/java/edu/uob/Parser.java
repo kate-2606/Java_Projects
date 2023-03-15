@@ -4,20 +4,20 @@ import java.util.*;
 
 public class Parser {
     // Token Type
-    public void Parser(String command){
-        LexAnalyser initiateLex = new LexAnalyser();
-        lex=initiateLex;
-        System.out.println(command);
-        lex.LexAnalyser(command);
-        parsedOkay=command();
+    public void Parser(ArrayList<Token> tokenList, Lexer inpLex){
+        lex=inpLex;
+        tokens=tokenList;
+        parsedOkay= command();
     }
 
-    private boolean debugging = true;
-    public LexAnalyser lex=null;
+    private Lexer lex;
+
+    private ArrayList<Token> tokens;
+    private boolean debugging = false;
 
     private boolean parsedOkay;
 
-    public boolean getParseResult(){ return parsedOkay; }
+    public boolean getParserResult(){ return parsedOkay; }
 
     public enum TokenType {
         USE, CREATE, DROP, ALTER, INSERT, SELECT, JOIN, DATABASE,
@@ -31,8 +31,8 @@ public class Parser {
         FLOAT_LIT, INT_LIT, PLAIN_TXT, ATTRIB_NAME
     }
 
-    private Boolean accept(TokenType t){
-        Token tok = lex.getCurrentToken();
+    public boolean accept(TokenType t){
+        Token tok = getCurrentToken();
         if (tok.getType()==t){
             if (t != TokenType.SEMI_COL) {
                 tok = lex.getNextToken();
@@ -42,12 +42,14 @@ public class Parser {
         return false;
     }
 
-    private Boolean expect(TokenType t){
+    private boolean expect(TokenType t){
         if (accept(t)){
             return true;
         }
         return false;
     }
+
+    public Token getCurrentToken() {return tokens.get(tokens.size()-1); }
 
     private boolean nameValueList(){
         Boolean ret = false;
@@ -60,7 +62,7 @@ public class Parser {
         return ret;
     }
 
-    private Boolean nameValuePair(){
+    private boolean nameValuePair(){
         if(attributeName()){
             if(accept(TokenType.EQUALS)){
                 if(value()){
@@ -106,7 +108,7 @@ public class Parser {
     }
 
     private boolean value() {
-        Token token = lex.getCurrentToken();
+        Token token = getCurrentToken();
         switch (token.getType()) {
             case STRING_LIT:
             case BOOL_LIT:
@@ -155,12 +157,12 @@ public class Parser {
     private boolean join() {
         lex.getNextToken();
         if(accept(TokenType.PLAIN_TXT)){
-            if(Objects.equals(lex.getCurrentToken().getValue(),"AND")){
+            if(Objects.equals(getCurrentToken().getValue(),"AND")){
                 lex.getNextToken();
                 if(accept(TokenType.PLAIN_TXT)){
                     if(accept(TokenType.ON)){
                         if(attributeName()){
-                            if(Objects.equals(lex.getCurrentToken().getValue(),"AND")){
+                            if(Objects.equals(getCurrentToken().getValue(),"AND")){
                                 lex.getNextToken();
                                 if(attributeName()){
                                     return true;
@@ -284,8 +286,9 @@ public class Parser {
         return expect(TokenType.PLAIN_TXT);
     }
 
+
     private boolean commandType(){
-        Token token = lex.getCurrentToken();
+        Token token = getCurrentToken();
         if(debugging){
             System.out.println("in commandType, token type is: "+ token.getType());
         }

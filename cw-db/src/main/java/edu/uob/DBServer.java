@@ -38,15 +38,30 @@ public class DBServer {
     *
     * <p>This method handles all incoming DB commands and carries out the required actions.
     */
-    public String handleCommand(String command) {
-        LexAnalyser lex = new LexAnalyser();
-        lex.LexAnalyser(command);
 
-        return "";
-   
+
+
+    public String handleCommand(String command) {
+        ArrayList<Token> tokens = new ArrayList<>();
+
+        Lexer lexer = new Lexer();
+        lexer.Lexer(command, tokens);
+
+        Parser parser = new Parser();
+        parser.Parser(tokens, lexer);
+
+        String result="";
+
+        if (parser.getParserResult()) {
+            result ="[OK]";
+            Interpreter interpreter = new Interpreter();
+            interpreter.Interpreter(storageFolderPath, tokens);
+        }
+
+        return result;
 
     }
-
+/*
     //change this exception?
     //how to test a private method -- this should be private:
     public Table readFile(String fileName) throws FileNotFoundException {
@@ -67,6 +82,7 @@ public class DBServer {
         return readTable;
 
     }
+ */
 
 
     public void exportTable(String fileLocation, Table tableToExport) {
@@ -78,7 +94,6 @@ public class DBServer {
                 BufferedWriter buffWriter = new BufferedWriter(writer);
 
                 int numberOfRows = tableToExport.getNumberOfDataRows();
-                int numberOfColumns = tableToExport.getNumberOfAttributes();
 
                 buffWriter.write(tableToExport.attributesToString() + "\n");
 
@@ -91,8 +106,8 @@ public class DBServer {
                 throw new RuntimeException(e);
             }
         }
-
     }
+
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===
 

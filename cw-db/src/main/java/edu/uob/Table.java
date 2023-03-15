@@ -6,31 +6,7 @@ import java.util.ArrayList;
 
 public class Table {
 //use file separator instead
-    public Table(String fileName, BufferedReader buffReader) throws IOException{
-
-        if(fileName.lastIndexOf(File.separator)!=-1){
-            this.tableName = fileName.substring(fileName.lastIndexOf(File.separator)+1, fileName.lastIndexOf("."));
-        }
-        else {
-            this.tableName = fileName.substring(0, fileName.lastIndexOf("."));
-        }
-
-        try {
-            this.attributes = new Attributes(buffReader.readLine());
-            this.data = new ArrayList<Row>();
-            String data = null;
-            int i=1;
-            while ((data = buffReader.readLine()) != null) {
-                Row dataRow = new Row(data);
-                this.data.add(dataRow);
-                i++;
-            }
-            primaryKey();
-
-        }catch (IOException e) {
-            throw new IOException();
-        }
-    }
+    public Table(String name) { tableName = name; }
 
     private Attributes attributes;
 

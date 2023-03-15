@@ -3,49 +3,55 @@ package edu.uob;
 import java.util.*;
 
 //use pattern.match() functions (reg expressions)
-//should be case insensitive
-//table names etc.. can't have the same name as keywords
-//tokeniser should split WHERE age<40 into 4 tokens, currently it would be two tokens
-//unsigned long for keys
+//should be case-insensitive
+//table names etc... can't have the same name as keywords
+//tokeniser should split WHERE age<40 into 4 tokens, currently it would be two tokens --- DONE
+//unsigned long for key
+//write good error messages
+//sort ugly function
+
+
 //key persists?
 //foriegn keys self generated?
 //tokeniser change special chars to strings
 //when to write to table?
+//parse a wordIndex then interpret?
+//can you create a databases in the directory? Or they have to be in a database?
+//can you delete a database while in a different database?
 
 
-public class LexAnalyser {
+//boolean upper or lkowercase?
 
-    public void LexAnalyser(String inpCommand){
+
+
+public class Lexer {
+
+    public void Lexer(String inpCommand, ArrayList<Token> tokenList){
+        tokens=tokenList;
         setCommand(inpCommand);
         setup();
-        /*
-        for(int i=0; i<words.size(); i++){
-            System.out.println("Word " + i + " = " + words.get(i));
-        }
-
-         */
     }
+
+    ArrayList<Token> tokens;
 
     String command = null;
 
     ArrayList<String> words = new ArrayList<>();
 
-    private ArrayList<Token> tokens = new ArrayList<>();
+    private int wordIndex;
 
-    private static int tokenNumber = 0;
 
-    public String getWord(int tokenNumber){
-        return words.get(tokenNumber);
+    public String getWord(int wordIndex){
+        return words.get(wordIndex);
     }
 
     public void setCommand(String inpCommand){
         words.clear();
-        tokens.clear();
         command=inpCommand;
-        tokenNumber=-1;
+        wordIndex=-1;
     }
 
-    public Token getCurrentToken() {return tokens.get(tokenNumber); }
+    public void resetWordIndex(){ wordIndex = -1; }
 
     private String[] tokenTypeStrings =
             {"USE", "CREATE", "DROP", "ALTER", "INSERT", "SELECT", "JOIN", "DATABASE",
@@ -54,13 +60,12 @@ public class LexAnalyser {
             };
 
 
-
     public Token getNextToken (){
 
-        tokenNumber++;
+        wordIndex++;
 
         Token curToken = new Token();
-        String word = words.get(tokenNumber);
+        String word = words.get(wordIndex);
 
         int i;
         int increment=0;
@@ -125,9 +130,7 @@ public class LexAnalyser {
 
 
         increment ++;
-        System.out.println("before att name "+ word);
         if (isAttributeName(word)){
-            System.out.println("passed att name");
             curToken.setType(i+increment);
             curToken.setValue(word);
             tokens.add(curToken);
@@ -136,21 +139,15 @@ public class LexAnalyser {
         return null;
     }
 
+    String[] comparators = {"==", ">", "<", ">=", "<=", "!=", "LIKE"};
 
     private Boolean isComparator(String word){
-        switch (word) {
-            case "==":
-            case ">":
-            case "<":
-            case ">=":
-            case "<=":
-            case "!=":
-            case "LIKE":
-                break;
-            default:
-                return false;
+        for (int i=0; i<comparators.length; i++) {
+            if (Objects.equals(word, comparators[i])) {
+                return true;
+            }
         }
-        return true;
+        return false;
     }
 
     private Boolean isBoolOp(String word){
@@ -291,9 +288,9 @@ public class LexAnalyser {
     }
 
 
-    void setup()
+    public void setup()
     {
-        //System.out.println(command);
+        words.clear();
         command = command.trim();
         String[] fragments = command.split("'");
         for (int i=0; i<fragments.length; i++) {
@@ -305,12 +302,34 @@ public class LexAnalyser {
         }
     }
 
-    String[] specialCharacters = {"(",")",",",";"};
+    String[] baseSpecialChars = {"(",")",",",";"};
 
-    String[] tokenise(String input)
+    ArrayList<String> specialCharacters = new ArrayList<>();
+
+    private void getSpecialCharacters(){
+        specialCharacters.clear();
+
+        int base = baseSpecialChars.length;
+        int comp = comparators.length;
+        int arrSize = base+comp;
+        for(int i=0; i<arrSize; i++){
+            if(i<base) {
+                specialCharacters.add(baseSpecialChars[i]);
+            }
+            if(i>=base){
+                specialCharacters.add(comparators[i-base]);
+            }
+        }
+        specialCharacters.add("AND");
+        specialCharacters.add("OR");
+    }
+
+
+    private String[] tokenise(String input)
     {
-        for(int i=0; i<specialCharacters.length ;i++) {
-            input = input.replace(specialCharacters[i], " " + specialCharacters[i] + " ");
+        getSpecialCharacters();
+        for(int i=0; i<specialCharacters.size() ;i++) {
+            input = input.replace(specialCharacters.get(i), " " + specialCharacters.get(i) + " ");
         }
         while (input.contains("  ")) input = input.replaceAll("  ", " ");
         input = input.trim();
