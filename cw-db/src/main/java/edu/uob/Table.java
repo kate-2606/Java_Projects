@@ -6,7 +6,9 @@ import java.util.ArrayList;
 
 public class Table {
 //use file separator instead
-    public Table(String name) { tableName = name; }
+    public Table(String name) {
+        tableName = name;
+    }
 
     private Attributes attributes;
 
@@ -32,6 +34,10 @@ public class Table {
     }
     public void addCellData(int rowNumber, int position, String dataStr) {
         data.get(rowNumber).addCellData(position, dataStr);
+    }
+
+    public void setAttributes(ArrayList<String> inpAttributes) {
+        attributes = new Attributes(inpAttributes);
     }
 
     public void primaryKey(){

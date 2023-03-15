@@ -7,16 +7,11 @@ public class Attributes {
 
     //name these with capitals?
 
-    public Attributes(String attributesStr){
-        String[] elements = attributesStr.split("\t");
-        int i=0;
-        while (i<elements.length){
-            attributes.add(elements[i]);
-            i++;
-        }
-      }
+    public Attributes(ArrayList<String> inpAttributes){
+        attributes=inpAttributes;
+    }
 
-    private ArrayList<String> attributes = new ArrayList<>();
+    private ArrayList<String> attributes ;
 
     public String getAttributeByNumber(int column) { return attributes.get(column); }
 

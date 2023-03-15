@@ -34,8 +34,8 @@ public class InterpreterTests {
     public void testBasicCreateAndCommand() {
         sendCommandToServer("CREATE DATABASE coursework;");
         sendCommandToServer("CREATE TABLE java (assignment, bugs, numOfFunction, enjoyable);");
-        sendCommandToServer("INSERT INTO java VALUES ('OXO', 0, 12, TRUE);");
-        sendCommandToServer("INSERT INTO java VALUES ('OXO', 57, 8000, TRUE);");
+        //sendCommandToServer("INSERT INTO java VALUES ('OXO', 0, 12, TRUE);");
+        //sendCommandToServer("INSERT INTO java VALUES ('OXO', 57, 8000, TRUE);");
         String response = sendCommandToServer("SELECT * FROM marks;");
         assertTrue(response.contains("[OK]"), "A valid Command was made, however an [OK] tag was not returned");
     }

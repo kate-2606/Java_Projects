@@ -9,6 +9,7 @@ public class Interpreter {
     public void Interpreter(String serverStorageFolderPath, ArrayList<Token> tokenList){
         storageFolderPath=serverStorageFolderPath;
         tokens=tokenList;
+        interpretCommand();
     }
 
     private ArrayList<Token> tokens;
@@ -98,10 +99,25 @@ public class Interpreter {
             token = getNextToken();
             workingDatabase = new Database(token.getValue());
         }
+        //make an error message here
         if(token.getType() == Parser.TokenType.TABLE && workingDatabase!=null) {
             token = getNextToken();
+
             Table newTable = new Table(token.getValue());
             workingDatabase.addTable(newTable);
+
+            if(getNextToken().getType()!= Parser.TokenType.SEMI_COL){
+
+                ArrayList<String> newAttributes = new ArrayList<>();
+
+                while(getCurrentToken().getType()!= Parser.TokenType.SEMI_COL) {
+                    if (getCurrentToken().getType() != Parser.TokenType.COMMA) {
+                        getNextToken();
+                    }
+                    newAttributes.add(getCurrentToken().getValue());
+                }
+                newTable.setAttributes(newAttributes);
+            }
         }
     }
 
@@ -111,7 +127,7 @@ public class Interpreter {
         databasePath = storageFolderPath + File.separator + databaseName ;
     }
 
-    private void commandType(){
+    private void interpretCommand(){
         Token token = getCurrentToken();
         if(debugging){
             System.out.println("in commandType, token type is: "+ token.getType());
