@@ -21,13 +21,14 @@ public class Parser {
 
     public enum TokenType {
         USE, CREATE, DROP, ALTER, INSERT, SELECT, JOIN, DATABASE,
-        //9
-        TABLE, INTO, UPDATE, DELETE, FROM, SET, WHERE, ON,
-        //17
-        ADD, OPEN_BR, CLOSE_BR, SPACE, COMMA, DOT, SEMI_COL, NULL, WILD_CRD,
-        //25
-        COMPARATOR, BOOL_OP, STRING_LIT, BOOL_LIT, FLOAT_LIT, INT_LIT,
-        PLAIN_TXT
+        //10
+        TABLE, INTO, UPDATE, DELETE, FROM, SET, WHERE, ON, VALUES,
+        //20
+        ADD, OPEN_BR, CLOSE_BR, SPACE, COMMA, SEMI_COL, NULL,
+        //28
+        WILD_CRD, EQUALS, COMPARATOR, BOOL_OP, STRING_LIT, BOOL_LIT,
+        //34
+        FLOAT_LIT, INT_LIT, PLAIN_TXT, ATTRIB_NAME
     }
 
     private Boolean accept(TokenType t){
@@ -50,12 +51,8 @@ public class Parser {
 
     private boolean nameValueList(){
         Boolean ret = false;
-        System.out.println("in name val list");
         if(nameValuePair()){
-            System.out.println("in name val list1");
-            Token token = lex.getCurrentToken();
-            if(Objects.equals(token.getValue(), ",")){
-                lex.getNextToken();
+            if(accept(TokenType.COMMA)){
                 return nameValueList();
             }
             ret=true;
@@ -64,15 +61,9 @@ public class Parser {
     }
 
     private Boolean nameValuePair(){
-        System.out.println("in name val pair 0 " + lex.getCurrentToken().getType());
         if(attributeName()){
-            Token token = lex.getCurrentToken();
-            System.out.println("in name val pair1, value="+token.getValue());
-            if(Objects.equals(token.getValue(), "=")){
-                lex.getNextToken();
-                System.out.println("in name val pair2, value="+token.getValue());
+            if(accept(TokenType.EQUALS)){
                 if(value()){
-                    System.out.println("in name val pair3, value="+token.getValue());
                     return true;
                 }
             }
@@ -136,24 +127,18 @@ public class Parser {
         if (value()){
             ret=true;
             if(accept(TokenType.COMMA)){
-                System.out.println("got past comma");
                 ret = valueList();
             }
         }
         return ret;
     }
 
+
     private boolean attributeName() {
-        boolean ret=false;
-        System.out.println("got into att name1 "+lex.getCurrentToken().getType() + " " + lex.getCurrentToken().getValue());
-        if(expect(TokenType.PLAIN_TXT)){
-            System.out.println("got into att name2" +lex.getCurrentToken().getType() + " " + lex.getCurrentToken().getValue());
-            ret=true;
-            if (accept(TokenType.DOT)){
-                    ret=expect(TokenType.PLAIN_TXT);
-            }
+        if(accept(TokenType.PLAIN_TXT) || accept(TokenType.ATTRIB_NAME)){
+            return true;
         }
-        return ret;
+        return false;
     }
 
     private boolean attributeList() {
@@ -168,22 +153,46 @@ public class Parser {
     }
 
     private boolean join() {
-        return true;
+        lex.getNextToken();
+        if(accept(TokenType.PLAIN_TXT)){
+            if(Objects.equals(lex.getCurrentToken().getValue(),"AND")){
+                lex.getNextToken();
+                if(accept(TokenType.PLAIN_TXT)){
+                    if(accept(TokenType.ON)){
+                        if(attributeName()){
+                            if(Objects.equals(lex.getCurrentToken().getValue(),"AND")){
+                                lex.getNextToken();
+                                if(attributeName()){
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private boolean delete() {
-        return true;
+        lex.getNextToken();
+        if(accept(TokenType.FROM)){
+            if(accept(TokenType.PLAIN_TXT)){
+                if(accept(TokenType.WHERE)){
+                    if(condition()){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private boolean update() {
         lex.getNextToken();
-        System.out.println("in update");
         if(accept(TokenType.PLAIN_TXT)) {
-            System.out.println("in after plain text");
             if(accept(TokenType.SET)) {
-                System.out.println("in after set");
                 if(nameValueList()){
-                    System.out.println("in after name val");
                     if(accept(TokenType.WHERE)) {
                         if (condition()) {
                             return true;
@@ -213,16 +222,18 @@ public class Parser {
 
     private boolean insert() {
         boolean ret =false;
-        lex.getNextToken();
+        Token token =lex.getNextToken();
+        if(debugging){
+            System.out.println("in insert, token type is: "+ token.getType());
+        }
         if(accept(TokenType.INTO)){
             if (accept(TokenType.PLAIN_TXT)){
-                if(value()){
+                if(accept(TokenType.VALUES)){
                     if(accept(TokenType.OPEN_BR)){
                         if(valueList()){
                             ret=expect(TokenType.CLOSE_BR);
                         }
                     }
-
                 }
             }
         }

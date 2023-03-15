@@ -183,14 +183,37 @@ public class PrelimTests {
     @Test
     public void testParserUpdate() {
         Parser testParser = new Parser();
-        LexAnalyser test = new LexAnalyser();
-        test.setCommand("SELECT * FROM marks WHERE (pass == FALSE) ADD mark LIKE 35;");
-        test.getWord(4);
-        testParser.Parser("UPDATE marks SET grade = 'rubbish', extra-work = 'lots' WHERE student == 'lazy';");
-        System.out.println(testParser.lex.getWord(4));
+        testParser.Parser("UPDATE marks SET grade = 'rubbish', extraWork = 'lots' WHERE student == 'lazy';");
+        assertTrue(testParser.getParseResult());
+
+
+        testParser.Parser("UPDATE marks SET grade = 'rubbish', extraWork.amount = 'lots' WHERE student == 'lazy';");
         assertTrue(testParser.getParseResult());
 
     }
 
+
+    @Test
+    public void testParserDelete() {
+        Parser testParser = new Parser();
+        testParser.Parser("DELETE FROM marks WHERE name == 'Dave';");
+        assertTrue(testParser.getParseResult());
+
+
+        testParser.Parser("DELETE FROM marks WHERE name = 'Dave';");
+        assertFalse(testParser.getParseResult());
+    }
+
+
+    @Test
+    public void testParserJoin() {
+        Parser testParser = new Parser();
+        testParser.Parser("JOIN coursework AND marks ON submission AND id;");
+        assertTrue(testParser.getParseResult());
+
+
+        testParser.Parser("JOIN coursework AND marks ON submission.ref AND id;");
+        assertTrue(testParser.getParseResult());
+    }
 
 }

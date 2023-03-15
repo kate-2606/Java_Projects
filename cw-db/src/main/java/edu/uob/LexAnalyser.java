@@ -2,20 +2,31 @@ package edu.uob;
 
 import java.util.*;
 
-//use pattern.match() functions.
+//use pattern.match() functions (reg expressions)
 //should be case insensitive
 //table names etc.. can't have the same name as keywords
 //tokeniser should split WHERE age<40 into 4 tokens, currently it would be two tokens
+//unsigned long for keys
+//key persists?
+//foriegn keys self generated?
+//tokeniser change special chars to strings
+//when to write to table?
+
 
 public class LexAnalyser {
 
     public void LexAnalyser(String inpCommand){
         setCommand(inpCommand);
         setup();
+        /*
+        for(int i=0; i<words.size(); i++){
+            System.out.println("Word " + i + " = " + words.get(i));
+        }
+
+         */
     }
 
     String command = null;
-    String[] specialCharacters = {"(",")",",",";"};
 
     ArrayList<String> words = new ArrayList<>();
 
@@ -38,9 +49,10 @@ public class LexAnalyser {
 
     private String[] tokenTypeStrings =
             {"USE", "CREATE", "DROP", "ALTER", "INSERT", "SELECT", "JOIN", "DATABASE",
-                    "TABLE", "INTO", "UPDATE", "DELETE", "FROM", "SET", "WHERE", "ON",
-                    "ADD", "(", ")", " ", ",", ".", ";", "NULL", "*"
+                    "TABLE", "INTO", "UPDATE", "DELETE", "FROM", "SET", "WHERE", "ON", "VALUES",
+                    "ADD", "(", ")", " ", ",", ";", "NULL", "*", "="
             };
+
 
 
     public Token getNextToken (){
@@ -78,7 +90,7 @@ public class LexAnalyser {
         increment ++;
         if (isStringLit(word)){
             curToken.setType(i+increment);
-            curToken.setValue(word.substring(0,word.length()-1));
+            curToken.setValue(word.substring(1,word.length()-1));
             tokens.add(curToken);
             return curToken;
         }
@@ -105,6 +117,17 @@ public class LexAnalyser {
         }
         increment ++;
         if (isPlainText(word)){
+            curToken.setType(i+increment);
+            curToken.setValue(word);
+            tokens.add(curToken);
+            return curToken;
+        }
+
+
+        increment ++;
+        System.out.println("before att name "+ word);
+        if (isAttributeName(word)){
+            System.out.println("passed att name");
             curToken.setType(i+increment);
             curToken.setValue(word);
             tokens.add(curToken);
@@ -256,6 +279,17 @@ public class LexAnalyser {
         return true;
     }
 
+    private Boolean isAttributeName(String word){
+        if(word.contains(".")){
+            String frag1 = word.substring(0,word.indexOf('.')-1);
+            String frag2 = word.substring(word.indexOf('.')+1, word.length()-1);
+            if(isPlainText(frag1) && isPlainText(frag2)){
+                return  true;
+            }
+        }
+        return false;
+    }
+
 
     void setup()
     {
@@ -270,6 +304,8 @@ public class LexAnalyser {
             }
         }
     }
+
+    String[] specialCharacters = {"(",")",",",";"};
 
     String[] tokenise(String input)
     {
