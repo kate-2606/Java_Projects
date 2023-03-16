@@ -1,7 +1,8 @@
 package edu.uob;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
+import java.nio.*;
 
 public class Interpreter {
 
@@ -21,6 +22,8 @@ public class Interpreter {
     private Database workingDatabase = null;
 
     private String databasePath;
+
+    private String output = null;
 
     private boolean accept(Parser.TokenType t){
         Token tok = getCurrentToken();
@@ -43,6 +46,42 @@ public class Interpreter {
         return null;
      }
 
+    private Table readTableFile(String fileName) throws FileNotFoundException {
+
+        Table readTable = null;
+
+        File fileToOpen = new File(storageFolderPath + File.separator + fileName);
+
+        if (!(fileToOpen.isDirectory()) && fileToOpen.exists()) {
+            //line too long
+            if(fileName.lastIndexOf(File.separator)!=-1){
+                String tableName = fileName.substring(fileName.lastIndexOf(File.separator)+1, fileName.lastIndexOf("."));
+                readTable = new Table(tableName);
+
+                try {
+                    FileReader reader = new FileReader(fileToOpen);
+                    BufferedReader buffReader = new BufferedReader(reader);
+                    String line = buffReader.readLine();
+                    readTable.setAttributes(true, line, null);
+
+                    while ((line = buffReader.readLine()) != null) {
+                       readTable.addRow(true, line, null);
+                    }
+                    readTable.primaryKey();
+
+                } catch (IOException e) {
+                    throw new FileNotFoundException();
+                    //this exception is in the wrong place
+                }
+            }
+            //throw exception saying file name is invalid
+
+        }
+        return readTable;
+    }
+
+    //private void exportTable
+
 
     public void interpretJoin(){
 
@@ -57,7 +96,17 @@ public class Interpreter {
     }
 
     public void interpretSelect(){
-
+        String result = null;
+        getNextToken();
+        if(accept(Parser.TokenType.WILD_CRD)){
+            String tableName=getNextToken().getValue();
+            Table table = workingDatabase.tableExists(tableName);
+            if(table!=null){
+                result = table.getAttributesAsString() + "\n";
+                result = result + table.getRowsAsString();
+            }
+        }
+        output = result;
     }
 
     public void interpretInsert(){
@@ -70,6 +119,7 @@ public class Interpreter {
 
     public void interpretDrop(){
         getNextToken();
+        //check this deletes every file in the directory
         if(accept(Parser.TokenType.DATABASE)){
             String fileLocation = storageFolderPath + File.separator + getCurrentToken().getValue();
             File fileToDelete = new File(fileLocation);
@@ -100,8 +150,7 @@ public class Interpreter {
             workingDatabase = new Database(token.getValue());
         }
         //make an error message here
-        if(token.getType() == Parser.TokenType.TABLE && workingDatabase!=null) {
-            token = getNextToken();
+        if(accept(Parser.TokenType.TABLE) && workingDatabase!=null) {
 
             Table newTable = new Table(token.getValue());
             workingDatabase.addTable(newTable);
@@ -116,7 +165,7 @@ public class Interpreter {
                     }
                     newAttributes.add(getCurrentToken().getValue());
                 }
-                newTable.setAttributes(newAttributes);
+                newTable.setAttributes(false, null, newAttributes);
             }
         }
     }

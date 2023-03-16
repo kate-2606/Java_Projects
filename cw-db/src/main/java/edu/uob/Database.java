@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Database {
 
@@ -15,5 +16,31 @@ public class Database {
         database.add(newTable);
     }
 
+    public Table tableExists(String tableName){
+        for(int i=0; i<database.size(); i++){
+            Table table = database.get(i);
+            if(Objects.equals(table.getTableName(), tableName)){
+                return table;
+            }
+        }
+        return null;
+    }
+
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

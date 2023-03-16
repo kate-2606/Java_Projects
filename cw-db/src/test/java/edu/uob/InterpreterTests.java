@@ -3,10 +3,12 @@ package edu.uob;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 public class InterpreterTests {
     private DBServer server;
@@ -16,6 +18,10 @@ public class InterpreterTests {
     public void setup() {
         server = new DBServer();
     }
+
+    String storageFolderPath = Paths.get("databases").toAbsolutePath().toString();
+
+    String testsFolderPath = storageFolderPath + File.separator + "Tests";
 
     private String generateRandomName()
     {
@@ -38,5 +44,14 @@ public class InterpreterTests {
         //sendCommandToServer("INSERT INTO java VALUES ('OXO', 57, 8000, TRUE);");
         String response = sendCommandToServer("SELECT * FROM marks;");
         assertTrue(response.contains("[OK]"), "A valid Command was made, however an [OK] tag was not returned");
+    }
+
+    @Test
+    private void testReadTableFile() throws IOException {
+        sendCommandToServer("CREATE DATABASE coursework;");
+        sendCommandToServer("CREATE TABLE java (assignment, bugs, numOfFunction, enjoyable);");
+        //exists isn't working in testing? -- passes when true or false....
+        File testDatabase = new File(testsFolderPath+File.separator+"coursework");
+        assertTrue(testDatabase.exists());
     }
 }

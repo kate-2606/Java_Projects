@@ -8,7 +8,7 @@ import java.util.*;
 //tokeniser should split WHERE age<40 into 4 tokens, currently it would be two tokens --- DONE
 //unsigned long for key
 //write good error messages
-//sort ugly function
+//sort ugly function --- https://stackoverflow.com/questions/3316582/iterating-through-methods
 
 
 //key persists?
