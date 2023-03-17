@@ -1,6 +1,8 @@
 package edu.uob;
 
+import java.io.*;
 import java.util.ArrayList;
+import java.util.*;
 
 
 public class Table {
@@ -15,7 +17,7 @@ public class Table {
 
     private String tableName;
 
-    public String getTableName(){ return tableName; }
+    public String getName(){ return tableName; }
 
     public String getCellDataByNumber(int columnNumber, int rowNumber){
         Row currRow = dataRows.get(rowNumber);
@@ -24,27 +26,56 @@ public class Table {
 
     public String getAttributeByNumber(int column){ return attributes.getAttributeByNumber(column); }
 
-    public int getNumberOfDataRows() { return dataRows.size(); }
+    public int getNumberOfDataRows() {
+        if (dataRows!=null) {
+            return dataRows.size();
+        }
+        else{
+            return 0;
+        }
+    }
+
 
     public int getNumberOfAttributes() { return attributes.getNumberOfAttributes(); }
 
-    public void addAttribute(int position, String attributeName) {
-        attributes.addAttribute(position, attributeName);
-    }
+    //public void appendAttribute(String attributeName) { attributes.appendAttribute(attributeName); }
 
     public void addCellData(int rowNumber, int position, String dataStr) {
         dataRows.get(rowNumber).addCellData(position, dataStr);
     }
 
-    public void setAttributes(boolean fromFile, String attributesStr, ArrayList<String> attributesList) {
-        attributes = new Attributes(fromFile, attributesStr, attributesList);
-    }
-
-    public void addRow(boolean fromFile, String rowStr, ArrayList<String> rowList){
-        Row row = new Row(fromFile, rowStr, rowList);
+    public void addRowFromCommand(boolean isAttributes, ArrayList<String> valuesList){
+        Row row = new Row(valuesList);
         dataRows.add(row);
     }
 
+    public void addRowFromFile(Boolean isAttributes, String rowStr) throws IOException{
+
+        String separator;
+        if (rowStr.contains("\t")) {
+            separator = "\t";
+        } else {
+            throw new IOException("Attribute separators in table are invalid, expected TABS");
+        }
+
+        String[] values = rowStr.split(separator);
+        ArrayList<String> valueList = new ArrayList<>();
+        //try this
+        // ArrayList<String> row= new ArrayList<>( Arrays.asList(rowStr.split("\t")));
+
+        int i = 0;
+        while (i < values.length) {
+            valueList.add(values[i].trim());
+            i++;
+        }
+        if(isAttributes){
+            attributes = new Attributes(valueList);
+        }
+        if(!isAttributes){
+            addRowFromCommand(true, valueList);
+        }
+    }
+/*
     public void primaryKey(){
         this.addAttribute(0, "id");
         for(int i=0; i<this.getNumberOfDataRows(); i++){
@@ -52,6 +83,7 @@ public class Table {
         }
     }
 
+ */
 
     public String getRowAsString(int rowNumber){
         int numberOfColumns = getNumberOfAttributes();

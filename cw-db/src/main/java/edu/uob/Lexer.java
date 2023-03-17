@@ -1,6 +1,11 @@
 package edu.uob;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.stream.Stream;
+
 
 //use pattern.match() functions (reg expressions)
 //should be case-insensitive
@@ -21,6 +26,8 @@ import java.util.*;
 
 
 //boolean upper or lkowercase?
+//replace lexer stuff with itterarators
+//sort the spaces either side of like
 
 
 
@@ -51,7 +58,12 @@ public class Lexer {
         wordIndex=-1;
     }
 
-    public void resetWordIndex(){ wordIndex = -1; }
+    public boolean isWordListEnd() {
+        if(wordIndex == words.size()-1){
+        return true;
+        }
+        return false;
+    }
 
     private String[] tokenTypeStrings =
             {"USE", "CREATE", "DROP", "ALTER", "INSERT", "SELECT", "JOIN", "DATABASE",
@@ -60,8 +72,10 @@ public class Lexer {
             };
 
 
-    public Token getNextToken (){
-
+    public Token getNextToken() throws IOException {
+        if(wordIndex==words.size()-1){
+            throw new IOException("Parser failed before reaching a ';'");
+        }
         wordIndex++;
 
         Token curToken = new Token();
@@ -139,14 +153,13 @@ public class Lexer {
         return null;
     }
 
-    String[] comparators = {"==", ">", "<", ">=", "<=", "!=", "LIKE"};
+    String[] comparators = {"==", ">", "<", ">=", "<=", "!="};
 
     private Boolean isComparator(String word){
-        for (int i=0; i<comparators.length; i++) {
-            if (Objects.equals(word, comparators[i])) {
-                return true;
-            }
+        for (String c : comparators) {
+            if (c.equals(word)) { return true; }
         }
+        if(word.equals("LIKE")) { return true; }
         return false;
     }
 
@@ -231,22 +244,10 @@ public class Lexer {
 
     // do this smarter with .contains
     private Boolean isFloatLit (String word){
+        Pattern patter = Pattern.compile("[+-]?([0-9]+[.]+[0-9]+)");
+        Matcher matcher = patter.matcher(word);
 
-        int decimals = 0;
-        if (Character.isDigit(word.charAt(0)) || word.charAt(0)=='+' || word.charAt(0)=='-'){
-            int x = Character.isDigit(word.charAt(0)) ? 0:1;
-
-            for (int i=x; i<word.length(); i++){
-                if(!(Character.isDigit(word.charAt(i))) && (word.charAt(i)!='.')){
-                   return false;
-                }
-                if (word.charAt(i)=='.'){
-                    decimals++;
-                }
-            }
-            if(decimals!=1){
-                return false;
-            }
+        if(matcher.find()){
             return true;
         }
         return false;
@@ -302,34 +303,29 @@ public class Lexer {
         }
     }
 
-    String[] baseSpecialChars = {"(",")",",",";"};
+    String[] baseChars = {"(",")",",",";"};
 
-    ArrayList<String> specialCharacters = new ArrayList<>();
+    ArrayList<String> specialChars = new ArrayList<>();
 
     private void getSpecialCharacters(){
-        specialCharacters.clear();
+        specialChars.clear();
 
-        int base = baseSpecialChars.length;
-        int comp = comparators.length;
-        int arrSize = base+comp;
-        for(int i=0; i<arrSize; i++){
-            if(i<base) {
-                specialCharacters.add(baseSpecialChars[i]);
-            }
-            if(i>=base){
-                specialCharacters.add(comparators[i-base]);
-            }
+        String[] splitters =
+                Stream.concat(Arrays.stream(baseChars), Arrays.stream(comparators)).toArray(String[]::new);
+
+        for(String s : splitters){
+            specialChars.add(s);
         }
-        specialCharacters.add("AND");
-        specialCharacters.add("OR");
+        specialChars.add("AND");
+        specialChars.add("OR");
     }
 
 
     private String[] tokenise(String input)
     {
         getSpecialCharacters();
-        for(int i=0; i<specialCharacters.size() ;i++) {
-            input = input.replace(specialCharacters.get(i), " " + specialCharacters.get(i) + " ");
+        for(int i=0; i<specialChars.size() ;i++) {
+            input = input.replace(specialChars.get(i), " " + specialChars.get(i) + " ");
         }
         while (input.contains("  ")) input = input.replaceAll("  ", " ");
         input = input.trim();

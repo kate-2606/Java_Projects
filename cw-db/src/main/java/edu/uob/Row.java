@@ -4,41 +4,14 @@ import java.util.ArrayList;
 
 public class Row {
 
-    private ArrayList<String> row = new ArrayList<>();
+    private ArrayList<String> row;
 
-    public Row(Boolean fromFile, String attributesStr, ArrayList<String> attributesList){
-        if(fromFile && attributesStr!=null){
-            setRowFromFile(attributesStr);
-        }
-        if(!fromFile){
-
-        }
-    }
+    public Row(ArrayList<String> row){ this.row=row; }
 
     public String getCellDataByNumber (int columnNumber) {
         return row.get(columnNumber);
     }
 
-    private void setRowFromFile(String inpRow){
-        String separator=null;
-        if(inpRow.contains(",")){
-            separator = ",";
-        }
-        if(inpRow.contains("\t")){
-            separator = "\t";
-        }
-        else{
-            //throw an exception
-        }
-
-        String[] dataArray = inpRow.split(separator);
-
-        int i=0;
-        while (i<dataArray.length){
-            row.add(dataArray[i].trim());
-            i++;
-        }
-    }
 
     public void addCellData(int position, String dataStr) {
         row.add(position, dataStr);

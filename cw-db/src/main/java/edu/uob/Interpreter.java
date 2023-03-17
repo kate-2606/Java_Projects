@@ -1,29 +1,37 @@
 package edu.uob;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.*;
+
 
 public class Interpreter {
 
     private boolean debugging = true;
-    public void Interpreter(String serverStorageFolderPath, ArrayList<Token> tokenList){
-        storageFolderPath=serverStorageFolderPath;
+    public void Interpreter(ArrayList<Token> tokenList, InterpContext inpIc){
+        ic=inpIc;
         tokens=tokenList;
-        interpretCommand();
+        try {
+            command();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
+
 
     private ArrayList<Token> tokens;
 
     private int tokenIndex=0;
 
-    private String storageFolderPath;
-
-    private Database workingDatabase = null;
-
-    private String databasePath;
+    private InterpContext ic;
 
     private String output = null;
+
+
 
     private boolean accept(Parser.TokenType t){
         Token tok = getCurrentToken();
@@ -36,9 +44,18 @@ public class Interpreter {
         return false;
     }
 
-    public Token getCurrentToken() {return tokens.get(tokenIndex); }
+    private Token getCurrentToken() {return tokens.get(tokenIndex); }
 
-    public Token getNextToken() {
+    private boolean isCurrentToken(Parser.TokenType type) {
+        if(getCurrentToken().getType() == type){
+            return true;
+        }
+        return false;
+    }
+
+
+
+    private Token getNextToken() {
         tokenIndex++;
         if(tokenIndex<=tokens.size()){
             return tokens.get(tokenIndex);
@@ -46,61 +63,75 @@ public class Interpreter {
         return null;
      }
 
+
+     //could check for that each row has the correct number of columns?
     private Table readTableFile(String fileName) throws FileNotFoundException {
 
         Table readTable = null;
-
-        File fileToOpen = new File(storageFolderPath + File.separator + fileName);
+        File fileToOpen = new File(ic.getStorageFolderPath() + File.separator + fileName);
 
         if (!(fileToOpen.isDirectory()) && fileToOpen.exists()) {
-            //line too long
             if(fileName.lastIndexOf(File.separator)!=-1){
-                String tableName = fileName.substring(fileName.lastIndexOf(File.separator)+1, fileName.lastIndexOf("."));
-                readTable = new Table(tableName);
+                String name = fileName.substring(fileName.lastIndexOf(File.separator)+1, fileName.lastIndexOf("."));
+                readTable = new Table(name);
 
                 try {
                     FileReader reader = new FileReader(fileToOpen);
                     BufferedReader buffReader = new BufferedReader(reader);
                     String line = buffReader.readLine();
-                    readTable.setAttributes(true, line, null);
+                    readTable.addRowFromFile(true, line);
 
                     while ((line = buffReader.readLine()) != null) {
-                       readTable.addRow(true, line, null);
+                       readTable.addRowFromFile(false, line);
                     }
-                    readTable.primaryKey();
-
                 } catch (IOException e) {
                     throw new FileNotFoundException();
                     //this exception is in the wrong place
                 }
             }
             //throw exception saying file name is invalid
-
         }
         return readTable;
     }
 
-    //private void exportTable
+    private void exportTable(Table table, File fileToOpen) throws IOException{
+
+        FileWriter writer = new FileWriter(fileToOpen);
+        BufferedWriter buffWriter = new BufferedWriter(writer);
+        String dataOut = table.getAttributesAsString();
+        System.out.println(table.getAttributesAsString());
+        if(dataOut!=null){
+            buffWriter.write(dataOut + "\n");
+        }
+        if (table.getNumberOfDataRows()>0) {
+            dataOut = table.getRowsAsString();
+            if (dataOut != null) {
+                buffWriter.write(dataOut);
+            }
+        }
+        buffWriter.flush();
+        buffWriter.close();
+    }
 
 
-    public void interpretJoin(){
+    public void join(){
 
     }
 
-    public void interpretDelete(){
+    public void delete(){
 
     }
 
-    public void interpretUpdate(){
+    public void update(){
 
     }
 
-    public void interpretSelect(){
+    public void select(){
         String result = null;
         getNextToken();
         if(accept(Parser.TokenType.WILD_CRD)){
             String tableName=getNextToken().getValue();
-            Table table = workingDatabase.tableExists(tableName);
+            Table table = ic.getWorkingDatabase().tableExists(tableName);
             if(table!=null){
                 result = table.getAttributesAsString() + "\n";
                 result = result + table.getRowsAsString();
@@ -109,97 +140,139 @@ public class Interpreter {
         output = result;
     }
 
-    public void interpretInsert(){
+    public void insert(){
 
     }
 
-    public void interpretAlter(){
+    public void alter(){
 
     }
 
-    public void interpretDrop(){
+    public void drop() throws FileNotFoundException{
         getNextToken();
-        //check this deletes every file in the directory
-        if(accept(Parser.TokenType.DATABASE)){
-            String fileLocation = storageFolderPath + File.separator + getCurrentToken().getValue();
-            File fileToDelete = new File(fileLocation);
-            if (fileToDelete.exists() && fileToDelete.isDirectory()) {
-                fileToDelete.delete();
-            }
-            else if (!debugging){
-                System.out.println("Could not delete database as it does not exist");
+        String fileLocation = ic.getStorageFolderPath() + File.separator + getCurrentToken().getValue();
+        File file = new File(fileLocation);
+        if (accept(Parser.TokenType.DATABASE)) {
+            String name = getCurrentToken().getValue();
+            deleteFiles(file, name);
+            ic.setWorkingDatabase(null);
+        }
+
+        if (accept(Parser.TokenType.TABLE)) {
+            String name = getCurrentToken().getValue();
+            if (file.exists() && !file.isDirectory()) {
+                if(!file.delete())
+                  throw new FileNotFoundException("Failed to delete " + name + " table");
+                //ic.getWorkingDatabase().getTable()
             }
         }
-        if (accept(Parser.TokenType.TABLE)){
-            String fileLocation = databasePath + File.separator + getCurrentToken().getValue();
-            File fileToDelete = new File(fileLocation);
-            if (fileToDelete.exists() && !fileToDelete.isDirectory()) {
-                fileToDelete.delete();
+    }
+
+    private void deleteFiles(File file, String name) throws FileNotFoundException{
+        if (file.exists() && file.isDirectory()) {
+            for (File f : file.listFiles())
+                deleteFiles(f, name);
+            if (!file.delete()) {
+                throw new FileNotFoundException("Failed to delete " + name + " database");
             }
-            else if (!debugging){
-                System.out.println("Could not delete table as it does not exist in the working database");
-            }
+        }
+    }
+
+    public void create() throws IOException {
+        if (debugging) {
+            System.out.println("in interpret create");
+        }
+        if (accept(Parser.TokenType.DATABASE)) {
+            createDatabase();
+        }
+        if (accept(Parser.TokenType.TABLE) && ic.getDatabasePath() != null) {
+            createTable();
         }
 
     }
 
-    public void interpretCreate(){
+    private void createDatabase() throws IOException{
+        String dirPath = ic.getStorageFolderPath() + File.separator + getCurrentToken().getValue();
+        File f = new File(dirPath);
+        if (f.exists()) {
+            throw new IOException("Database already exists");
+        }
+        try {
+            Files.createDirectories(Paths.get(dirPath));
+        } catch (IOException e) {
+            throw new IOException("Could not create database");
+        }
+    }
+
+    private void createTable() throws IOException{
         Token token = getNextToken();
-        if(accept(Parser.TokenType.DATABASE)) {
-            token = getNextToken();
-            workingDatabase = new Database(token.getValue());
+
+        Table newTable = new Table(token.getValue());
+        ic.getWorkingDatabase().addTable(newTable);
+        String tablePath =ic.getDatabasePath() + File.separator + newTable.getName() + ".tab";
+        File f = new File(tablePath);
+
+        if (f.exists()) {
+            throw new IOException("Table already exists");
         }
-        //make an error message here
-        if(accept(Parser.TokenType.TABLE) && workingDatabase!=null) {
+        try {
+            Files.createFile(Paths.get(tablePath));
+        } catch (IOException e) {
+            throw new IOException("Could not create table");
+        }
 
-            Table newTable = new Table(token.getValue());
-            workingDatabase.addTable(newTable);
-
-            if(getNextToken().getType()!= Parser.TokenType.SEMI_COL){
-
-                ArrayList<String> newAttributes = new ArrayList<>();
-
-                while(getCurrentToken().getType()!= Parser.TokenType.SEMI_COL) {
-                    if (getCurrentToken().getType() != Parser.TokenType.COMMA) {
-                        getNextToken();
-                    }
-                    newAttributes.add(getCurrentToken().getValue());
-                }
-                newTable.setAttributes(false, null, newAttributes);
+        getNextToken();
+        ArrayList<String> attributes = new ArrayList<>();
+        while (!accept(Parser.TokenType.SEMI_COL)) {
+            if (isCurrentToken(Parser.TokenType.PLAIN_TXT)){
+                attributes.add(getCurrentToken().getValue());
             }
+            getNextToken();
+
+        }
+        if(attributes.size()!=0){
+            newTable.addRowFromCommand(true, attributes);
+            exportTable(newTable, f);
         }
     }
 
-    public void interpretUse(){
+
+    public void use(){
+        if(debugging){
+            System.out.println("in interpret use");
+        }
         Token token = getNextToken();
         String databaseName = token.getValue();
-        databasePath = storageFolderPath + File.separator + databaseName ;
+
+        Database workingDatabase = new Database(databaseName);
+        ic.setWorkingDatabase(workingDatabase);
+        ic.setDatabasePath(databaseName);
     }
 
-    private void interpretCommand(){
+
+    private void command() throws IOException {
         Token token = getCurrentToken();
         if(debugging){
             System.out.println("in commandType, token type is: "+ token.getType());
         }
-        boolean ret;
         switch (token.getType()){
-            case USE : interpretUse();
+            case USE : use();
                 break;
-            case CREATE : interpretCreate();
+            case CREATE : create();
                 break;
-            case DROP : interpretDrop();
+            case DROP : drop();
                 break;
-            case ALTER : interpretAlter();
+            case ALTER : alter();
                 break;
-            case INSERT : interpretInsert();
+            case INSERT : insert();
                 break;
-            case SELECT : interpretSelect();
+            case SELECT : select();
                 break;
-            case UPDATE : interpretUpdate();
+            case UPDATE : update();
                 break;
-            case DELETE : interpretDelete();
+            case DELETE : delete();
                 break;
-            case JOIN : interpretJoin();
+            case JOIN : join();
                 break;
             default:
         }

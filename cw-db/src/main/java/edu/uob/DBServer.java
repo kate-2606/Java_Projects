@@ -54,8 +54,10 @@ public class DBServer {
 
         if (parser.getParserResult()) {
             result ="[OK]";
+            InterpContext ic = new InterpContext();
+            ic.InterpContext(storageFolderPath);
             Interpreter interpreter = new Interpreter();
-            interpreter.Interpreter(storageFolderPath, tokens);
+            interpreter.Interpreter(tokens, ic);
         }
 
         return result;
@@ -95,10 +97,10 @@ public class DBServer {
 
                 int numberOfRows = tableToExport.getNumberOfDataRows();
 
-                buffWriter.write(tableToExport.attributesToString() + "\n");
+                buffWriter.write(tableToExport.getAttributesAsString() + "\n");
 
                 for (int i = 0; i < numberOfRows; i++) {
-                    buffWriter.write(tableToExport.rowToString(i) + "\n");
+                    buffWriter.write(tableToExport.getRowAsString(i) + "\n");
                 }
                 buffWriter.flush();
                 buffWriter.close();

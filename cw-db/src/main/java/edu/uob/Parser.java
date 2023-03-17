@@ -1,19 +1,25 @@
 package edu.uob;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Parser {
     // Token Type
-    public void Parser(ArrayList<Token> tokenList, Lexer inpLex){
+    public void Parser(ArrayList<Token> tokenList, Lexer inpLex) {
         lex=inpLex;
         tokens=tokenList;
-        parsedOkay= command();
+        try {
+            parsedOkay = command();
+        } catch(Exception e){
+            // this will catch all the parser exceptions and do whatever with the message
+            System.out.println(e.getMessage());
+        }
     }
 
     private Lexer lex;
 
     private ArrayList<Token> tokens;
-    private boolean debugging = false;
+    private boolean debugging = true;
 
     private boolean parsedOkay;
 
@@ -31,7 +37,7 @@ public class Parser {
         FLOAT_LIT, INT_LIT, PLAIN_TXT, ATTRIB_NAME
     }
 
-    public boolean accept(TokenType t){
+    public boolean accept(TokenType t) throws IOException{
         Token tok = getCurrentToken();
         if (tok.getType()==t){
             if (t != TokenType.SEMI_COL) {
@@ -42,7 +48,7 @@ public class Parser {
         return false;
     }
 
-    private boolean expect(TokenType t){
+    private boolean expect(TokenType t) throws IOException{
         if (accept(t)){
             return true;
         }
@@ -51,18 +57,18 @@ public class Parser {
 
     public Token getCurrentToken() {return tokens.get(tokens.size()-1); }
 
-    private boolean nameValueList(){
-        Boolean ret = false;
+    private boolean nameValueList() throws IOException{
         if(nameValuePair()){
             if(accept(TokenType.COMMA)){
                 return nameValueList();
             }
-            ret=true;
+            return true;
         }
-        return ret;
+        Token token = getCurrentToken();
+        throw new IOException("Was expecting NameValuePair(s)");
     }
 
-    private boolean nameValuePair(){
+    private boolean nameValuePair() throws IOException{
         if(attributeName()){
             if(accept(TokenType.EQUALS)){
                 if(value()){
@@ -70,11 +76,12 @@ public class Parser {
                 }
             }
         }
-        return false;
+        Token token = getCurrentToken();
+        throw new IOException("Was expecting EQUALS instead of " + token.getType().toString() + " in NameValuePair");
     }
 
 
-    private boolean condition() {
+    private boolean condition() throws IOException{
         if (attributeName()) {
             if (accept(TokenType.COMPARATOR)) {
                 if (value()) {
@@ -95,19 +102,17 @@ public class Parser {
                 }
             }
         }
-
-        return false;
+        throw new IOException("Failed to parse condition statement");
     }
 
-    private boolean wildAttribList(){
-        boolean ret=false;
+    private boolean wildAttribList() throws IOException{
         if(attributeList() || accept(TokenType.WILD_CRD)){
-            ret=true;
+            return true;
         }
-        return ret;
+        throw new IOException("Was expecting AttributeList or '*'");
     }
 
-    private boolean value() {
+    private boolean value() throws IOException {
         Token token = getCurrentToken();
         switch (token.getType()) {
             case STRING_LIT:
@@ -117,14 +122,14 @@ public class Parser {
             case NULL:
                 break;
             default:
-                return false;
+                throw new IOException("Encountered an invalid VALUE");
         }
         lex.getNextToken();
         return true;
     }
 
 
-    private boolean valueList() {
+    private boolean valueList() throws IOException{
         boolean ret = false;
         if (value()){
             ret=true;
@@ -132,18 +137,21 @@ public class Parser {
                 ret = valueList();
             }
         }
-        return ret;
+        if(ret){
+            return ret;
+        }
+        throw new IOException("Encountered an invalid ValueList");
     }
 
 
-    private boolean attributeName() {
+    private boolean attributeName() throws IOException{
         if(accept(TokenType.PLAIN_TXT) || accept(TokenType.ATTRIB_NAME)){
             return true;
         }
         return false;
     }
 
-    private boolean attributeList() {
+    private boolean attributeList() throws IOException{
         boolean ret = false;
         if (attributeName()){
             ret=true;
@@ -154,7 +162,7 @@ public class Parser {
         return ret;
     }
 
-    private boolean join() {
+    private boolean join() throws IOException{
         lex.getNextToken();
         if(accept(TokenType.PLAIN_TXT)){
             if(Objects.equals(getCurrentToken().getValue(),"AND")){
@@ -173,10 +181,10 @@ public class Parser {
                 }
             }
         }
-        return false;
+        throw new IOException("JOIN syntax failed");
     }
 
-    private boolean delete() {
+    private boolean delete() throws IOException{
         lex.getNextToken();
         if(accept(TokenType.FROM)){
             if(accept(TokenType.PLAIN_TXT)){
@@ -187,10 +195,10 @@ public class Parser {
                 }
             }
         }
-        return false;
+        throw new IOException("DELETE syntax failed");
     }
 
-    private boolean update() {
+    private boolean update() throws IOException{
         lex.getNextToken();
         if(accept(TokenType.PLAIN_TXT)) {
             if(accept(TokenType.SET)) {
@@ -203,10 +211,10 @@ public class Parser {
                 }
             }
         }
-        return false;
+        throw new IOException("UPDATE syntax failed");
     }
 
-    private boolean select() {
+    private boolean select() throws IOException{
         boolean ret =false;
         lex.getNextToken();
         if(wildAttribList()){
@@ -219,11 +227,13 @@ public class Parser {
                 }
             }
         }
+        if(!ret) {
+            throw new IOException("SELECT syntax failed");
+        }
         return ret;
     }
 
-    private boolean insert() {
-        boolean ret =false;
+    private boolean insert() throws IOException{
         Token token =lex.getNextToken();
         if(debugging){
             System.out.println("in insert, token type is: "+ token.getType());
@@ -233,34 +243,37 @@ public class Parser {
                 if(accept(TokenType.VALUES)){
                     if(accept(TokenType.OPEN_BR)){
                         if(valueList()){
-                            ret=expect(TokenType.CLOSE_BR);
+                            return expect(TokenType.CLOSE_BR);
                         }
                     }
                 }
             }
         }
-        return ret;
+        throw new IOException("INSERT syntax failed");
     }
 
-    private boolean alter() {
+    private boolean alter() throws IOException{
         boolean ret =false;
         lex.getNextToken();
         if(accept(TokenType.TABLE)){
             if(accept(TokenType.PLAIN_TXT)){
                 if (accept(TokenType.DROP) || accept(TokenType.ADD)){
-                    ret=attributeName();
+                    return attributeName();
                 }
             }
         }
-        return ret;
+        throw new IOException("ALTER syntax failed");
     }
 
-    private boolean drop() {
+    private boolean drop() throws IOException{
         lex.getNextToken();
-        return expect(TokenType.PLAIN_TXT);
+        if(accept(TokenType.TABLE) || accept(TokenType.DATABASE)){
+            return expect(TokenType.PLAIN_TXT);
+        }
+        throw new IOException("DROP syntax failed");
     }
 
-    private boolean create() {
+    private boolean create() throws IOException{
         boolean ret =false;
         lex.getNextToken();
         if(expect(TokenType.TABLE) || expect(TokenType.DATABASE)) {
@@ -268,29 +281,34 @@ public class Parser {
                 ret = true;
                 if (!(expect(TokenType.SEMI_COL)) && expect(TokenType.OPEN_BR)){
                     if (attributeList()) {
-                        if (expect(TokenType.CLOSE_BR)) {
-                            ret = true;
-                        }
+                        return expect(TokenType.CLOSE_BR);
                     }
                 }
             }
         }
-        return ret;
+        if(ret){
+            return ret;
+        }
+        throw new IOException("CREATE syntax failed");
     }
 
-    private boolean use() {
+    private boolean use() throws IOException{
         Token token = lex.getNextToken();
+        boolean ret=false;
         if(debugging){
             System.out.println("in commandType, token type is: "+ token.getType());
         }
-        return expect(TokenType.PLAIN_TXT);
+        if(expect(TokenType.PLAIN_TXT)){
+            return true;
+        }
+        throw new IOException("USE syntax failed");
     }
 
 
-    private boolean commandType(){
+    private boolean commandType() throws IOException{
         Token token = getCurrentToken();
         if(debugging){
-            System.out.println("in commandType, token type is: "+ token.getType());
+            System.out.println("in commandType, token type is: "+ token.getType().toString());
         }
         boolean ret;
         switch (token.getType()){
@@ -319,13 +337,14 @@ public class Parser {
         return ret;
     }
 
-    public boolean command() {
+    //
+    public boolean command() throws IOException{
         Token token = lex.getNextToken();
         if(debugging){
             System.out.println("in command, token type is: "+ token.getType());
         }
         if (commandType()) {
-            if (expect(TokenType.SEMI_COL)) {
+            if (expect(TokenType.SEMI_COL) && lex.isWordListEnd()) {
                 return true;
             }
         }

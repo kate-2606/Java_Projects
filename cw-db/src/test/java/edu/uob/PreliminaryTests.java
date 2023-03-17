@@ -3,6 +3,7 @@ package edu.uob;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,10 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
+
+// Test lots of floats ---------------------------------
+
 public class PreliminaryTests {
     private DBServer server;
 
-    // Create a new server _before_ every @Test
     @BeforeEach
     public void setup() {
         server = new DBServer();
@@ -33,7 +36,7 @@ public class PreliminaryTests {
 
 
     @Test
-    public void testTokenizer() {
+    public void testTokenizer() throws IOException {
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer test = new Lexer();
         test.Lexer(" INSERT USE DELETE UPDATE 'Test' AND (A=0)", tokens);
@@ -61,7 +64,7 @@ public class PreliminaryTests {
     }
 
     @Test
-    public void testLexicalAnalyser(){
+    public void testLexicalAnalyser() throws IOException{
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer test = new Lexer();
         test.Lexer("CREATE 'Steve' TRUE +2.0 -76 plaintext * NULL", tokens);
@@ -101,15 +104,23 @@ public class PreliminaryTests {
 
         Parser testParser3 = createNewParser("CREATE TABLEmarks (name,mark,pass);");
         assertFalse(testParser3.getParserResult());
+
+        Parser testParser4 = createNewParser("CREATE TABLE firstTest (column1, column2, column3);");
+        assertTrue(testParser4.getParserResult());
+
+
     }
 
     @Test
     public void testParserDrop() {
         Parser testParser = createNewParser("DROP databasename;");
-        assertTrue(testParser.getParserResult());
+        assertFalse(testParser.getParserResult());
 
         Parser testParser1 = createNewParser("DROP TABLE databasename;");
-        assertFalse(testParser1.getParserResult());
+        assertTrue(testParser1.getParserResult());
+
+        Parser testParser2 = createNewParser("DROP TABLE databasename;;");
+        assertFalse(testParser2.getParserResult());
     }
 
     @Test
@@ -150,11 +161,17 @@ public class PreliminaryTests {
         Parser testParser5 = createNewParser("SELECT * FROM marks WHERE (pass == FALSE) AND mark > 35;");
         assertTrue(testParser5.getParserResult());
 
-        Parser testParser6 = createNewParser("SELECT * FROM marks WHERE (pass == FALSE) AND mark LIKE 35;");
-        assertTrue(testParser6.getParserResult());
+        Parser testParser6 = createNewParser("SELECT * FROM marks WHERE (pass == FALSE)) AND mark > 35;");
+        assertFalse(testParser6.getParserResult());
 
-        Parser testParser7 = createNewParser("SELECT * FROM marks WHERE (pass == FALSE) ADD mark LIKE 35;");
+        Parser testParser7 = createNewParser("SELECT * FROM marks WHERE (pass == FALSE) AND markLIKE 35;");
         assertFalse(testParser7.getParserResult());
+
+        Parser testParser8 = createNewParser("SELECT * FROM marks WHERE (pass == FALSE) ADD mark LIKE 35;");
+        assertFalse(testParser8.getParserResult());
+
+        Parser testParser9 = createNewParser("SELECT * FROM marks WHERE (pass = FALSE) AND (mark > 35);");
+        assertFalse(testParser9.getParserResult());
     }
 
     @Test
@@ -165,8 +182,7 @@ public class PreliminaryTests {
         Parser testParser1 = createNewParser("UPDATE marks SET grade = 'rubbish', extraWork.amount = 'lots' WHERE student == 'lazy';");
         assertTrue(testParser1.getParserResult());
 
-        //should this work?
-        Parser testParser2 = createNewParser("UPDATE marks SET grade = 'rubbish', extraWork.amount = 'lots' WHERE student.nameLIKE'lazy';");
+        Parser testParser2 = createNewParser("UPDATE marks SET grade = 'rubbish', extraWork.amount = 'lots' WHERE student.name LIKE 'lazy';");
         assertTrue(testParser2.getParserResult());
 
     }

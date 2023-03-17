@@ -19,13 +19,21 @@ public class Database {
     public Table tableExists(String tableName){
         for(int i=0; i<database.size(); i++){
             Table table = database.get(i);
-            if(Objects.equals(table.getTableName(), tableName)){
+            if(Objects.equals(table.getName(), tableName)){
                 return table;
             }
         }
         return null;
     }
 
+    public Table getTable(String name){
+        for(Table table : database) {
+            if (table.getName().equals(name)) {
+                return table;
+            }
+        }
+        return null;
+    }
 
 
 }

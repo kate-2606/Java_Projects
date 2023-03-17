@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class InterpreterTests {
     private DBServer server;
@@ -20,8 +21,6 @@ public class InterpreterTests {
     }
 
     String storageFolderPath = Paths.get("databases").toAbsolutePath().toString();
-
-    String testsFolderPath = storageFolderPath + File.separator + "Tests";
 
     private String generateRandomName()
     {
@@ -36,14 +35,36 @@ public class InterpreterTests {
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
+    private Interpreter interpretCommand(String command, InterpContext ic){
+        ArrayList<Token> tokens = new ArrayList<>();
+
+        Lexer lexer = new Lexer();
+        lexer.Lexer(command, tokens);
+
+        Parser parser = new Parser();
+        parser.Parser(tokens, lexer);
+
+        if (parser.getParserResult()) {
+            ic.InterpContext(storageFolderPath);
+            Interpreter interpreter = new Interpreter();
+            interpreter.Interpreter(tokens, ic);
+            return interpreter;
+        }
+        return null;
+    }
+
     @Test
     public void testBasicCreateAndCommand() {
-        sendCommandToServer("CREATE DATABASE coursework;");
-        sendCommandToServer("CREATE TABLE java (assignment, bugs, numOfFunction, enjoyable);");
-        //sendCommandToServer("INSERT INTO java VALUES ('OXO', 0, 12, TRUE);");
-        //sendCommandToServer("INSERT INTO java VALUES ('OXO', 57, 8000, TRUE);");
-        String response = sendCommandToServer("SELECT * FROM marks;");
-        assertTrue(response.contains("[OK]"), "A valid Command was made, however an [OK] tag was not returned");
+
+        InterpContext ic = new InterpContext();
+        interpretCommand("CREATE DATABASE coursework;", ic);
+        interpretCommand("USE coursework;", ic);
+        String path = ic.getDatabasePath();
+        String database = path.substring(path.lastIndexOf(File.separator)+1);
+        assertEquals("coursework", database );
+        assertEquals("coursework", ic.getWorkingDatabase().getName());
+        interpretCommand("CREATE TABLE firstTest (column1, column2, column3);", ic);
+        interpretCommand("DROP DATABASE coursework;", ic);
     }
 
     @Test
@@ -51,7 +72,5 @@ public class InterpreterTests {
         sendCommandToServer("CREATE DATABASE coursework;");
         sendCommandToServer("CREATE TABLE java (assignment, bugs, numOfFunction, enjoyable);");
         //exists isn't working in testing? -- passes when true or false....
-        File testDatabase = new File(testsFolderPath+File.separator+"coursework");
-        assertTrue(testDatabase.exists());
     }
 }
