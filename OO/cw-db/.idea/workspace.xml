@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="edcd6346-07e2-4156-a1ae-49115b770574" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/.mvn/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/.mvn/wrapper/maven-wrapper.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/people.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/sheds.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/mvnw" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/mvnw.cmd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Attributes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/DBClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/DBServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Database.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/InterpContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Interpreter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Lexer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Parser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/ParserExceptions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Row.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Table.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/main/java/edu/uob/Token.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/test/java/edu/uob/ExampleDBTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/test/java/edu/uob/InterpreterTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/src/test/java/edu/uob/PreliminaryTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/.mvn/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/.mvn/wrapper/maven-wrapper.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/Delete/people.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/Delete/sheds.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/Tests/Out/out.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/Tests/Out/people.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/Tests/people.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/people.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/databases/sheds.tab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/mvnw" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/mvnw.cmd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Attributes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/DBClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/DBServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Database.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/InterpContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Interpreter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/InterpreterException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Lexer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Parser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/ParserExceptions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Row.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Table.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/main/java/edu/uob/Token.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/test/java/edu/uob/ExampleDBTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/test/java/edu/uob/InterpreterTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/test/java/edu/uob/PreliminaryTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mvn/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/Delete/people.tab" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Delete/people.tab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/Delete/sheds.tab" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Delete/sheds.tab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/Tests/Out/out.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Tests/Out/out.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/Tests/Out/people.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Tests/Out/people.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/Tests/people.tab" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Tests/people.tab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/null" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/people.tab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/databases/sheds.tab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Attributes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/DBClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/DBServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Database.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/InterpContext.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Interpreter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Lexer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Parser.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/ParserExceptions.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Row.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Table.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Token.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/ExampleDBTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/InterpreterTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/PreliminaryTests.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="JavaAutoRunManager">
+    <enabled-run-configurations>
+      <run-configuration type="JUnit" name="PreliminaryTests.firstTest" />
+    </enabled-run-configurations>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="Use Maven wrapper" />
+        <option name="useMavenConfig" value="true" />
+      </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="workspaceImportEnabled" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectId" id="2Mp7kdEfevQjt5oA4uEeDSubeCm" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/home/kate/CS_Java/Java_CW/cw-db",
+    "settings.editor.selected.configurable": "debugger.dataViews"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="edu.uob" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="InterpreterTests.testBasicCreateAndCommand" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="cw-db" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.uob.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.uob" />
+      <option name="MAIN_CLASS_NAME" value="edu.uob.InterpreterTests" />
+      <option name="METHOD_NAME" value="testBasicCreateAndCommand" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PreliminaryTests.firstTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="cw-db" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.uob.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.uob" />
+      <option name="MAIN_CLASS_NAME" value="edu.uob.PreliminaryTests" />
+      <option name="METHOD_NAME" value="firstTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.InterpreterTests.testBasicCreateAndCommand" />
+        <item itemvalue="JUnit.PreliminaryTests.firstTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="edcd6346-07e2-4156-a1ae-49115b770574" name="Changes" comment="" />
+      <created>1678452813602</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1678452813602</updated>
+    </task>
+    <servers />
+  </component>
+</project>
