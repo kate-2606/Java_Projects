@@ -51,10 +51,11 @@ public class Table {
 
     public HashMap getDataRows() { return dataRows; }
 
-    public Row getRow(long rowNumber) throws InterpreterException {
-        for(Long i  : dataRows.keySet()){
-            if (i==rowNumber)
-                return dataRows.get(i);
+    public Row getRow(int rowNumber) throws InterpreterException {
+        int i=0;
+        for( Row r : dataRows.values()){
+            if (i==rowNumber) {return r; }
+            i++;
         }
         throw new InterpreterException.AccessingNonExistentRow(rowNumber);
     }
@@ -123,23 +124,13 @@ public class Table {
 
     public void addAttribute(String attributeName) throws InterpreterException {
         attributes.addAttribute(attributeName);
-        int position = getAttributePosition(attributeName);
+        int position = attributes.getAttributePosition(attributeName);
         if(dataRows!=null) {
             for (Row r : dataRows.values()) {
                 r.addCell(position, "");
             }
         }
     }
-
-    public int getAttributePosition(String attributeName) throws InterpreterException{
-        return attributes.getAttributePosition(attributeName);
-    }
-
-    public ArrayList<String> getAttributesAsList() { return attributes.getAttributesAsList(); }
-
-
-    public String getAttributeByNumber(int column) { return attributes.getAttributeByNumber(column); }
-
 
     public void removeAttribute(String attributeName) throws InterpreterException {
         int position = attributes.getAttributePosition(attributeName);
@@ -176,7 +167,7 @@ public class Table {
                         data = data + dataRows.get(l).getCellDataByNumber(i-1) + "\t";
                     }
                 }
-                data = data.trim() + "\n";
+                data = data + "\n";
             }
             select=false;
         }
@@ -194,7 +185,6 @@ public class Table {
             }
         }
     }
-
 
     public HashSet<Long> getEqualHash(int column, String target, Boolean equal){
         HashSet<Long> set = new HashSet<>();
@@ -239,6 +229,11 @@ public class Table {
         }
         return set;
     }
+
+
+
+
+
 }
 
 

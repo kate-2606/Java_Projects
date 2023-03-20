@@ -47,7 +47,8 @@ public class InterpreterTests {
         Parser parser = new Parser();
         parser.Parser(tokens, lexer, ic);
         if (parser.getParserResult()) {
-            Interpreter interpreter = new Interpreter(tokens, ic);
+            Interpreter interpreter = new Interpreter();
+            interpreter.Interpreter(tokens, ic);
             return interpreter;
         }
         return null;
@@ -211,19 +212,10 @@ public class InterpreterTests {
         sendCommandToServer("INSERT INTO cars VALUES ('P3456H', 'landrover', 'blue', 650, TRUE);");
         sendCommandToServer("INSERT INTO cars VALUES ('HGEMKHU', 'fiat', 'silver', 350, FALSE);");
         sendCommandToServer("INSERT INTO cars VALUES ('QX22223', 'merc', 'blue' , 200, TRUE);");
-        sendCommandToServer("UPDATE cars SET brand='Fail' WHERE hp<450;");
+        sendCommandToServer("UPDATE cars SET brand='itallianFail' WHERE hp<450;");
         InterpContext ic = server.getInterpretationContext();
         Table table = ic.getWorkingDatabase().getTableByName("cars");
-        assertEquals("Fail", table.getRow(5).getCellDataByNumber(1));
-        assertEquals("Fail", table.getRow(6).getCellDataByNumber(1));
-
-        sendCommandToServer("CREATE TABLE marks (name, mark, pass, iq);");
-        sendCommandToServer("INSERT INTO marks VALUES ('Steve', 65, TRUE, 650);");
-        sendCommandToServer("INSERT INTO marks VALUES ('Dave', 55, TRUE, 350);");
-        sendCommandToServer("INSERT INTO marks VALUES ('Bob', 35, FALSE, 200);");
-        sendCommandToServer("INSERT INTO marks VALUES ('Clive', 20, FALSE, 130);");
-        String result = sendCommandToServer("JOIN marks AND cars ON iq AND hp;");
-        System.out.println(result);
+        assertEquals("itallianFail", table.getRow(4).getCellDataByNumber(1));
         sendCommandToServer("DROP DATABASE vehicles;");
     }
 
@@ -238,27 +230,24 @@ public class InterpreterTests {
     @Test
     public void testTranscript() throws InterpreterException {
         String result=sendCommandToServer("CREATE DATABASE markbook;");
-        System.out.println(result);
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("USE markbook;");
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("INSERT INTO marks VALUES ('Steve', 65, TRUE);");
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("INSERT INTO marks VALUES ('Dave', 55, TRUE);");
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("INSERT INTO marks VALUES ('Bob', 35, FALSE);");
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("INSERT INTO marks VALUES ('Clive', 20, FALSE);");
-        assertEquals("[OK]\n", result);
+        assertEquals("[OK]", result);
         result=sendCommandToServer("SELECT * FROM marks;");
         assertTrue(result.contains("Dave"));
         assertTrue(result.contains("Steve"));
         assertTrue(result.contains("Bob"));
         assertTrue(result.contains("Clive"));
-
-        sendCommandToServer("DROP DATABASE markbook;");
         //finish this
     }
 }

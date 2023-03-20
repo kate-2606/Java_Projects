@@ -72,7 +72,7 @@ import java.io.Serial;
         public static class AccessingNonExistentRow extends InterpreterException {
             @Serial private static final long serialVersionUID = 1;
 
-            public AccessingNonExistentRow(Long rowNumber) {
+            public AccessingNonExistentRow(Integer rowNumber) {
                 super("Row number " + rowNumber + " does not exist");
             }
         }

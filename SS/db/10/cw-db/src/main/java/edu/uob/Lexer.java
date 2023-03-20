@@ -9,12 +9,9 @@ import java.util.stream.Stream;
 
 //should be case-insensitive -- .equals case insensitive
 //table names etc... can't have the same name as keywords
-//select table.attribute test
-//make a check that column names aren't the same
+//unsigned long for key
 //write good error messages
 //sort ugly function --- https://stackoverflow.com/questions/3316582/iterating-through-methods
-
-//select sort by id high to low
 
 
 //key persists --YES

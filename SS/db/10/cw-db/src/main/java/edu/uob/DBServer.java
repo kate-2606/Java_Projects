@@ -53,7 +53,8 @@ public class DBServer {
         Parser parser = new Parser();
         parser.Parser(tokens, lexer, ic);
 
-        Interpreter interpreter = new Interpreter(tokens, ic);
+        Interpreter interpreter = new Interpreter();
+        interpreter.Interpreter(tokens, ic);
         String result = ic.getResult();
         ic.setResult("");
         return result;
