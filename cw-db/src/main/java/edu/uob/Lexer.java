@@ -6,31 +6,33 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
-
-//should be case-insensitive -- .equals case insensitive
-//table names etc... can't have the same name as keywords
+/*---------------------DONE---------------------*/
 //select table.attribute test
-//make a check that column names aren't the same
-//write good error messages
+//LIKE only compares strings
+//key persists
+//throw exception if column already exisists
+//command should be case-insensitive -- .equals caseinsensitive
+//can other columns can't be labeled ID
+//throw exception if there are too few/too many values in insert
+
+
+
+/*---------------------TO DO--------------------*/
+//table names etc... can't have the same name as keywords
+//true false are caseinsensitive but saved in the right case
+//can select id
+//join should check attribute exists in that table
+//attribute name queries are caseinsensistive
+//bool literals in tables are caseinsensitive
+//do some queries with null -- names and cell values
+//table empty strings NULL or ""?
+
 //sort ugly function --- https://stackoverflow.com/questions/3316582/iterating-through-methods
 
-//select sort by id high to low
-
-
-//key persists --YES
-//foriegn keys self generated?
+//select sort by id high to low?
 //can you delete a database while in a different database --YES
-
-
-//trim row strings
-//replace lexer stuff with itterarators
-//can other columns be labeled id?? -- ASSUMING NO
-//LIKE only compares strings
-//can't name a columns id or other columns
-
-
+//replace lexer stuff with itterarator
 //what happens if the lexer fails?
-
 //test pdf tests
 
 
@@ -56,8 +58,6 @@ public class Lexer {
     }
 
     ArrayList<Token> tokens;
-
-    String storageFolderPath = Paths.get("databases").toAbsolutePath().toString();
 
     String command = null;
 
@@ -99,20 +99,21 @@ public class Lexer {
         Token curToken = new Token();
         String word = words.get(wordIndex);
 
-        int i;
+        int i=0;
         int increment=0;
 
-        for (i=0; i<tokenTypeStrings.length; i++ ){
-            if(Objects.equals(word,tokenTypeStrings[i])){
+        for (String s : tokenTypeStrings){
+            if(s.equalsIgnoreCase(word)){
                 curToken.setType(i);
                 tokens.add(curToken);
                 return curToken;
             }
+            i++;
         }
 
         if (isComparator(word)){
             curToken.setType(i+increment);
-            curToken.setValue(word);
+            curToken.setValue(word.toUpperCase());
             tokens.add(curToken);
             return curToken;
         }
@@ -120,7 +121,7 @@ public class Lexer {
 
         if (isBoolOp(word)){
             curToken.setType(i+increment);
-            curToken.setValue(word);
+            curToken.setValue(word.toUpperCase());
             tokens.add(curToken);
             return curToken;
         }
@@ -134,21 +135,21 @@ public class Lexer {
         increment ++;
         if (isBoolLit(word)){
             curToken.setType(i+increment);
-            curToken.setValue(word);
+            curToken.setValue(word.toUpperCase());
             tokens.add(curToken);
             return curToken;
         }
         increment ++;
         if (isFloatLit(word)){
             curToken.setType(i+increment);
-            curToken.setValue(word);
+            curToken.setValue(word.toUpperCase());
             tokens.add(curToken);
             return curToken;
         }
         increment ++;
         if (isIntLit(word)){
             curToken.setType(i+increment);
-            curToken.setValue(word);
+            curToken.setValue(word.toUpperCase());
             tokens.add(curToken);
             return curToken;
         }
@@ -178,12 +179,21 @@ public class Lexer {
 
             if (c.equals(word)) { return true; }
         }
-        if(word.equals("LIKE")) { return true; }
+        if(word.equalsIgnoreCase("LIKE")) {
+            return true; }
         return false;
     }
 
     private Boolean isBoolOp(String word){
-        if(word.equals("AND") || word.equals("OR")){
+        if(word.equalsIgnoreCase("AND")) {
+            words.remove(wordIndex);
+            words.add(wordIndex, "AND");
+            return true;
+        }
+
+        if(word.equalsIgnoreCase("OR")){
+            words.remove(wordIndex);
+            words.add(wordIndex,"OR");
             return true;
         }
         return false;
@@ -204,7 +214,7 @@ public class Lexer {
     }
 
     private Boolean isBoolLit(String word){
-        switch (word) {
+        switch (word.toUpperCase()) {
             case "TRUE", "FALSE":
                 break;
             default:

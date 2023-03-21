@@ -59,10 +59,14 @@
       <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/test/java/edu/uob/ExampleDBTests.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/test/java/edu/uob/InterpreterTests.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../SS/db/06/cw-db/src/test/java/edu/uob/PreliminaryTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/AlterCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/CreateCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/DropCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/InsertCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/InterpreterException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/SelectCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/StartCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/edu/uob/UseCommand.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/databases/Delete/people.tab" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Delete/people.tab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/databases/Delete/sheds.tab" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Delete/sheds.tab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/databases/Tests/Out/out.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../SS/db/05/cw-db/databases/Tests/Out/out.txt" afterDir="false" />
@@ -71,24 +75,19 @@
       <change beforePath="$PROJECT_DIR$/databases/null" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/databases/people.tab" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/databases/sheds.tab" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Attributes.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/DBClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/DBServer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Database.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/InterpContext.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Interpreter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Lexer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Parser.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/ParserExceptions.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Row.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Table.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Token.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/ExampleDBTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/InterpreterTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/PreliminaryTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Attributes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Attributes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/DBServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/DBServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/InterpContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/InterpContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Interpreter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Interpreter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Lexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Row.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Row.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Table.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Table.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/uob/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/uob/Token.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/InterpreterTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/edu/uob/InterpreterTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/edu/uob/PreliminaryTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/edu/uob/PreliminaryTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +137,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/kate/CS_Java/Java_CW/cw-db",
+    "last_opened_file_path": "/home/kate/CS_Java/Java_CW/OO/01/cw-db",
     "settings.editor.selected.configurable": "debugger.dataViews"
   }
 }]]></component>

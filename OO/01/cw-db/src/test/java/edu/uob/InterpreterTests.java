@@ -3,6 +3,8 @@ package edu.uob;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.crypto.Data;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileNotFoundException;
@@ -37,24 +39,25 @@ public class InterpreterTests {
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
-    private StartCommand interpretCommand(String command, InterpContext ic){
+    private Interpreter interpretCommand(String command, InterpContext ic) throws InterpreterException, IOException {
         ArrayList<Token> tokens = new ArrayList<>();
+        ic.InterpContext(storageFolderPath);
+
         Lexer lexer = new Lexer();
         lexer.Lexer(command, tokens);
+
         Parser parser = new Parser();
-        parser.Parser(tokens, lexer);
+        parser.Parser(tokens, lexer, ic);
 
         if (parser.getParserResult()) {
-            ic.InterpContext(storageFolderPath);
-            StartCommand startCommand = new StartCommand();
-            startCommand.StartCommand(tokens, ic);
-            return startCommand;
+            StartCommand start = new StartCommand(ic, tokens);
+            start.interpretCommand();
         }
         return null;
     }
 
     @Test
-    public void testBasicCreateAndCommand1() {
+    public void testBasicCreateAndCommand1() throws InterpreterException, IOException {
         InterpContext ic = new InterpContext();
         interpretCommand("CREATE DATABASE coursework;", ic);
         interpretCommand("USE coursework;", ic);
@@ -85,7 +88,7 @@ public class InterpreterTests {
     //try to create a table which already exists and do operations on it
 
     @Test
-    public void testBasicCreateAndCommand2() throws InterpreterException, FileNotFoundException {
+    public void testBasicCreateAndCommand2() throws InterpreterException, IOException {
         InterpContext ic = new InterpContext();
         interpretCommand("CREATE DATABASE food;", ic);
         interpretCommand("USE food;", ic);
@@ -127,10 +130,10 @@ public class InterpreterTests {
         assertFalse(response.contains("Quentin"));
         assertFalse(response.contains("Paul"));
         response = sendCommandToServer("SELECT * FROM marks WHERE mark!=10;");
-        assertFalse(response.contains("Steve"));
-        assertFalse(response.contains("Pete"));
-        assertFalse(response.contains("Quentin"));
-        assertTrue(response.contains("Paul"));
+        assertTrue(response.contains("Steve"));
+        assertTrue(response.contains("Pete"));
+        assertTrue(response.contains("Quentin"));
+        assertFalse(response.contains("Paul"));
         response = sendCommandToServer("SELECT * FROM marks WHERE mark LIKE 5;");
         assertTrue(response.contains("Steve"));
         assertTrue(response.contains("Pete"));
@@ -151,23 +154,114 @@ public class InterpreterTests {
         String randomName = generateRandomName();
         sendCommandToServer("CREATE DATABASE " + "students" + ";");
         sendCommandToServer("USE " + "students" + ";");
-        sendCommandToServer("CREATE TABLE details (name, email, hairColour);");
-        sendCommandToServer("INSERT INTO details VALUES ('Steve', 's@gmail.com', 'brown');");
-        sendCommandToServer("INSERT INTO details VALUES ('Pete', 'p@hotmail.co.uk', 'brown');");
-        sendCommandToServer("INSERT INTO details VALUES ('Quentin', 'q@bluebottle.co.uk', 'silver');");
-        sendCommandToServer("INSERT INTO details VALUES ('Paul', 'paul@hotmail.com', 'pink');");
-        sendCommandToServer("INSERT INTO details VALUES ('Fran', 'fran@hotmail.com', 'pink');");
-        String response = sendCommandToServer("SELECT * FROM details WHERE (email LIKE 'hotmail' AND hairColour=='brown') OR hairColour=='silver';");
+        sendCommandToServer("CREATE TABLE details (name, email, hairColour, height);");
+        sendCommandToServer("INSERT INTO details VALUES ('Steve', 's@gmail.com', 'brown', 175);");
+        sendCommandToServer("INSERT INTO details VALUES ('Pete', 'p@hotmail.co.uk', 'brown',201);");
+        sendCommandToServer("INSERT INTO details VALUES ('Quentin', 'q@bluebottle.co.uk', 'silver', 154);");
+        sendCommandToServer("INSERT INTO details VALUES ('Paul', 'paul@hotmail.com', 'pink', 187);");
+        sendCommandToServer("INSERT INTO details VALUES ('Fran', 'fran@example.com', 'pink', 150);");
+        String response = sendCommandToServer("SELECT * FROM details WHERE (email LIKE 'hotmail' AND hairColour=='brown') AND hairColour!='silver';");
+        assertFalse(response.contains("Steve"));
+        assertFalse(response.contains("Paul"));
+        assertTrue(response.contains("Pete"));
+        assertFalse(response.contains("Quentin"));
+
+        response = sendCommandToServer("SELECT * FROM details WHERE ((email LIKE 'hotmail' AND hairColour=='brown') OR " +
+                "(hairColour=='pink' AND email LIKE 'example')) OR name=='Quentin';");
+        assertFalse(response.contains("Steve"));
+        assertFalse(response.contains("Paul"));
+        assertTrue(response.contains("Fran"));
+        assertTrue(response.contains("Quentin"));
+        assertTrue(response.contains("Pete"));
+
+
+        response = sendCommandToServer("SELECT * FROM details WHERE (((email LIKE 'hotmail' AND hairColour=='brown') OR " +
+                "(hairColour=='pink' AND email LIKE 'example')) AND height>150) OR name=='Quentin';");
+        assertFalse(response.contains("Steve"));
+        assertFalse(response.contains("Paul"));
+        assertFalse(response.contains("Fran"));
+        assertTrue(response.contains("Quentin"));
+        assertTrue(response.contains("Pete"));
+
+
+        response = sendCommandToServer("SELECT * FROM details WHERE height>=160;");
+        assertTrue(response.contains("Steve"));
+        assertTrue(response.contains("Paul"));
+        assertFalse(response.contains("Fran"));
+        assertFalse(response.contains("Quentin"));
+        assertTrue(response.contains("Pete"));
+
+        response = sendCommandToServer("SELECT * FROM details WHERE (((email LIKE 'hotmail' AND hairColour=='brown') OR " +
+                "(hairColour=='pink' AND email LIKE 'example')) AND (height>=150 AND hairColour!='brown')) OR name=='Quentin';");
+        assertFalse(response.contains("Steve"));
+        assertFalse(response.contains("Paul"));
+        assertTrue(response.contains("Fran"));
+        assertTrue(response.contains("Quentin"));
+        assertFalse(response.contains("Pete"));
         sendCommandToServer("DROP DATABASE students;");
     }
 
 
-    //add exceptions so handles invalid attribute
+    @Test
+    public void testUpdateCommand() throws InterpreterException {
+        String randomName = generateRandomName();
+        sendCommandToServer("CREATE DATABASE " + "vehicles" + ";");
+        sendCommandToServer("USE " + "vehicles" + ";");
+        sendCommandToServer("CREATE TABLE cars(reg, brand, colour, hp, good);");
+        sendCommandToServer("INSERT INTO cars VALUES ('YE456H', 'tyota', 'yellow', 500, TRUE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('ZCEMKHU', 'tyota', 'red', 450, FALSE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('BQ22223', 'fiat', 'blue' , 700, TRUE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('P3456H', 'landrover', 'blue', 650, TRUE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('HGEMKHU', 'fiat', 'silver', 350, FALSE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('QX22223', 'merc', 'blue' , 200, TRUE);");
+        sendCommandToServer("UPDATE cars SET brand='Fail' WHERE hp<450;");
+        InterpContext ic = server.getInterpretationContext();
+        Table table = ic.getWorkingDatabase().getTableByName("cars");
+        assertEquals("Fail", table.getRow(5).getCellDataByNumber(1));
+        assertEquals("Fail", table.getRow(6).getCellDataByNumber(1));
+
+        sendCommandToServer("CREATE TABLE marks (name, mark, pass, iq);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Steve', 65, TRUE, 650);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Dave', 55, TRUE, 350);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Bob', 35, FALSE, 200);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Clive', 20, FALSE, 130);");
+        String result = sendCommandToServer("JOIN marks AND cars ON iq AND hp;");
+        System.out.println(result);
+        sendCommandToServer("DROP DATABASE vehicles;");
+    }
+
 
     @Test
     private void testReadTableFile() throws IOException {
         sendCommandToServer("CREATE DATABASE coursework;");
         sendCommandToServer("CREATE TABLE java (assignment, bugs, numOfFunction, enjoyable);");
         //exists isn't working in testing? -- passes when true or false....
+    }
+
+    @Test
+    public void testTranscript() throws InterpreterException {
+        String result=sendCommandToServer("CREATE DATABASE markbook;");
+        System.out.println(result);
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("USE markbook;");
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("INSERT INTO marks VALUES ('Steve', 65, TRUE);");
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("INSERT INTO marks VALUES ('Dave', 55, TRUE);");
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("INSERT INTO marks VALUES ('Bob', 35, FALSE);");
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("INSERT INTO marks VALUES ('Clive', 20, FALSE);");
+        assertEquals("[OK]\n", result);
+        result=sendCommandToServer("SELECT * FROM marks;");
+        assertTrue(result.contains("Dave"));
+        assertTrue(result.contains("Steve"));
+        assertTrue(result.contains("Bob"));
+        assertTrue(result.contains("Clive"));
+
+        sendCommandToServer("DROP DATABASE markbook;");
+        //finish this
     }
 }

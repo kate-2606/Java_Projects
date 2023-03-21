@@ -18,8 +18,8 @@ public class Database {
     public void addTable(Table newTable){
         String name="";
         if(newTable!=null){
-                name=newTable.getName();
-                }
+            name=newTable.getName();
+        }
         database.add(newTable);
     }
 

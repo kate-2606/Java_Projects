@@ -1,0 +1,7 @@
+id	reg	brand	colour	hp	good	
+1	YE456H	tyota	yellow	500	TRUE	
+2	ZCEMKHU	tyota	red	450	FALSE	
+3	BQ22223	fiat	blue	700	TRUE	
+4	P3456H	landrover	blue	650	TRUE	
+5	HGEMKHU	Fail	silver	350	FALSE	
+6	QX22223	Fail	blue	200	TRUE	

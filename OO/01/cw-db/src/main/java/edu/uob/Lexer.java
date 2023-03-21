@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -8,9 +9,12 @@ import java.util.stream.Stream;
 
 //should be case-insensitive -- .equals case insensitive
 //table names etc... can't have the same name as keywords
-//unsigned long for key
+//select table.attribute test
+//make a check that column names aren't the same
 //write good error messages
 //sort ugly function --- https://stackoverflow.com/questions/3316582/iterating-through-methods
+
+//select sort by id high to low
 
 
 //key persists --YES
@@ -18,13 +22,32 @@ import java.util.stream.Stream;
 //can you delete a database while in a different database --YES
 
 
-//boolean upper or lowercase?
+//trim row strings
 //replace lexer stuff with itterarators
 //can other columns be labeled id?? -- ASSUMING NO
-// select should print id too
+//LIKE only compares strings
+//can't name a columns id or other columns
+
+
+//what happens if the lexer fails?
+
+//test pdf tests
+
+
+
+/*
+Any table names provided by the user should be converted into lowercase before saving out to the filesystem. You
+should treat column names as case insensitive for querying, but you should preserve the case when storing them
+(so that the user can make use of CamelCase if they wish).
+
+select * from people; is equivalent to SELECT * FROM people;. This is true for all keywords in the BNF
+(including TRUE/FALSE, AND/OR, LIKE etc.) In addition to this, all SQL keywords are reserved words, therefore you
+should not allow them to be used as database/table/attribute names.
+ */
 
 
 public class Lexer {
+
 
     public void Lexer(String inpCommand, ArrayList<Token> tokenList){
         tokens=tokenList;
@@ -33,6 +56,8 @@ public class Lexer {
     }
 
     ArrayList<Token> tokens;
+
+    String storageFolderPath = Paths.get("databases").toAbsolutePath().toString();
 
     String command = null;
 
@@ -53,7 +78,7 @@ public class Lexer {
 
     public boolean isWordListEnd() {
         if(wordIndex == words.size()-1){
-        return true;
+            return true;
         }
         return false;
     }
@@ -258,7 +283,7 @@ public class Lexer {
         }
     }
 
-    private String[] baseChars = {"(",")",",",";"};
+    private String[] baseChars = {"(",")",",",";","=","!"};
 
     private ArrayList<String> specialChars = new ArrayList<>();
 
@@ -282,9 +307,11 @@ public class Lexer {
         for(int i=0; i<specialChars.size() ;i++) {
             input = input.replace(specialChars.get(i), " " + specialChars.get(i) + " ");
         }
-        while (input.contains("> =") || input.contains("< =")){
-            input = input.replace("> =", ">=");
-            input = input.replace("< =", "<=");
+        while (input.contains(">  =") || input.contains("<  =") || input.contains("=  =") || input.contains("!  =")){
+            input = input.replace(">  =", ">=");
+            input = input.replace("<  =", "<=");
+            input = input.replace("!  =", "!=");
+            input = input.replace("=  =", "==");
         }
         while (input.contains("  ")) input = input.replaceAll("  ", " ");
         input = input.trim();

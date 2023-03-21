@@ -13,13 +13,22 @@ import java.io.Serial;
 
         public enum RowOrColumn { ROW, COLUMN }
 
-        public static class AttributeDoesNotExist extends InterpreterException {
+        public static class ExistingAttribute extends InterpreterException {
             @Serial private static final long serialVersionUID = 1;
 
-            public AttributeDoesNotExist(String attributeName) {
+            public ExistingAttribute(String attributeName) {
+                super("Attribute name '" +attributeName +"' already exists in this table");
+            }
+        }
+
+        public static class NotExistentAttribute extends InterpreterException {
+            @Serial private static final long serialVersionUID = 1;
+
+            public NotExistentAttribute (String attributeName) {
                 super("Attribute name '" +attributeName +"' does not exist");
             }
         }
+
 
         public static class CannotDeletePrimaryKey extends InterpreterException {
             @Serial private static final long serialVersionUID = 1;
@@ -74,6 +83,41 @@ import java.io.Serial;
 
             public AccessingNonExistentRow(Long rowNumber) {
                 super("Row number " + rowNumber + " does not exist");
+            }
+        }
+
+
+        public static class FailedToFindPrimaryKey extends InterpreterException {
+            @Serial private static final long serialVersionUID = 1;
+
+            public FailedToFindPrimaryKey() {
+                super("Failed to make a new primary key there may be an unwanted directory in the database");
+            }
+        }
+
+        public static class InvalidNumberOfValues extends InterpreterException {
+            @Serial private static final long serialVersionUID = 1;
+
+            public InvalidNumberOfValues() {
+                super("The number of values does not math the number of attributes in the table");
+            }
+        }
+
+
+        public static class MatchingKeyWord extends InterpreterException {
+            @Serial private static final long serialVersionUID = 1;
+
+            public MatchingKeyWord() {
+                super("An attribute or table name matches a key word");
+            }
+        }
+
+
+        public static class PotentialEmptyFile extends InterpreterException {
+            @Serial private static final long serialVersionUID = 1;
+
+            public PotentialEmptyFile() {
+                super("The table being read is empty");
             }
         }
 }

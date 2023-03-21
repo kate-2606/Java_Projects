@@ -9,7 +9,7 @@ import static java.lang.Float.parseFloat;
 
 
 public class Table {
-//use file separator instead
+    //use file separator instead
     public Table(String name) {
         tableName = name;
     }
@@ -50,6 +50,14 @@ public class Table {
     }
 
     public HashMap getDataRows() { return dataRows; }
+
+    public Row getRow(long rowNumber) throws InterpreterException {
+        for(Long i  : dataRows.keySet()){
+            if (i==rowNumber)
+                return dataRows.get(i);
+        }
+        throw new InterpreterException.AccessingNonExistentRow(rowNumber);
+    }
 
 
     public int getNumberOfAttributes() { return attributes.getNumberOfAttributes(); }
@@ -113,9 +121,9 @@ public class Table {
 
     public Attributes getAttributes() { return attributes; }
 
-    public void addAttribute(String attributeName){
+    public void addAttribute(String attributeName) throws InterpreterException {
         attributes.addAttribute(attributeName);
-        int position = attributes.getAttributePosition(attributeName);
+        int position = getAttributePosition(attributeName);
         if(dataRows!=null) {
             for (Row r : dataRows.values()) {
                 r.addCell(position, "");
@@ -123,8 +131,17 @@ public class Table {
         }
     }
 
-    public void removeAttribute(String attributeName) throws InterpreterException.CannotDeletePrimaryKey,
-            InterpreterException.AttributeDoesNotExist {
+    public int getAttributePosition(String attributeName) throws InterpreterException{
+        return attributes.getAttributePosition(attributeName);
+    }
+
+    public ArrayList<String> getAttributesAsList() { return attributes.getAttributesAsList(); }
+
+
+    public String getAttributeByNumber(int column) { return attributes.getAttributeByNumber(column); }
+
+
+    public void removeAttribute(String attributeName) throws InterpreterException {
         int position = attributes.getAttributePosition(attributeName);
         if(position>0){
             attributes.removeAttribute(position);
@@ -139,6 +156,7 @@ public class Table {
         if(position==-1) { throw new InterpreterException.AttributeDoesNotExist(attributeName);}
     }
 
+    //clean this upp!!!!
     public String getDataColumnsAsString(ArrayList<Integer> columns, HashSet<Long> rows){
         String data="";
         Boolean select = false;
@@ -158,12 +176,25 @@ public class Table {
                         data = data + dataRows.get(l).getCellDataByNumber(i-1) + "\t";
                     }
                 }
-                data = data + "\n";
+                data = data.trim() + "\n";
             }
             select=false;
         }
         return data;
     }
+
+    public void updateTableData(ArrayList<String[]> valuePairs, HashSet<Long> rows) throws InterpreterException {
+        int column;   String data;   Row row;
+        for(Long l : rows){
+            row=dataRows.get(l);
+            for(String[] p : valuePairs) {
+                column = attributes.getAttributePosition(p[0])-1;
+                data = p[1];
+                row.changeCellData(column, data);
+            }
+        }
+    }
+
 
     public HashSet<Long> getEqualHash(int column, String target, Boolean equal){
         HashSet<Long> set = new HashSet<>();
@@ -185,10 +216,10 @@ public class Table {
             Row r = dataRows.get(l);
             String data = r.getCellDataByNumber(column);
             if((Lexer.isIntLit(data) || Lexer.isFloatLit(data))&&(Lexer.isIntLit(target) || Lexer.isFloatLit(target))){
-                if (condition.equals(">") && parseFloat(data)>parseFloat(target)) {
+                if (condition.contains(">") && parseFloat(data)>parseFloat(target)) {
                     set.add(l);
                 }
-                if (condition.equals("<") && parseFloat(data)<parseFloat(target)) {
+                if (condition.contains("<") && parseFloat(data)<parseFloat(target)) {
                     set.add(l);
                 }
             }
@@ -208,9 +239,6 @@ public class Table {
         }
         return set;
     }
-
-
-
 }
 
 

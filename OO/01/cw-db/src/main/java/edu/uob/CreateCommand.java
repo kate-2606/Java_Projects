@@ -6,23 +6,29 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import static edu.uob.TokenType.*;
+
 public class CreateCommand extends Interpreter{
 
-    public void createCommand() throws IOException, InterpreterException {
+    public CreateCommand(InterpContext context, ArrayList<Token> tokens) {
+        super(context, tokens);
+    }
+
+    public void interpretCommand() throws IOException, InterpreterException {
         getNextToken();
-        if (accept(Parser.TokenType.DATABASE)) {
+        if (accept(DATABASE)) {
             createDatabase();
         }
-        if (accept(Parser.TokenType.TABLE) && ic.getDatabasePath() != null) {
+        if (accept(TABLE) && context.getDatabasePath() != null) {
             String tableName = getCurrentToken().getValue();
-            String tablePath = ic.getDatabasePath() + File.separator + tableName + ".tab";
+            String tablePath = context.getDatabasePath() + File.separator + tableName + ".tab";
 
             File f = new File(tablePath);
             if (f.exists()) {
-                if (!ic.getWorkingDatabase().tableExists(tableName)) {
+                if (!context.getWorkingDatabase().tableExists(tableName)) {
                     Table table = readTableFile(tableName);
                     table.setNextPrimaryKey(-1);
-                    ic.getWorkingDatabase().addTable(table);
+                    context.getWorkingDatabase().addTable(table);
                 }
                 throw new InterpreterException.CreatingTableThatExistsAlready(tableName);
             }
@@ -31,7 +37,8 @@ public class CreateCommand extends Interpreter{
     }
 
     private void createDatabase() throws IOException{
-        String dirPath = ic.getStorageFolderPath() + File.separator + getCurrentToken().getValue();
+        String dirPath = context.getStorageFolderPath() + File.separator + getCurrentToken().getValue();
+        System.out.println(dirPath);
         File f = new File(dirPath);
         if (f.exists()) {
             throw new IOException("Database already exists");
@@ -50,16 +57,16 @@ public class CreateCommand extends Interpreter{
             throw new IOException("Could not create table");
         }
         Table newTable = new Table(tableName);
-        ic.getWorkingDatabase().addTable(newTable);
+        context.getWorkingDatabase().addTable(newTable);
+        System.out.println(context.getWorkingDatabase().getTableByName(tableName));
         newTable.setNextPrimaryKey(1);
 
         getNextToken();
         ArrayList<String> attributes = new ArrayList<>();
-        while (!accept(Parser.TokenType.SEMI_COL)) {
-            if (isCurrentToken(Parser.TokenType.PLAIN_TXT) || isCurrentToken(Parser.TokenType.ATTRIB_NAME)) {
+        while (!accept(SEMI_COL)) {
+            if (isCurrentToken(PLAIN_TXT) || isCurrentToken(ATTRIB_NAME)) {
                 String attributeName = getCurrentToken().getValue();
-                if (!checkAttributeName(attributeName, tableName))
-                    throw new InterpreterException.ReferencingWrongTable(attributeName);
+                checkAttributeName(attributeName, tableName);
                 attributes.add(attributeName);
             }
             getNextToken();

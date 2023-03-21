@@ -27,9 +27,10 @@ public class PreliminaryTests {
     private Parser createNewParser(String command){
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer testLexer = new Lexer();
+        InterpContext ic = new InterpContext();
         testLexer.Lexer(command, tokens);
         Parser testParser = new Parser();
-        testParser.Parser(tokens, testLexer);
+        testParser.Parser(tokens, testLexer, ic);
         return testParser;
     }
 

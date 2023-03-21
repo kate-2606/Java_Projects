@@ -2,6 +2,7 @@ package edu.uob;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.nio.file.Paths;
 import static edu.uob.TokenType.*;
@@ -70,6 +71,24 @@ public class Interpreter {
         return false;
      }
 
+     private void isNotKeyWord(String name) throws InterpreterException {
+        int i=0;
+         TokenType type=TokenType.values()[i];
+         while (type!=OPEN_BR){
+             type=TokenType.values()[i];
+             if(type.toString().equals(name)){
+                 throw new InterpreterException.MatchingKeyWord();
+             }
+             i++;
+         }
+         if(name.toUpperCase()=="AND" || name.toUpperCase()=="OR" || name.toUpperCase()=="LIKE"){
+             throw new InterpreterException.MatchingKeyWord();
+         }
+         if(name.toUpperCase()=="TRUE" || name.toUpperCase()=="FALSE"){
+             throw new InterpreterException.MatchingKeyWord();
+         }
+     }
+
 
      //could check for that each row has the correct number of columns?
     private Table readTableFile(String tableName) throws FileNotFoundException, InterpreterException {
@@ -77,7 +96,7 @@ public class Interpreter {
         if(!ic.getWorkingDatabase().tableExists(tableName)) {
             File fileToOpen = new File(ic.getDatabasePath() + File.separator + tableName + ".tab");
             if (!(fileToOpen.isDirectory()) && fileToOpen.exists()) {
-                Table readTable = new Table(tableName);
+                Table readTable = new Table(tableName, ic.getDatabasePath());
                 try {
                     FileReader reader = new FileReader(fileToOpen);
                     BufferedReader buffReader = new BufferedReader(reader);
@@ -100,11 +119,17 @@ public class Interpreter {
 
     private void exportTable(Table table) throws IOException {
         String path = ic.getDatabasePath() + File.separator + table.getName()+".tab";
+
         File fileToOpen = new File(path);
+        if(fileToOpen.exists()){
+            fileToOpen.delete();
+        }
+        fileToOpen = new File(path);
         new FileOutputStream(fileToOpen, false).close();
         FileWriter writer = new FileWriter(fileToOpen);
         BufferedWriter buffWriter = new BufferedWriter(writer);
         String dataOut = table.getAttributesAsString();
+
         if (dataOut != null) {
             buffWriter.write(dataOut + "\n");
         }
@@ -151,14 +176,12 @@ public class Interpreter {
     }
 
 
-    public void joinCommand() throws InterpreterException {
+    public void joinCommand() throws InterpreterException, FileNotFoundException {
         String tableName=getName();
-        System.out.println(tableName);
-        Table tableA = ic.getWorkingDatabase().getTableByName(tableName);
+        Table tableA = findTable(tableName);
         getNextToken();
         tableName=getName();
-        System.out.println(tableName);
-        Table tableB = ic.getWorkingDatabase().getTableByName(tableName);
+        Table tableB = findTable(tableName);
         getNextToken();
         String attributeA=getName();
         getNextToken();
@@ -185,24 +208,30 @@ public class Interpreter {
         ArrayList<Long[]> joinMap = new ArrayList<>();
         HashMap<Long, Row> mapA = tableA.getDataRows();
         HashMap<Long, Row> mapB = tableB.getDataRows();
-        String cellA = "";  String cellB = "";
+        String cellA;  String cellB;
         int posA = tableA.getAttributePosition(attributeA)-1;
         int posB = tableB.getAttributePosition(attributeB)-1;
 
-        for(Long l : mapA.keySet()){
-            System.out.println("key here");
-            cellA=mapA.get(l).getCellDataByNumber(posA);
-            for(Long k : mapB.keySet()){
-               cellB=mapB.get(k).getCellDataByNumber(posB);
-                System.out.println(cellA + " " + cellB);
+        String attributes = tableA.getAttributesAsString().replace(attributeA+"\t", "");
+
+        attributes = attributes + tableB.getAttributesAsString().replace("id\t", "") +"\n";
+
+        attributes = attributes.replace(attributeB+"\t", "");
+
+
+        int i=0;
+        for(Long keyA : mapA.keySet()){
+            cellA=mapA.get(keyA).getCellDataByNumber(posA);
+
+            for(Long keyB : mapB.keySet()){
+               cellB=mapB.get(keyB).getCellDataByNumber(posB);
                if(cellA.equals(cellB)){
-                   Long[] match = {l, k};
+                   Long[] match = {keyA, keyB};
                    joinMap.add(match);
-                   System.out.println("match " + match);
                 }
             }
         }
-        return joinMerge(tableA, tableB, attributeA, attributeB, joinMap);
+        return attributes + joinMerge(tableA, tableB, attributeA, attributeB, joinMap);
     }
 
 
@@ -210,13 +239,11 @@ public class Interpreter {
     private String joinMerge(Table tableA, Table tableB, String attributeA, String attributeB, ArrayList<Long[]> map)
             throws InterpreterException {
         String result = "";
-        System.out.println("here");
+        int key=1;
         for(Long[] l : map){
-            System.out.println("here1");
             long keyA = l[0];
             int i=0;
-            ArrayList<String> row = new ArrayList<>();
-            row.add(String.valueOf(keyA));
+            result =result + key + "\t";
             while (i<tableA.getNumberOfAttributes()-1){
                 if(i!=tableA.getAttributePosition(attributeA)-1)
                     result = result + tableA.getRow(keyA).getCellDataByNumber(i) + "\t";
@@ -230,13 +257,21 @@ public class Interpreter {
                 i++;
             }
             result = result.trim() + "\n";
+            key++;
         }
         return result;
     }
 
 
-    public void deleteCommand(){
-
+    public void deleteCommand() throws InterpreterException, IOException {
+        String tableName=getName();
+        Table table = findTable(tableName);
+        getNextToken();
+        accept(WHERE);
+        HashSet<Long> deletedRows = null;
+        deletedRows = conditionCommand(table, deletedRows);
+        table.deleteRows(deletedRows);
+        exportTable(table);
     }
 
     public void updateCommand() throws InterpreterException, IOException {
@@ -244,9 +279,7 @@ public class Interpreter {
         Table table =findTable(tableName);
         ArrayList<String[]> valuePairs = new ArrayList<>();
         getNextToken();
-        System.out.println(getCurrentToken().getType() + " " + getCurrentToken().getValue());
         accept(SET);
-        System.out.println(getCurrentToken().getType() + " " + getCurrentToken().getValue());
         int i=0;
         while(!accept(WHERE)){
             accept(COMMA);
@@ -263,7 +296,6 @@ public class Interpreter {
             }
             valuePairs.add(valuePair);
         }
-        System.out.println(getCurrentToken().getType() + " " + getCurrentToken().getValue());
         HashSet<Long> conditionalSet = new HashSet<>();
         conditionalSet=conditionCommand(table, conditionalSet);
         table.updateTableData(valuePairs, conditionalSet);
@@ -294,16 +326,22 @@ public class Interpreter {
         String attributes = "";
         for (String s : selectedAttributes) {
             checkAttributeName(s, tableName);
+            if(s.contains(".")){
+
+                String[] arr =s.split("[.]");
+                System.out.println("it contains arr size is "+arr.length);
+                s=arr[1];
+            }
             column = table.getAttributePosition(s);
             attributes = attributes + table.getAttributeByNumber(column) + "\t";
             columns.add(column);
         }
-        HashSet<Long> conditionalSet = null;
+        HashSet<Long> selectedRows = null;
 
         if (accept(WHERE)) {
-            conditionalSet = conditionCommand(table, conditionalSet);
+            selectedRows = conditionCommand(table, selectedRows);
         }
-        String result = attributes + "\n" + table.getDataColumnsAsString(columns, conditionalSet);
+        String result = attributes + "\n" + table.getDataColumnsAsString(columns, selectedRows);
         ic.setResult(result);
     }
 
@@ -393,6 +431,10 @@ public class Interpreter {
             }
         }
 
+        if(values.size()!=table.getNumberOfAttributes()-1){
+            throw new InterpreterException.InvalidNumberOfValues();
+        }
+
         table.addRowFromCommand(false, values);
         exportTable(table);
     }
@@ -453,13 +495,14 @@ public class Interpreter {
         }
         if (accept(TABLE) && ic.getDatabasePath() != null) {
             String tableName = getCurrentToken().getValue();
+            isNotKeyWord(tableName);
             String tablePath = ic.getDatabasePath() + File.separator + tableName + ".tab";
 
             File f = new File(tablePath);
             if (f.exists()) {
                 if (!ic.getWorkingDatabase().tableExists(tableName)) {
                     Table table = readTableFile(tableName);
-                    table.setNextPrimaryKey(-1);
+                    table.setNextPrimaryKey();
                     ic.getWorkingDatabase().addTable(table);
                 }
                 throw new InterpreterException.CreatingTableThatExistsAlready(tableName);
@@ -468,8 +511,10 @@ public class Interpreter {
         }
     }
 
-    private void createDatabase() throws IOException{
-        String dirPath = ic.getStorageFolderPath() + File.separator + getCurrentToken().getValue();
+    private void createDatabase() throws IOException, InterpreterException {
+        String name = getCurrentToken().getValue();
+        isNotKeyWord(name);
+        String dirPath = ic.getStorageFolderPath() + File.separator + name;
         File f = new File(dirPath);
         if (f.exists()) {
             throw new IOException("Database already exists");
@@ -487,9 +532,9 @@ public class Interpreter {
         } catch (IOException e) {
             throw new IOException("Could not create table");
         }
-        Table newTable = new Table(tableName);
+        Table newTable = new Table(tableName, ic.getDatabasePath());
         ic.getWorkingDatabase().addTable(newTable);
-        newTable.setNextPrimaryKey(1);
+        newTable.getNextPrimaryKey();
 
         getNextToken();
         ArrayList<String> attributes = new ArrayList<>();

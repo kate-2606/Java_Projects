@@ -19,8 +19,8 @@ public class DBServer {
     }
 
     /**
-    * KEEP this signature otherwise we won't be able to mark your submission correctly.
-    */
+     * KEEP this signature otherwise we won't be able to mark your submission correctly.
+     */
     public DBServer() {
         storageFolderPath = Paths.get("databases").toAbsolutePath().toString();
         try {
@@ -32,40 +32,32 @@ public class DBServer {
     }
 
     /**
-    * KEEP this signature (i.e. {@code edu.uob.DBServer.handleCommand(String)}) otherwise we won't be
-    * able to mark your submission correctly.
-    *
-    * <p>This method handles all incoming DB commands and carries out the required actions.
-    */
+     * KEEP this signature (i.e. {@code edu.uob.DBServer.handleCommand(String)}) otherwise we won't be
+     * able to mark your submission correctly.
+     *
+     * <p>This method handles all incoming DB commands and carries out the required actions.
+     */
 
-  private InterpContext ic = new InterpContext();
+    private InterpContext ic = new InterpContext();
 
-    public String handleCommand(String command) {
+    public InterpContext getInterpretationContext() { return ic; }
+
+    public String handleCommand(String command) throws InterpreterException, IOException {
         ArrayList<Token> tokens = new ArrayList<>();
+        ic.InterpContext(storageFolderPath);
 
         Lexer lexer = new Lexer();
         lexer.Lexer(command, tokens);
 
         Parser parser = new Parser();
-        parser.Parser(tokens, lexer);
+        parser.Parser(tokens, lexer, ic);
+        String result = "";
+            StartCommand start = new StartCommand(ic, tokens);
+            result = ic.getResult();
+            ic.prependResult("[OK]\n");
 
-        String result="";
-
-        if (parser.getParserResult()) {
-            result ="[OK] \n";
-
-            ic.InterpContext(storageFolderPath);
-            StartCommand startCommand = new StartCommand();
-            startCommand.StartCommand(tokens, ic);
-
-            result = result + ic.getResult();
-            ic.setResult("");
-        }
-        else{
-            result ="[ERROR] \n";
-        }
+        ic.setResult("");
         return result;
-
     }
 
 
@@ -88,8 +80,8 @@ public class DBServer {
 
     private void blockingHandleConnection(ServerSocket serverSocket) throws IOException {
         try (Socket s = serverSocket.accept();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
 
             System.out.println("Connection established: " + serverSocket.getInetAddress());
             while (!Thread.interrupted()) {
@@ -100,6 +92,8 @@ public class DBServer {
                 writer.write("\n" + END_OF_TRANSMISSION + "\n");
                 writer.flush();
             }
+        } catch (InterpreterException e) {
+            throw new RuntimeException(e);
         }
     }
 }

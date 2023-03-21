@@ -5,49 +5,63 @@ import java.util.ArrayList;
 
 public class StartCommand extends Interpreter{
 
-    public void StartCommand(ArrayList<Token> tokenList, InterpContext inpIc){
-        ic=inpIc;
-        tokens=tokenList;
-        try {
-            commandCommand();
-        } catch (InterpreterException | IOException e) {
-            System.out.println(e.getMessage());
-        }
+    public StartCommand(InterpContext context, ArrayList<Token> tokens) throws InterpreterException, IOException {
+        super(context, tokens);
     }
-    private void commandCommand() throws InterpreterException, IOException {
+
+    public void interpretCommand(){
+        try{
         Token token = getCurrentToken();
+        System.out.println(getCurrentToken().getType());
+        /*
         if (debugging) {
             System.out.println("in commandType, token type is: " + token.getType());
         }
+        */
         switch (token.getType()) {
             case USE:
-                new UseCommand().UseCommand();
+                UseCommand use = new UseCommand(context, tokens);
+                use.interpretCommand();
                 break;
             case CREATE:
-                new CreateCommand().createCommand();;
+                CreateCommand create = new CreateCommand(context, tokens);
+                create.interpretCommand();
                 break;
             case DROP:
-                new DropCommand().DropCommand();;
+                DropCommand drop = new DropCommand(context, tokens);
+                drop.interpretCommand();
                 break;
             case ALTER:
-                new AlterCommand().AlterCommand();
+                AlterCommand alter = new AlterCommand(context, tokens);
+                alter.interpretCommand();
                 break;
             case INSERT:
-                new InsertCommand().InsertCommand();
+                InsertCommand insert = new InsertCommand(context, tokens);
+                insert.interpretCommand();
                 break;
             case SELECT:
-                new SelectCommand().SelectCommand();
+                SelectCommand select = new SelectCommand(context, tokens);
+                select.interpretCommand();
+                break;
+            case UPDATE :
+                UpdateCommand update = new UpdateCommand(context, tokens);
+                update.interpretCommand();
                 break;
                 /*
-            case UPDATE : new UpdateCommand();
-                break;
             case DELETE : new DeleteCommand();
-                break;
-            case JOIN : new JoinCommand();
                 break;
 
                  */
+            case JOIN :
+
+                JoinCommand join = new JoinCommand(context, tokens);
+                join.interpretCommand();
+                break;
+
             default:
         }
+    } catch (InterpreterException | IOException e) {
+        context.setResult("[ERROR]\n"+ e.getMessage() + "\n");
+    }
     }
 }
