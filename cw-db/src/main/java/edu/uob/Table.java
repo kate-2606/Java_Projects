@@ -216,6 +216,7 @@ public class Table {
         return data;
     }
 
+
     public void updateTableData(ArrayList<String[]> valuePairs, HashSet<Long> rows) throws InterpreterException {
         int column;   String data;   Row row;
         for(Long l : rows){
@@ -247,6 +248,7 @@ public class Table {
         }
         return set;
     }
+
 
     public HashSet<Long> getGreaterOrLessHash(int column, String target, String condition) {
         HashSet<Long> set = new HashSet<>();

@@ -48,7 +48,7 @@ public class DBServer {
         ic.initiateContext(storageFolderPath);
 
         Lexer lexer = new Lexer();
-        lexer.Lexer(command, tokens, ic);
+        lexer.initiate(command, tokens, ic);
 
         Parser parser = new Parser();
         parser.Parser(tokens, lexer, ic);

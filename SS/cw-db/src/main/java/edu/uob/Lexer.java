@@ -119,13 +119,7 @@ public class Lexer {
             tokens.add(curToken);
             return curToken;
         }
-        increment ++;
-        if (isStringLit(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.substring(1,word.length()-1));
-            tokens.add(curToken);
-            return curToken;
-        }
+
         increment ++;
         if (isBoolLit(word)){
             curToken.setType(i+increment);
@@ -144,6 +138,13 @@ public class Lexer {
         if (isIntLit(word)){
             curToken.setType(i+increment);
             curToken.setValue(word);
+            tokens.add(curToken);
+            return curToken;
+        }
+        increment ++;
+        if (isStringLit(word)){
+            curToken.setType(i+increment);
+            curToken.setValue(word.substring(1,word.length()-1));
             tokens.add(curToken);
             return curToken;
         }

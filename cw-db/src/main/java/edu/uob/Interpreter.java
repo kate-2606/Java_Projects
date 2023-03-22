@@ -8,13 +8,7 @@ import java.nio.file.Paths;
 import static edu.uob.TokenType.*;
 
 
-
-//change method names to verb noun format
-
 public class Interpreter {
-
-    private final boolean debugging = false;
-
 
     public Interpreter(ArrayList<Token> tokenList, InterpContext inpIc){
         ic=inpIc;
@@ -37,7 +31,7 @@ public class Interpreter {
     private InterpContext ic;
 
 
-    private boolean accept(TokenType t){
+    private boolean acceptToken(TokenType t){
         Token tok = getCurrentToken();
         if (tok.getType()==t){
             if (t != SEMI_COL) {
@@ -56,7 +50,6 @@ public class Interpreter {
     }
 
 
-
     private Token getNextToken() {
         tokenIndex++;
         if(tokenIndex<=tokens.size()){
@@ -65,6 +58,7 @@ public class Interpreter {
         return null;
      }
 
+
      private boolean isValue() {
          TokenType[] values = {STRING_LIT, BOOL_LIT, FLOAT_LIT, INT_LIT, NULL};
         for(TokenType t : values){
@@ -72,6 +66,7 @@ public class Interpreter {
         }
         return false;
      }
+
 
      private void isNotKeyWord(String name) throws InterpreterException {
         int i=0;
@@ -83,7 +78,10 @@ public class Interpreter {
              }
              i++;
          }
-         if(name.equalsIgnoreCase("AND") || name.equalsIgnoreCase("OR") || name.equalsIgnoreCase("LIKE")){
+         if(name.equalsIgnoreCase("AND") || name.equalsIgnoreCase("OR")){
+             throw new InterpreterException.MatchingKeyWord();
+         }
+         if(name.equalsIgnoreCase("LIKE")){
              throw new InterpreterException.MatchingKeyWord();
          }
          if(name.equalsIgnoreCase("TRUE") || name.equalsIgnoreCase("FALSE")){
@@ -92,7 +90,6 @@ public class Interpreter {
      }
 
 
-     //could check for that each row has the correct number of columns?
     private Table readTableFile(String tableName) throws FileNotFoundException, InterpreterException {
 
         if(!ic.getWorkingDatabase().tableExists(tableName)) {
@@ -111,7 +108,6 @@ public class Interpreter {
                     buffReader.close();
                 } catch (IOException e) {
                     throw new FileNotFoundException();
-                    //this exception is in the wrong place
                 }
                 ic.getWorkingDatabase().addTable(readTable);
                 return readTable;
@@ -131,6 +127,7 @@ public class Interpreter {
         new FileOutputStream(fileToOpen, false).close();
         FileWriter writer = new FileWriter(fileToOpen);
         BufferedWriter buffWriter = new BufferedWriter(writer);
+
         String dataOut = table.getAttributesAsString();
 
         if (dataOut != null) {
@@ -146,7 +143,8 @@ public class Interpreter {
         buffWriter.close();
     }
 
-    private void checkAttributeName(String attributeName, String tableName, Boolean creatingTable) throws InterpreterException {
+    private void checkAttributeName(String attributeName, String tableName, Boolean creatingTable)
+            throws InterpreterException {
         Table table = ic.getWorkingDatabase().getTableByName(tableName.toLowerCase());
 
         if(attributeName.contains(".")) {
@@ -193,22 +191,21 @@ public class Interpreter {
     }
 
 
-    //NULL OR BOOL CANT USE < >
     public void joinCommand() throws InterpreterException, FileNotFoundException {
         Table tableA = findTable(getName());
         getNextToken();
         Table tableB = findTable(getName());
-        getNextToken();  accept(ON);
+        getNextToken();  acceptToken(ON);
         String nameA = getCurrentToken().getValue();
-        getNextToken();  accept(BOOL_OP);
+        getNextToken();  acceptToken(BOOL_OP);
         String nameB = getCurrentToken().getValue();
 
         if(nameA!=nameB && !nameB.contains(".") && !nameA.contains(".")){
             if(tableA.attributeExists(nameA) && tableB.attributeExists(nameA)){
-                throw new InterpreterException("Both tables in JOIN contain the attribute '"+nameA+"'");
+                throw new InterpreterException.ContainedInTwoTables(nameA);
             }
             if(tableA.attributeExists(nameB) && tableB.attributeExists(nameB)){
-                throw new InterpreterException("Both tables in JOIN contain the attribute '"+nameB+"'");
+                throw new InterpreterException.ContainedInTwoTables(nameB);
             }
         }
 
@@ -219,6 +216,7 @@ public class Interpreter {
         checkAttributeName(attributeB, tableB.getName(), false);
         ic.setResult(joinHelper(tableA, tableB, attributeA, attributeB));
     }
+
 
     private String attributeBelongsTo(String nameA, String nameB, Table table) throws InterpreterException {
         if(nameA.contains(".")) {
@@ -276,7 +274,6 @@ public class Interpreter {
     }
 
 
-
     private String joinMerge(Table tableA, Table tableB, String attributeA, String attributeB, ArrayList<Long[]> map)
             throws InterpreterException {
         String result = "";
@@ -307,35 +304,40 @@ public class Interpreter {
     public void deleteCommand() throws InterpreterException, IOException {
         String tableName=getName();
         Table table = findTable(tableName);
+
         getNextToken();
-        accept(WHERE);
+        acceptToken(WHERE);
+        
         HashSet<Long> deletedRows = null;
         deletedRows = conditionCommand(table, deletedRows);
         table.deleteRows(deletedRows);
         exportTable(table);
     }
 
+
     public void updateCommand() throws InterpreterException, IOException {
         String tableName=getName();
         Table table =findTable(tableName);
         ArrayList<String[]> valuePairs = new ArrayList<>();
         getNextToken();
-        accept(SET);
-        int i=0;
-        while(!accept(WHERE)){
-            accept(COMMA);
+        acceptToken(SET);
+
+        while(!acceptToken(WHERE)){
+            acceptToken(COMMA);
             String[] valuePair = {"",""};
             if(isCurrentToken(PLAIN_TXT) || isCurrentToken(ATTRIB_NAME)){
                 String attributeName = getCurrentToken().getValue();
                 checkAttributeName(attributeName, tableName, false);
-                if(accept(ATTRIB_NAME) && attributeName.contains(".")){
+
+                if(acceptToken(ATTRIB_NAME) && attributeName.contains(".")){
                     attributeName=attributeName.split("[.]")[1];
                 }
+
                 valuePair[0] = attributeName;
-                accept(PLAIN_TXT);
+                acceptToken(PLAIN_TXT);
             }
 
-            accept(EQUALS);
+            acceptToken(EQUALS);
             if(isValue()){
                 valuePair[1] = getCurrentToken().getValue();
                 getNextToken();
@@ -348,13 +350,13 @@ public class Interpreter {
         exportTable(table);
     }
 
-//reduce the size of this
+
     public void selectCommand() throws InterpreterException, FileNotFoundException {
         ArrayList<String> selectedAttributes = new ArrayList<>();
         getNextToken();
 
-        while (!accept(FROM)) {
-            accept(COMMA);
+        while (!acceptToken(FROM)) {
+            acceptToken(COMMA);
             if (isCurrentToken(PLAIN_TXT) || isCurrentToken(ATTRIB_NAME)) {
                 selectedAttributes.add(getCurrentToken().getValue());
             }
@@ -367,11 +369,17 @@ public class Interpreter {
         if (selectedAttributes.size() == 0) {
             selectedAttributes = table.getAttributesAsList();
         }
+        selectHelper(selectedAttributes, table);
+    }
+
+
+    private void selectHelper(ArrayList<String> selectedAttributes, Table table) throws InterpreterException {
         ArrayList<Integer> columns = new ArrayList<>();
         int column;
         String attributes = "";
+
         for (String s : selectedAttributes) {
-            checkAttributeName(s, tableName, false);
+            checkAttributeName(s, table.getName(), false);
             if(s.contains(".")){
 
                 String[] arr =s.split("[.]");
@@ -381,15 +389,17 @@ public class Interpreter {
             attributes = attributes + table.getAttributeByNumber(column) + "\t";
             columns.add(column);
         }
+
         HashSet<Long> selectedRows = null;
 
-        if (accept(WHERE)) {
+        if (acceptToken(WHERE)) {
             selectedRows = conditionCommand(table, selectedRows);
         }
         String data="";
         if(table.getNumberOfDataRows()!=0){
             data = table.getDataColumnsAsString(columns, selectedRows);
         }
+
         String result = attributes + "\n" + data;
         ic.setResult(result);
     }
@@ -403,9 +413,9 @@ public class Interpreter {
         if(isCurrentToken(BOOL_OP)){
             conditionalSet = operationBoolean(table, conditionalSet);
         }
-        if(accept(OPEN_BR)){
+        if(acceptToken(OPEN_BR)){
             conditionalSet = conditionCommand(table, conditionalSet);
-            if(accept(CLOSE_BR)){
+            if(acceptToken(CLOSE_BR)){
                 conditionalSet = conditionCommand(table, conditionalSet);
             }
         }
@@ -418,18 +428,21 @@ public class Interpreter {
         HashSet<Long> setEqual = new HashSet<>();
         String columnStr = getCurrentToken().getValue();
         checkAttributeName(columnStr, table.getName(), false);
-        if(!accept(PLAIN_TXT) && columnStr.contains(".")){
+        if(!acceptToken(PLAIN_TXT) && columnStr.contains(".")){
             columnStr=columnStr.split("[.]")[1];
         }
-        accept(ATTRIB_NAME);
+
+        acceptToken(ATTRIB_NAME);
 
         int column = table.getAttributePosition(columnStr);
         String condition = getCurrentToken().getValue();
         String target = getNextToken().getValue();
+
         if(condition.equals("==") || condition.equals(">=") || condition.equals("<=") || condition.equals("!=")){
             setEqual = baseConditionEquals(column, target, condition, table);
             setReturn=setEqual;
         }
+
         if(condition.equals(">") || condition.equals(">=") || condition.equals("<=") || condition.equals("<")){
             HashSet<Long> setGreaterLess = table.getGreaterOrLessHash(column-1, target, condition);
             if(condition.equals(">=") || condition.equals("<=")) {
@@ -437,6 +450,7 @@ public class Interpreter {
             }
             setReturn=setGreaterLess;
         }
+
         if(condition.equals("LIKE")){
             setEqual=table.getLikeHash(column-1, target);
             setReturn=setEqual;
@@ -457,13 +471,15 @@ public class Interpreter {
 
 
     private HashSet<Long> operationBoolean(Table table, HashSet<Long> conditionalSet) throws InterpreterException {
-
         HashSet<Long> conditionalSetAfterBool = new HashSet<>();
+
         if (getCurrentToken().getValue().equals("AND")) {
             getNextToken();
             conditionalSetAfterBool = conditionCommand(table, conditionalSet);
             conditionalSet.retainAll(conditionalSetAfterBool);
-        } else if (getCurrentToken().getValue().equals("OR")) {
+        }
+
+        else if (getCurrentToken().getValue().equals("OR")) {
             getNextToken();
             conditionalSetAfterBool = conditionCommand(table, conditionalSet);
             conditionalSet.addAll(conditionalSetAfterBool);
@@ -476,7 +492,8 @@ public class Interpreter {
         String tableName = getName();
         Table table = findTable(tableName);
         ArrayList<String> values = new ArrayList<>();
-        while (!accept(SEMI_COL)){
+
+        while (!acceptToken(SEMI_COL)){
             getNextToken();
             if(getCurrentToken().getValue()!=null){
                 values.add(getCurrentToken().getValue());
@@ -496,12 +513,13 @@ public class Interpreter {
         Table table = findTable(tableName);
 
         getNextToken();
-        if(accept(ADD)){
+        if(acceptToken(ADD)){
             String name = getName();
             checkAttributeName(name, tableName, true);
             table.addAttribute(getCurrentToken().getValue());
         }
-        if(accept(DROP)){
+
+        if(acceptToken(DROP)){
             String name = getName();
             checkAttributeName(name, tableName, false);
             table.removeAttribute(getCurrentToken().getValue());
@@ -512,7 +530,7 @@ public class Interpreter {
     public void dropCommand() throws FileNotFoundException, InterpreterException {
         getNextToken();
 
-        if (accept(DATABASE)) {
+        if (acceptToken(DATABASE)) {
             String fileLocation = ic.getStorageFolderPath() + File.separator + getCurrentToken().getValue();
             File file = new File(fileLocation);
             String name = getCurrentToken().getValue();
@@ -520,7 +538,7 @@ public class Interpreter {
             ic.setWorkingDatabase(null);
         }
 
-        if (accept(TABLE)) {
+        if (acceptToken(TABLE)) {
             String name = getCurrentToken().getValue().toLowerCase();
             String fileLocation = ic.getDatabasePath() + File.separator + name + ".tab";
             String fileKeyLocation = ic.getDatabasePath() + File.separator + name + "Key.txt";
@@ -548,10 +566,10 @@ public class Interpreter {
 
     public void createCommand() throws IOException, InterpreterException {
         getNextToken();
-        if (accept(DATABASE)) {
+        if (acceptToken(DATABASE)) {
             createDatabase();
         }
-        if (accept(TABLE) && ic.getDatabasePath() != null) {
+        if (acceptToken(TABLE) && ic.getDatabasePath() != null) {
             String tableName = getCurrentToken().getValue().toLowerCase();
             isNotKeyWord(tableName);
             String tablePath = ic.getDatabasePath() + File.separator + tableName + ".tab";
@@ -577,9 +595,11 @@ public class Interpreter {
         isNotKeyWord(name);
         String dirPath = ic.getStorageFolderPath() + File.separator + name;
         File f = new File(dirPath);
+
         if (f.exists()) {
             throw new IOException("Database already exists");
         }
+
         try {
             Files.createDirectories(Paths.get(dirPath));
         } catch (IOException e) {
@@ -593,13 +613,15 @@ public class Interpreter {
         } catch (IOException e) {
             throw new IOException("Could not create table");
         }
+
         Table newTable = new Table(tableName, ic.getDatabasePath());
         ic.getWorkingDatabase().addTable(newTable);
         newTable.getNextPrimaryKey();
 
         getNextToken();
         ArrayList<String> attributes = new ArrayList<>();
-        while (!accept(SEMI_COL)) {
+
+        while (!acceptToken(SEMI_COL)) {
             if (isCurrentToken(PLAIN_TXT) || isCurrentToken(ATTRIB_NAME)) {
                 String attributeName = getCurrentToken().getValue();
                 checkAttributeName(attributeName, tableName, true);
@@ -607,6 +629,7 @@ public class Interpreter {
             }
             getNextToken();
         }
+
         if (attributes.size() != 0) {
             newTable.addRowFromCommand(true, attributes);
         }
@@ -616,9 +639,6 @@ public class Interpreter {
 
 
     public void useCommand(){
-        if(debugging){
-            System.out.println("in interpret use");
-        }
         Token token = getNextToken();
         String databaseName = token.getValue();
 
@@ -630,9 +650,6 @@ public class Interpreter {
 
     private void commandCommand() throws InterpreterException, IOException {
         Token token = getCurrentToken();
-        if(debugging){
-            System.out.println("in commandType, token type is: "+ token.getType());
-        }
         switch (token.getType()){
             case USE : useCommand();
                 break;

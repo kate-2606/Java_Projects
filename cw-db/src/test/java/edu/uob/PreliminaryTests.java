@@ -20,7 +20,7 @@ public class PreliminaryTests {
         ArrayList<Token> tokens = new ArrayList<>();
         ic.initiateContext(storageFolderPath);
         Lexer testLexer = new Lexer();
-        testLexer.Lexer(command, tokens, ic);
+        testLexer.initiate(command, tokens, ic);
         Parser testParser = new Parser();
         testParser.Parser(tokens, testLexer, ic);
         return testParser;
@@ -31,7 +31,7 @@ public class PreliminaryTests {
     public void testTokenizer() throws IOException {
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer test = new Lexer();
-        test.Lexer(" INSERT USE DELETE UPDATE 'Test' AND (A=0)", tokens, ic);
+        test.initiate(" INSERT USE DELETE UPDATE 'Test' AND (A=0)", tokens, ic);
         assertEquals("INSERT", test.getWord(0));
         assertEquals("USE", test.getWord(1));
         assertEquals("DELETE", test.getWord(2));
@@ -59,7 +59,7 @@ public class PreliminaryTests {
     public void testLexicalAnalyser1() throws IOException{
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer test = new Lexer();
-        test.Lexer("CREATE 'Steve' TRUE +2.0 -76 plaintext * NULL", tokens, ic);
+        test.initiate("CREATE 'Steve' TRUE +2.0 -76 plaintext * NULL", tokens, ic);
         assertEquals("CREATE", test.getNextToken().typeToString());
         assertEquals("STRING_LIT", test.getNextToken().typeToString());
         assertEquals("BOOL_LIT", test.getNextToken().typeToString());
@@ -75,7 +75,7 @@ public class PreliminaryTests {
     public void testLexicalAnalyser2() throws IOException{
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer test = new Lexer();
-        test.Lexer("+2..0 -178 +968796 +0.8 98.7.546 true false", tokens, ic);
+        test.initiate("+2..0 -178 +968796 +0.8 98.7.546 true false", tokens, ic);
         assertNull(test.getNextToken());
         assertEquals("INT_LIT", test.getNextToken().typeToString());
         assertEquals("INT_LIT", test.getNextToken().typeToString());

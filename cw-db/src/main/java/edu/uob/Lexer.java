@@ -1,7 +1,7 @@
 package edu.uob;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import static edu.uob.TokenType.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -21,39 +21,25 @@ import java.util.stream.Stream;
 //can select id
 //test condition only works on the right types
 //bool literals in tables are caseinsensitive
+//join should check attribute exists in that table -- and makse sure attribute can't exist in both tables
 
 
 
 /*---------------------TO DO--------------------*/
-//join should check attribute exists in that table -- and makse sure attribute can't exist in both tables
 //do some queries with null -- names and cell values
-//table empty strings NULL or ""?
 
 //sort ugly function --- https://stackoverflow.com/questions/3316582/iterating-through-methods
 
-//select sort by id high to low?
-//can you delete a database while in a different database --YES
 //replace lexer stuff with itterarator
 //what happens if the lexer fails?
 //test pdf tests
 
 
 
-/*
-Any table names provided by the user should be converted into lowercase before saving out to the filesystem. You
-should treat column names as case insensitive for querying, but you should preserve the case when storing them
-(so that the user can make use of CamelCase if they wish).
-
-select * from people; is equivalent to SELECT * FROM people;. This is true for all keywords in the BNF
-(including TRUE/FALSE, AND/OR, LIKE etc.) In addition to this, all SQL keywords are reserved words, therefore you
-should not allow them to be used as database/table/attribute names.
- */
-
-
 public class Lexer {
 
 
-    public void Lexer(String inpCommand, ArrayList<Token> tokenList, InterpContext ic){
+    public void initiate(String inpCommand, ArrayList<Token> tokenList, InterpContext ic){
         tokens=tokenList;
         setCommand(inpCommand);
         setup();
@@ -92,6 +78,10 @@ public class Lexer {
             };
 
 
+
+    private String[] tokenTypeMethods = {"isComparator", "isBoolOp", "isBoolLit", "isFloatLit", "isIntLit"};
+
+
     public Token getNextToken() throws IOException {
         if(wordIndex==words.size()-1){
             throw new IOException("Parser failed before reaching a ';'");
@@ -113,66 +103,50 @@ public class Lexer {
             i++;
         }
 
-        if (isComparator(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.toUpperCase());
-            tokens.add(curToken);
-            return curToken;
-        }
-        increment ++;
+        if (isComparator(word)){  return setToken(i+increment, word.toUpperCase()); }
+        increment++;
 
-        if (isBoolOp(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.toUpperCase());
-            tokens.add(curToken);
-            return curToken;
-        }
-        increment ++;
+        if (isBoolOp(word)){  return setToken(i+increment, word.toUpperCase()); }
+        increment++;
+
+        if (isBoolLit(word)){  return setToken(i+increment, word.toUpperCase()); }
+        increment++;
+
+        if (isFloatLit(word)){  return setToken(i+increment, word.toUpperCase()); }
+        increment++;
+
+        if (isIntLit(word)){  return setToken(i+increment, word.toUpperCase()); }
+
+        return getNextTextToken();
+    }
+
+
+    public Token getNextTextToken() {
+
+        String word = words.get(wordIndex);
+        int increment = STRING_LIT.ordinal();
         if (isStringLit(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.substring(1,word.length()-1));
-            tokens.add(curToken);
-            return curToken;
-        }
-        increment ++;
-        if (isBoolLit(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.toUpperCase());
-            tokens.add(curToken);
-            return curToken;
-        }
-        increment ++;
-        if (isFloatLit(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.toUpperCase());
-            tokens.add(curToken);
-            return curToken;
-        }
-        increment ++;
-        if (isIntLit(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word.toUpperCase());
-            tokens.add(curToken);
-            return curToken;
+            return setToken(increment, word.substring(1,word.length()-1));
         }
         increment ++;
         if (isPlainText(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word);
-            tokens.add(curToken);
-            return curToken;
+            return setToken(increment, word);
         }
-
-
         increment ++;
         if (isAttributeName(word)){
-            curToken.setType(i+increment);
-            curToken.setValue(word);
-            tokens.add(curToken);
-            return curToken;
+            return setToken(increment, word);
         }
         return null;
     }
+
+    private Token setToken(int tokenNum, String value){
+        Token curToken = new Token();
+        curToken.setType(tokenNum);
+        curToken.setValue(value);
+        tokens.add(curToken);
+        return curToken;
+    }
+
 
     private String[] comparators = {"==", ">=", "<=", "!=", "<", ">"};
 

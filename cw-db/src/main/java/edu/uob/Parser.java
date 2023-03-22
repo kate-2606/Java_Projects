@@ -6,7 +6,6 @@ import java.util.*;
 import static edu.uob.TokenType.*;
 
 public class Parser {
-    // Token Type
     public void Parser(ArrayList<Token> tokenList, Lexer inpLex, InterpContext ic) {
         lex=inpLex;
         tokens=tokenList;
@@ -26,14 +25,13 @@ public class Parser {
     private InterpContext ic;
 
     private ArrayList<Token> tokens;
-    private boolean debugging = false;
 
     private boolean parsedOkay;
 
     public boolean getParserResult(){ return parsedOkay; }
 
 
-    public boolean accept(TokenType t) throws IOException{
+    public boolean acceptToken(TokenType t) throws IOException{
         Token tok = getCurrentToken();
         if (tok.getType()==t){
             if (t != SEMI_COL) {
@@ -45,7 +43,7 @@ public class Parser {
     }
 
     private boolean expect(TokenType t) throws IOException{
-        if (accept(t)){
+        if (acceptToken(t)){
             return true;
         }
         return false;
@@ -55,7 +53,7 @@ public class Parser {
 
     private boolean nameValueList() throws IOException{
         if(nameValuePair()){
-            if(accept(COMMA)){
+            if(acceptToken(COMMA)){
                 return nameValueList();
             }
             return true;
@@ -69,7 +67,7 @@ public class Parser {
         if(token.getType()==INT_LIT){
             token.changeType(PLAIN_TXT);
         }
-        if(accept(PLAIN_TXT)){
+        if(acceptToken(PLAIN_TXT)){
             return true;
         }
         return false;
@@ -77,7 +75,7 @@ public class Parser {
 
     private boolean nameValuePair() throws IOException{
         if(attributeName()){
-            if(accept(TokenType.EQUALS)){
+            if(acceptToken(EQUALS)){
                 if(value()){
                     return true;
                 }
@@ -89,24 +87,20 @@ public class Parser {
 
 
     private boolean condition() throws IOException{
-        Token token =getCurrentToken();
-        if(debugging){
-            System.out.println("in condition, token type is: "+ token.getType());
-        }
         if (attributeName()) {
-            if (accept(COMPARATOR)) {
+            if (acceptToken(COMPARATOR)) {
                 if (value()) {
-                    if (accept(BOOL_OP)) {
+                    if (acceptToken(BOOL_OP)) {
                         return condition();
                     }
                     return true;
                 }
             }
         }
-        if (accept(OPEN_BR)) {
+        if (acceptToken(OPEN_BR)) {
             if (condition()) {
-                if (accept(CLOSE_BR)) {
-                    if (accept(BOOL_OP)) {
+                if (acceptToken(CLOSE_BR)) {
+                    if (acceptToken(BOOL_OP)) {
                         return condition();
                     }
                     return true;
@@ -117,11 +111,7 @@ public class Parser {
     }
 
     private boolean wildAttribList() throws IOException{
-        Token token =getCurrentToken();
-        if(debugging){
-            System.out.println("in wildcard, token type is: "+ token.getType());
-        }
-        if(attributeList() || accept(WILD_CRD)){
+        if(attributeList() || acceptToken(WILD_CRD)){
             return true;
         }
         throw new IOException("Was expecting AttributeList or '*'");
@@ -148,7 +138,7 @@ public class Parser {
         boolean ret = false;
         if (value()){
             ret=true;
-            if(accept(TokenType.COMMA)){
+            if(acceptToken(COMMA)){
                 ret = valueList();
             }
         }
@@ -160,7 +150,7 @@ public class Parser {
 
 
     private boolean attributeName() throws IOException{
-        if(acceptPlainTxt() || accept(TokenType.ATTRIB_NAME)){
+        if(acceptPlainTxt() || acceptToken(ATTRIB_NAME)){
             return true;
         }
 
@@ -171,7 +161,7 @@ public class Parser {
         boolean ret = false;
         if (attributeName()){
             ret=true;
-            if(accept(TokenType.COMMA)){
+            if(acceptToken(COMMA)){
                 ret = attributeList();
             }
         }
@@ -184,7 +174,7 @@ public class Parser {
             if(Objects.equals(getCurrentToken().getValue(),"AND")){
                 lex.getNextToken();
                 if(acceptPlainTxt()){
-                    if(accept(TokenType.ON)){
+                    if(acceptToken(ON)){
                         if(attributeName()){
                             if(Objects.equals(getCurrentToken().getValue(),"AND")){
                                 lex.getNextToken();
@@ -202,9 +192,9 @@ public class Parser {
 
     private boolean delete() throws IOException{
         lex.getNextToken();
-        if(accept(TokenType.FROM)){
+        if(acceptToken(FROM)){
             if(acceptPlainTxt()){
-                if(accept(TokenType.WHERE)){
+                if(acceptToken(WHERE)){
                     if(condition()){
                         return true;
                     }
@@ -217,9 +207,9 @@ public class Parser {
     private boolean update() throws IOException{
         lex.getNextToken();
         if(acceptPlainTxt()) {
-            if(accept(TokenType.SET)) {
+            if(acceptToken(SET)) {
                 if(nameValueList()){
-                    if(accept(TokenType.WHERE)) {
+                    if(acceptToken(WHERE)) {
                         if (condition()) {
                             return true;
                         }
@@ -234,10 +224,10 @@ public class Parser {
         boolean ret =false;
         lex.getNextToken();
         if(wildAttribList()){
-            if(accept(TokenType.FROM)){
+            if(acceptToken(FROM)){
                 if(acceptPlainTxt()){
                     ret=true;
-                    if(accept(TokenType.WHERE)){
+                    if(acceptToken(WHERE)){
                         ret=condition();
                     }
                 }
@@ -250,16 +240,13 @@ public class Parser {
     }
 
     private boolean insert() throws IOException{
-        Token token =lex.getNextToken();
-        if(debugging){
-            System.out.println("in insert, token type is: "+ token.getType());
-        }
-        if(accept(TokenType.INTO)){
+        lex.getNextToken();
+        if(acceptToken(INTO)){
             if (acceptPlainTxt()){
-                if(accept(TokenType.VALUES)){
-                    if(accept(TokenType.OPEN_BR)){
+                if(acceptToken(VALUES)){
+                    if(acceptToken(OPEN_BR)){
                         if(valueList()){
-                            return expect(TokenType.CLOSE_BR);
+                            return expect(CLOSE_BR);
                         }
                     }
                 }
@@ -271,9 +258,9 @@ public class Parser {
     private boolean alter() throws IOException{
         boolean ret =false;
         lex.getNextToken();
-        if(accept(TokenType.TABLE)){
+        if(acceptToken(TABLE)){
             if(acceptPlainTxt()){
-                if (accept(TokenType.DROP) || accept(TokenType.ADD)){
+                if (acceptToken(DROP) || acceptToken(ADD)){
                     return attributeName();
                 }
             }
@@ -283,7 +270,7 @@ public class Parser {
 
     private boolean drop() throws IOException{
         lex.getNextToken();
-        if(accept(TokenType.TABLE) || accept(TokenType.DATABASE)){
+        if(acceptToken(TABLE) || acceptToken(DATABASE)){
             return acceptPlainTxt();
         }
         throw new IOException("DROP syntax failed");
@@ -292,12 +279,12 @@ public class Parser {
     private boolean create() throws IOException{
         boolean ret =false;
         lex.getNextToken();
-        if(expect(TokenType.TABLE) || expect(TokenType.DATABASE)) {
+        if(expect(TABLE) || expect(DATABASE)) {
             if (acceptPlainTxt()) {
                 ret = true;
-                if (!(expect(TokenType.SEMI_COL)) && expect(TokenType.OPEN_BR)){
+                if (!(expect(SEMI_COL)) && expect(OPEN_BR)){
                     if (attributeList()) {
-                        return expect(TokenType.CLOSE_BR);
+                        return expect(CLOSE_BR);
                     }
                 }
             }
@@ -309,11 +296,7 @@ public class Parser {
     }
 
     private boolean use() throws IOException{
-        Token token = lex.getNextToken();
-        boolean ret=false;
-        if(debugging){
-            System.out.println("in commandType, token type is: "+ token.getType());
-        }
+        lex.getNextToken();
         if(acceptPlainTxt()){
             return true;
         }
@@ -323,9 +306,6 @@ public class Parser {
 
     private boolean commandType() throws IOException{
         Token token = getCurrentToken();
-        if(debugging){
-            System.out.println("in commandType, token type is: "+ token.getType().toString());
-        }
         boolean ret;
         switch (token.getType()){
             case USE : ret=use();
@@ -354,10 +334,7 @@ public class Parser {
 
 
     public boolean command() throws IOException{
-        Token token = lex.getNextToken();
-        if(debugging){
-            System.out.println("in command, token type is: "+ token.getType());
-        }
+        lex.getNextToken();
         if (commandType()) {
             if (expect(TokenType.SEMI_COL) && lex.isWordListEnd()) {
                 return true;

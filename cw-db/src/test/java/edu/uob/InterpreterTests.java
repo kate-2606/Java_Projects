@@ -398,6 +398,16 @@ public class InterpreterTests {
         assertFalse(result.contains("200"));
     }
 
+    @Test
+    public void testUpdateJoinCommand6() {
+        sendCommandToServer("USE " + "vehicles" + ";");
+        sendCommandToServer("ALTER TABLE cars ADD iq;");
+        String result = sendCommandToServer("JOIN marks AND cars ON iq AND hp;");
+        assertFalse(result.contains("hp"));
+        assertFalse(result.contains("toyota"));
+        assertFalse(result.contains("Steve"));
+        sendCommandToServer("DROP DATABASE vehicles;");
+    }
 
     @Test
     public void testCaseInsensitive1() {

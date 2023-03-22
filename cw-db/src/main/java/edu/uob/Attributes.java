@@ -21,7 +21,6 @@ public class Attributes {
     public int getNumberOfAttributes() { return attributes.size(); }
 
 
-
     private void checkAttributes() throws InterpreterException {
         for(String s: attributes){
             int cnt=0;
