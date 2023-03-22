@@ -45,7 +45,7 @@ public class DBServer {
 
     public String handleCommand(String command) {
         ArrayList<Token> tokens = new ArrayList<>();
-        ic.InterpContext(storageFolderPath);
+        ic.initiateContext(storageFolderPath);
 
         Lexer lexer = new Lexer();
         lexer.Lexer(command, tokens, ic);
@@ -53,6 +53,7 @@ public class DBServer {
         Parser parser = new Parser();
         parser.Parser(tokens, lexer, ic);
 
+        //if(ic.getResult())
         Interpreter interpreter = new Interpreter(tokens, ic);
         String result = ic.getResult();
         ic.setResult("");

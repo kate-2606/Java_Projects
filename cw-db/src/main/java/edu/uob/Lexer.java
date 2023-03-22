@@ -12,18 +12,20 @@ import java.util.stream.Stream;
 //key persists
 //throw exception if column already exisists
 //command should be case-insensitive -- .equals caseinsensitive
-//can other columns can't be labeled ID
+//can other columns can't be labeled ID or repeated
 //throw exception if there are too few/too many values in insert
+//table names etc... can't have the same name as keywords
+//table names saved as lower case
+//also delete key files
+//attribute name queries are caseinsensistive
+//can select id
+//test condition only works on the right types
+//bool literals in tables are caseinsensitive
 
 
 
 /*---------------------TO DO--------------------*/
-//table names etc... can't have the same name as keywords
-//true false are caseinsensitive but saved in the right case
-//can select id
-//join should check attribute exists in that table
-//attribute name queries are caseinsensistive
-//bool literals in tables are caseinsensitive
+//join should check attribute exists in that table -- and makse sure attribute can't exist in both tables
 //do some queries with null -- names and cell values
 //table empty strings NULL or ""?
 
@@ -103,7 +105,7 @@ public class Lexer {
         int increment=0;
 
         for (String s : tokenTypeStrings){
-            if(s.equalsIgnoreCase(word)){
+            if(s.equalsIgnoreCase(word.toString())){
                 curToken.setType(i);
                 tokens.add(curToken);
                 return curToken;
@@ -213,9 +215,9 @@ public class Lexer {
         return false;
     }
 
-    private Boolean isBoolLit(String word){
+    public static Boolean isBoolLit(String word){
         switch (word.toUpperCase()) {
-            case "TRUE", "FALSE":
+            case "FALSE", "TRUE":
                 break;
             default:
                 return false;

@@ -5,12 +5,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.FileNotFoundException;
 import java.time.Duration;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-public class InterpreterBasicTests {
+public class InterpreterTests {
     private DBServer server;
 
     // Create a new server _before_ every @Test
@@ -51,40 +50,31 @@ public class InterpreterBasicTests {
 
     @Test
     public void testBasicCreateAndCommand1() throws InterpreterException, IOException {
-        String randomName = generateRandomName();
-        System.out.println(storageFolderPath);
-        InterpContext ic = new InterpContext();
-        sendCommandToServer("CREATE DATABASE "+randomName+";");
-        sendCommandToServer("USE  "+randomName+";");
+        sendCommandToServer("CREATE DATABASE creator;");
+        sendCommandToServer("USE  creator;");
 
-        String response  = sendCommandToServer("CREATE TABLE second (column1, column2, column3);");
-        System.out.println(response);
-        //Database database = ic.getWorkingDatabase();
-        //assertEquals(1, ic.getNumberOfTables());
-        //Table table = database.getTableByName("firstTest");
-        response = sendCommandToServer("SELECT * FROM second;");
-        System.out.println(response);
+        sendCommandToServer("CREATE TABLE second (column1, column2, column3);");
+        String response = sendCommandToServer("SELECT * FROM second;");
         assertTrue(response.contains("id"));
         assertTrue(response.contains("column1"));
         assertTrue(response.contains("column2"));
         assertTrue(response.contains("column3"));
-        /*
+        sendCommandToServer("ALTER TABLE second DROP column3;");
+        response = sendCommandToServer("SELECT * FROM second;");
+        assertFalse(response.contains("column3"));
+        sendCommandToServer("ALTER TABLE second ADD column4;");
+        response = sendCommandToServer("SELECT * FROM second;");
+        assertFalse(response.contains("column3"));
 
-//        assertEquals("column3", table.getAttributes().getAttributeByNumber(3));
-        assertEquals(4, table.getNumberOfAttributes());
-        interpretCommand("ALTER TABLE firstTest DROP column3;", ic);
-        assertEquals(3, table.getNumberOfAttributes());
-        interpretCommand("ALTER TABLE firstTest ADD column4;", ic);
-        //assertEquals(3, table.getAttributes().getAttributePosition("column4"));
-        interpretCommand("INSERT INTO firstTest VALUES('OXO', 'Carparks', 'Db');", ic);
-        interpretCommand("INSERT INTO firstTest VALUES('OXO', 'Carparks', 'Db');", ic);
-        interpretCommand("INSERT INTO firstTest VALUES('OXO', 'Carparks', 'Db');", ic);
-        interpretCommand("SELECT * FROM firstTest;", ic);
-
-        assertEquals(4, table.getNextPrimaryKey());
-        //interpretCommand("DROP DATABASE coursework;", ic);
-
-         */
+        assertTrue(response.contains("column4"));
+        sendCommandToServer("INSERT INTO second VALUES('OXO', 'Carparks', 'Db');");
+        sendCommandToServer("INSERT INTO second VALUES('OXO', 'Carparks', 'Db');");
+        sendCommandToServer("INSERT INTO second VALUES('OXO', 'Carparks', 'Db');");
+        response = sendCommandToServer("SELECT * FROM second;");
+        assertTrue(response.contains("Db\n2"));
+        response = sendCommandToServer("CREATE TABLE SECOND (column1, column2, column3);");
+        assertTrue(response.contains("[ERROR]"));
+        sendCommandToServer("DROP TABLE second;");
     }
 
 
@@ -114,11 +104,33 @@ public class InterpreterBasicTests {
 
     }
 
+    @Test
+    public void testBasicCreateAndCommand3() throws InterpreterException, IOException {
+        sendCommandToServer("CREATE DATABASE creator;");
+        sendCommandToServer("USE  creator;");
+        String response = sendCommandToServer("CREATE TABLE elvis ();");
+        assertTrue(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testBasicCreateAndCommand4() throws InterpreterException, IOException {
+        sendCommandToServer("CREATE DATABASE creator;");
+        sendCommandToServer("USE  creator;");
+        String response = sendCommandToServer("CREATE TABLE elvis (ADD, column2, column3);");
+        assertTrue(response.contains("[ERROR]"));
+    }
+
+    @Test
+    public void testBasicCreateAndCommand5() throws InterpreterException, IOException {
+        sendCommandToServer("CREATE DATABASE creator;");
+        sendCommandToServer("USE  creator;");
+        String response = sendCommandToServer("CREATE TABLE elvis (, , ,);");
+        assertTrue(response.contains("[ERROR]"));
+    }
 
 
     @Test
     public void testSelectBasicCommand0() {
-        System.out.println(storageFolderPath);
         sendCommandToServer("CREATE DATABASE " + "test"+ ";");
         sendCommandToServer("USE " + "test"+ ";");
         sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
@@ -208,7 +220,7 @@ public class InterpreterBasicTests {
         response = sendCommandToServer("SELECT * FROM t;");
         assertFalse(response.contains("4"));
         assertTrue(response.contains("5\tPamela"));
-        sendCommandToServer("DROP DATABASE test;");
+        sendCommandToServer("DROP DATABASE help;");
     }
 
 
@@ -285,7 +297,6 @@ public class InterpreterBasicTests {
 
     @Test
     public void testUpdateJoinCommand1() throws InterpreterException {
-        String randomName = generateRandomName();
         sendCommandToServer("CREATE DATABASE " + "vehicles" + ";");
         sendCommandToServer("USE " + "vehicles" + ";");
         sendCommandToServer("CREATE TABLE cars(reg, brand, colour, hp, good);");
@@ -300,11 +311,20 @@ public class InterpreterBasicTests {
         Table table = ic.getWorkingDatabase().getTableByName("cars");
         assertEquals("Fail", table.getRow(5).getCellDataByNumber(1));
         assertEquals("Fail", table.getRow(6).getCellDataByNumber(1));
+        sendCommandToServer("SELECT * FROM cars;");
+        sendCommandToServer("UPDATE cars SET CARS.REG='Unknown' WHERE cars.brand=='Fail';");
+        assertEquals("Unknown", table.getRow(5).getCellDataByNumber(0));
     }
 
 
     @Test
     public void testUpdateJoinCommand2() throws InterpreterException {
+
+    }
+
+
+    @Test
+    public void testUpdateJoinCommand3() throws InterpreterException {
         sendCommandToServer("USE " + "vehicles" + ";");
         sendCommandToServer("CREATE TABLE marks (name, mark, pass, iq);");
         sendCommandToServer("INSERT INTO marks VALUES ('Steve', 65, TRUE, 650);");
@@ -317,10 +337,9 @@ public class InterpreterBasicTests {
     }
 
     @Test
-    public void testUpdateJoinCommand3() throws InterpreterException {
+    public void testUpdateJoinCommand4() throws InterpreterException {
         sendCommandToServer("USE " + "vehicles" + ";");
         String result = sendCommandToServer("SELECT marks.mark FROM marks;");
-        System.out.println(result);
         assertFalse(result.contains("Steve"));
         assertFalse(result.contains("TRUE"));
         assertFalse(result.contains("200"));
@@ -331,19 +350,28 @@ public class InterpreterBasicTests {
     public void testCaseInsensitive1() throws InterpreterException {
         sendCommandToServer("CREATE DATABASE " + "case" + ";");
         sendCommandToServer("USE " + "case" + ";");
-        sendCommandToServer("CREATE TABLE point (name, email, hairColour, height);");
-        sendCommandToServer("INSERT INTO point VALUES ('Steve', 's@gmail.com', 'brown', 175);");
+        sendCommandToServer("CREATE TABLE Point (name, email, hairColour, height);");
+        sendCommandToServer("INSERT INTO POINT VALUES ('Steve', 's@gmail.com', 'brown', 175);");
         sendCommandToServer("INSERT INTO point VALUES ('Pete', 'p@hotmail.co.uk', 'brown',201);");
         sendCommandToServer("INSERT INTO point VALUES ('Quentin', 'q@bluebottle.co.uk', 'silver', 154);");
         sendCommandToServer("INSERT INTO point VALUES ('Paul', 'paul@hotmail.com', 'pink', 187);");
         sendCommandToServer("INSERT INTO point VALUES ('Fran', 'fran@example.com', 'pink', 150);");
-        String response = sendCommandToServer("SELECT * FROM details WHERE (((email LIKE 'hotmail' AND hairColour=='brown') OR " +
+        sendCommandToServer("SELECT * FROM point;");
+        String response = sendCommandToServer("SELECT * FROM point WHERE (((email LIKE 'hotmail' AND hairColour=='brown') OR " +
                 "(hairColour=='pink' AND email LIKE 'example')) AND height>150) OR name=='Quentin';");
-        String response1 = sendCommandToServer("select * from details where (((email like 'hotmail' and hairColour=='brown') or " +
-                "(hairColour=='pink' and email LIKE 'example')) and height>150) or name=='Quentin';");
+        String response1 = sendCommandToServer("select * FROM poinT where (((email like 'hotmail' and POINT.hairColour=='brown') or " +
+                "(hairColour=='pink' and email like 'example')) and height>150) or name=='Quentin';");
+        String response2 = sendCommandToServer("select * FROM point where (((Email like 'hotmail' and HAIRCOLOUR=='brown') or " +
+                "(hairColour=='pink' and email like 'example')) and height>150) or name=='Quentin';");
+        assertTrue(response.contains("name\temail\thairColour\theight"));
+        System.out.println(response1);
         assertTrue(response1.contains(response));
         assertTrue(response.contains(response1));
+        assertTrue(response.contains(response2));
+        sendCommandToServer("DROP TABLE POINT;");
     }
+
+    //test update comand considers name value pairs
 
     @Test
     private void testReadTableFile() throws IOException {
@@ -357,7 +385,6 @@ public class InterpreterBasicTests {
     public void testTranscript() throws InterpreterException {
         String randomName = generateRandomName();
         String result=sendCommandToServer("CREATE DATABASE "+ randomName +";");
-        System.out.println(result);
         assertEquals("[OK]\n", result);
         result=sendCommandToServer("USE " + randomName +";");
         assertEquals("[OK]\n", result);

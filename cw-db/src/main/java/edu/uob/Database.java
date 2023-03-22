@@ -16,17 +16,16 @@ public class Database {
     public String getName() { return databaseName;}
 
     public void addTable(Table newTable){
-        String name="";
         if(newTable!=null){
-                name=newTable.getName();
-                }
-        database.add(newTable);
+            database.add(newTable);
+        }
+
     }
 
     public boolean tableExists(String tableName){
         if(database!=null) {
             for (Table t : database) {
-                if (t!=null && t.getName().equals(tableName)) {
+                if (t!=null && t.getName().equalsIgnoreCase(tableName)) {
                     return true;
                 }
             }
@@ -43,14 +42,8 @@ public class Database {
         return null;
     }
 
-    public Table getTableByIndex(int index) { return database.get(index); }
-
     public void removeTable (String name){
         database.remove(getTableByName(name));
-    }
-
-    public int getNumberOfTables() {
-        return database.size();
     }
 
 

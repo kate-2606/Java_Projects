@@ -1,29 +1,15 @@
 package edu.uob;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.junit.jupiter.api.Assertions.*;
 
-
-// Test lots of floats ---------------------------------
 
 public class PreliminaryTests {
-    private DBServer server;
-
-    @BeforeEach
-    public void setup() {
-        server = new DBServer();
-    }
 
     InterpContext ic = new InterpContext();
 
@@ -32,7 +18,7 @@ public class PreliminaryTests {
 
     private Parser createNewParser(String command){
         ArrayList<Token> tokens = new ArrayList<>();
-        ic.InterpContext(storageFolderPath);
+        ic.initiateContext(storageFolderPath);
         Lexer testLexer = new Lexer();
         testLexer.Lexer(command, tokens, ic);
         Parser testParser = new Parser();
@@ -91,11 +77,11 @@ public class PreliminaryTests {
         ArrayList<Token> tokens = new ArrayList<>();
         Lexer test = new Lexer();
         test.Lexer("+2..0 -178 +968796 +0.8 98.7.546 true false", tokens, ic);
-        assertEquals(null, test.getNextToken());
+        assertNull(test.getNextToken());
         assertEquals("INT_LIT", test.getNextToken().typeToString());
         assertEquals("INT_LIT", test.getNextToken().typeToString());
         assertEquals("FLOAT_LIT", test.getNextToken().typeToString());
-        assertEquals(null, test.getNextToken());
+        assertNull(test.getNextToken());
         assertEquals("BOOL_LIT", test.getNextToken().typeToString());
         assertEquals("BOOL_LIT", test.getNextToken().typeToString());
     }
@@ -314,5 +300,12 @@ public class PreliminaryTests {
         Parser testParser1 = createNewParser("JOIN coursework AND marks ON submission.ref AND id;");
         assertTrue(testParser1.getParserResult());
     }
+
+    @Test
+    public void testParserNull() {
+        Parser testParser1 = createNewParser("CREATE DATABASE null;");
+        assertFalse(testParser1.getParserResult());
+    }
+
 
 }

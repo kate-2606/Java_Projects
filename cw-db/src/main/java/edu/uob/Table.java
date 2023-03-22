@@ -27,21 +27,6 @@ public class Table {
 
     public String getName(){ return tableName; }
 
-    public String getCellDataByNumber(int columnNumber, int rowNumber){
-        Row currRow = dataRows.get(rowNumber);
-        return currRow.getCellDataByNumber(columnNumber);
-    }
-/*
-    public void setNextPrimaryKey(long nextPrimaryKey) {
-        if(nextPrimaryKey==-1){
-            this.nextPrimaryKey=Collections.max(dataRows.keySet())+1;
-        }
-        else {
-            this.nextPrimaryKey = nextPrimaryKey;
-        }
-    }
-
- */
 
     public long getNextPrimaryKey() throws IOException, InterpreterException {
         File fileToOpen = new File(keyPath);
@@ -103,7 +88,11 @@ public class Table {
     }
 
 
-    public int getNumberOfAttributes() { return attributes.getNumberOfAttributes(); }
+    public int getNumberOfAttributes() throws InterpreterException {
+        if(attributes==null){
+            throw new InterpreterException.NotExistentAttributes(getName());
+        }
+        return attributes.getNumberOfAttributes(); }
 
 
     public void addRowFromCommand(boolean isAttributes, ArrayList<String> valuesList) throws IOException, InterpreterException {
@@ -151,7 +140,11 @@ public class Table {
         return output;
     }
 
-    public String getAttributesAsString(){ return attributes.getAttributesAsString(); }
+    public String getAttributesAsString() throws InterpreterException {
+        if(attributes==null){
+            throw new InterpreterException.NotExistentAttributes(getName());
+        }
+        return attributes.getAttributesAsString(); }
 
     public Attributes getAttributes() { return attributes; }
 
@@ -166,6 +159,7 @@ public class Table {
     }
 
     public int getAttributePosition(String attributeName) throws InterpreterException{
+        if(this.attributes==null) { return -1; }
         return attributes.getAttributePosition(attributeName);
     }
 
@@ -239,10 +233,15 @@ public class Table {
         HashSet<Long> set = new HashSet<>();
         for(Long l : dataRows.keySet()){
             Row r = dataRows.get(l);
-            if(r.getCellDataByNumber(column).equals(target) && equal){
+            String data=r.getCellDataByNumber(column);
+            if(Lexer.isBoolLit(data) && Lexer.isBoolLit(target)){
+                data=data.toLowerCase();
+                target=target.toLowerCase();
+            }
+            if(data.equals(target) && equal){
                 set.add(l);
             }
-            else if (!r.getCellDataByNumber(column).equals(target) && !equal){
+            else if (!data.equals(target) && !equal){
                 set.add(l);
             }
         }
@@ -270,9 +269,12 @@ public class Table {
 
     public HashSet<Long> getLikeHash(int column, String target){
         HashSet<Long> set = new HashSet<>();
+        if(Lexer.isFloatLit(target)||Lexer.isIntLit(target)||Lexer.isBoolLit(target)||target.equalsIgnoreCase("null")){
+            return set;
+        }
         for(Long l : dataRows.keySet()){
             Row r = dataRows.get(l);
-            if(r.getCellDataByNumber(column).contains(target) && !Lexer.isFloatLit(target) && !Lexer.isIntLit(target)){
+            if(r.getCellDataByNumber(column).contains(target)){
                 set.add(l);
             }
         }

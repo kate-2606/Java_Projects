@@ -4,7 +4,7 @@ import java.io.File;
 
 public class InterpContext {
 
-    public void InterpContext(String path){
+    public void initiateContext(String path){
         storageFolderPath = path;
     }
     private String storageFolderPath;
