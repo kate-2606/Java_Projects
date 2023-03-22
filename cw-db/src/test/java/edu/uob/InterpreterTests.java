@@ -80,6 +80,7 @@ public class InterpreterTests {
         response=sendCommandToServer("SELECT red FROM fruit WHERE red=='apple';");
         assertFalse(response.contains("raspberry"));
         assertTrue(response.contains("apple"));
+        sendCommandToServer("ALTER TABLE food ADD salt;");
         sendCommandToServer("DROP DATABASE food;");
 
     }
@@ -130,7 +131,6 @@ public class InterpreterTests {
     public void testSelectBasicCommand1() {
         sendCommandToServer("USE " + "test"+ ";");
         String response = sendCommandToServer("SELECT * FROM marks WHERE mark==65;");
-        System.out.println(response);
         assertTrue(response.contains("Steve"));
         assertFalse(response.contains("Pete"));
     }
@@ -221,7 +221,6 @@ public class InterpreterTests {
     public void testSelectBasicCommand01() {
         sendCommandToServer("USE " + "test"+ ";");
         String response = sendCommandToServer("SELECT id FROM marks WHERE PASS == FALSE;");
-        System.out.println(response);
         assertFalse(response.contains("1"));
         assertFalse(response.contains("2"));
         assertFalse(response.contains("3"));
@@ -256,7 +255,6 @@ public class InterpreterTests {
         assertTrue(response.contains("5\tPamela"));
         sendCommandToServer("DROP DATABASE help;");
     }
-
 
 
     @Test
@@ -333,8 +331,8 @@ public class InterpreterTests {
         sendCommandToServer("CREATE DATABASE " + "vehicles" + ";");
         sendCommandToServer("USE " + "vehicles" + ";");
         sendCommandToServer("CREATE TABLE cars(reg, brand, colour, hp, good);");
-        sendCommandToServer("INSERT INTO cars VALUES ('YE456H', 'tyota', 'yellow', 500, TRUE);");
-        sendCommandToServer("INSERT INTO cars VALUES ('ZCEMKHU', 'tyota', 'red', 450, FALSE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('YE456H', 'toyota', 'yellow', 500, TRUE);");
+        sendCommandToServer("INSERT INTO cars VALUES ('ZCEMKHU', 'toyota', 'red', 450, FALSE);");
         sendCommandToServer("INSERT INTO cars VALUES ('BQ22223', 'fiat', 'blue' , 700, TRUE);");
         sendCommandToServer("INSERT INTO cars VALUES ('P3456H', 'landrover', 'blue', 650, TRUE);");
         sendCommandToServer("INSERT INTO cars VALUES ('HGEMKHU', 'fiat', 'silver', 350, FALSE);");
@@ -352,12 +350,6 @@ public class InterpreterTests {
 
     @Test
     public void testUpdateJoinCommand2() {
-
-    }
-
-
-    @Test
-    public void testUpdateJoinCommand3() {
         sendCommandToServer("USE " + "vehicles" + ";");
         sendCommandToServer("CREATE TABLE marks (name, mark, pass, iq);");
         sendCommandToServer("INSERT INTO marks VALUES ('Steve', 65, TRUE, 650);");
@@ -367,10 +359,38 @@ public class InterpreterTests {
         String result = sendCommandToServer("JOIN marks AND cars ON iq AND hp;");
         assertFalse(result.contains("hp"));
         assertFalse(result.contains("iq"));
+        assertTrue(result.contains("toyota"));
+        assertTrue(result.contains("Steve"));
+        String result1 = sendCommandToServer("JOIN marks AND cars ON hp AND iq;");
+        assertTrue(result1.contains(result));
+    }
+
+    @Test
+    public void testUpdateJoinCommand3() {
+        sendCommandToServer("USE " + "vehicles" + ";");
+        String result = sendCommandToServer("JOIN marks AND cars ON CARS.HP AND marks.iq;");
+        String result1 = sendCommandToServer("JOIN marks AND cars ON marks.iq AND CARS.HP;");
+        assertFalse(result.contains("hp"));
+        assertFalse(result.contains("iq"));
+        assertTrue(result.contains("toyota"));
+        assertTrue(result.contains("Steve"));
+        assertTrue(result1.contains(result));
+        assertTrue(result.contains(result1));
     }
 
     @Test
     public void testUpdateJoinCommand4() {
+        sendCommandToServer("USE " + "vehicles" + ";");
+        String result = sendCommandToServer("JOIN marks AND cars ON CARS.HP AND marks.IQ;");
+        assertFalse(result.contains("hp"));
+        assertFalse(result.contains("iq"));
+        assertTrue(result.contains("toyota"));
+        assertTrue(result.contains("Steve"));
+    }
+
+
+    @Test
+    public void testUpdateJoinCommand5() {
         sendCommandToServer("USE " + "vehicles" + ";");
         String result = sendCommandToServer("SELECT marks.mark FROM marks;");
         assertFalse(result.contains("Steve"));

@@ -14,7 +14,7 @@ public class Row {
 
 
     public void addCell(int position, String dataStr) {
-        row.add(position, dataStr);
+        row.add(dataStr);
     }
 
     public void removeCell(int position) { row.remove(position); }
