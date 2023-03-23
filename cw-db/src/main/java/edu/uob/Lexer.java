@@ -97,6 +97,9 @@ public class Lexer {
         for (String s : tokenTypeStrings){
             if(s.equalsIgnoreCase(word.toString())){
                 curToken.setType(i);
+                if(curToken.getType()==NULL){
+                    curToken.setValue("NULL");
+                }
                 tokens.add(curToken);
                 return curToken;
             }

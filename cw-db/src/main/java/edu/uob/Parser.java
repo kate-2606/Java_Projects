@@ -9,7 +9,6 @@ public class Parser {
     public void Parser(ArrayList<Token> tokenList, Lexer inpLex, InterpContext ic) {
         lex=inpLex;
         tokens=tokenList;
-        this.ic=ic;
         try {
             parsedOkay = command();
             if(!parsedOkay){
@@ -21,8 +20,6 @@ public class Parser {
     }
 
     private Lexer lex;
-
-    private InterpContext ic;
 
     private ArrayList<Token> tokens;
 
@@ -42,6 +39,7 @@ public class Parser {
         return false;
     }
 
+
     private boolean expect(TokenType t) throws IOException{
         if (acceptToken(t)){
             return true;
@@ -49,7 +47,9 @@ public class Parser {
         return false;
     }
 
+
     public Token getCurrentToken() {return tokens.get(tokens.size()-1); }
+
 
     private boolean nameValueList() throws IOException{
         if(nameValuePair()){
@@ -62,6 +62,7 @@ public class Parser {
         throw new IOException("Was expecting NameValuePair(s)");
     }
 
+
     private boolean acceptPlainTxt() throws IOException {
         Token token = getCurrentToken();
         if(token.getType()==INT_LIT){
@@ -72,6 +73,7 @@ public class Parser {
         }
         return false;
     }
+
 
     private boolean nameValuePair() throws IOException{
         if(attributeName()){
@@ -110,12 +112,14 @@ public class Parser {
         throw new IOException("Failed to parse condition statement");
     }
 
+
     private boolean wildAttribList() throws IOException{
         if(attributeList() || acceptToken(WILD_CRD)){
             return true;
         }
         throw new IOException("Was expecting AttributeList or '*'");
     }
+
 
     private boolean value() throws IOException {
         Token token = getCurrentToken();
@@ -157,6 +161,7 @@ public class Parser {
         return false;
     }
 
+
     private boolean attributeList() throws IOException{
         boolean ret = false;
         if (attributeName()){
@@ -168,69 +173,76 @@ public class Parser {
         return ret;
     }
 
+
     private boolean join() throws IOException{
         lex.getNextToken();
-        if(acceptPlainTxt()){
-            if(Objects.equals(getCurrentToken().getValue(),"AND")){
-                lex.getNextToken();
-                if(acceptPlainTxt()){
-                    if(acceptToken(ON)){
-                        if(attributeName()){
-                            if(Objects.equals(getCurrentToken().getValue(),"AND")){
-                                lex.getNextToken();
-                                if(attributeName()){
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        if(!acceptPlainTxt()){ return false; }
+
+        if(!Objects.equals(getCurrentToken().getValue(),"AND")){ return false; }
+
+        lex.getNextToken();
+        if(!acceptPlainTxt()){ return false; }
+
+        if(!acceptToken(ON)){ return false; }
+
+        if(!attributeName()){ return false; }
+
+        if(!Objects.equals(getCurrentToken().getValue(),"AND")){ return false; }
+
+        lex.getNextToken();
+        if(attributeName()){
+            return true;
         }
+
         throw new IOException("JOIN syntax failed");
     }
 
+
     private boolean delete() throws IOException{
         lex.getNextToken();
-        if(acceptToken(FROM)){
-            if(acceptPlainTxt()){
-                if(acceptToken(WHERE)){
-                    if(condition()){
-                        return true;
-                    }
-                }
-            }
+        if(!acceptToken(FROM)){ return false; }
+
+        if(!acceptPlainTxt()){ return false; }
+
+        if(!acceptToken(WHERE)){ return false; }
+
+        if(condition()){
+            return true;
         }
+
         throw new IOException("DELETE syntax failed");
     }
 
+
     private boolean update() throws IOException{
         lex.getNextToken();
-        if(acceptPlainTxt()) {
-            if(acceptToken(SET)) {
-                if(nameValueList()){
-                    if(acceptToken(WHERE)) {
-                        if (condition()) {
-                            return true;
-                        }
-                    }
-                }
-            }
+        if(!acceptPlainTxt()) { return false; }
+
+        if(!acceptToken(SET)) { return false; }
+
+        if(!nameValueList()){ return false; }
+
+        if(!acceptToken(WHERE)) { return false; }
+
+        if (condition()) {
+            return true;
         }
+
         throw new IOException("UPDATE syntax failed");
     }
+
 
     private boolean select() throws IOException{
         boolean ret =false;
         lex.getNextToken();
-        if(wildAttribList()){
-            if(acceptToken(FROM)){
-                if(acceptPlainTxt()){
-                    ret=true;
-                    if(acceptToken(WHERE)){
-                        ret=condition();
-                    }
-                }
+        if(!wildAttribList()){ return false; }
+
+        if(!acceptToken(FROM)){ return false; }
+
+        if(acceptPlainTxt()){
+            ret=true;
+            if(acceptToken(WHERE)){
+                ret=condition();
             }
         }
         if(!ret) {
@@ -239,21 +251,23 @@ public class Parser {
         return ret;
     }
 
+
     private boolean insert() throws IOException{
         lex.getNextToken();
-        if(acceptToken(INTO)){
-            if (acceptPlainTxt()){
-                if(acceptToken(VALUES)){
-                    if(acceptToken(OPEN_BR)){
-                        if(valueList()){
-                            return expect(CLOSE_BR);
-                        }
-                    }
-                }
-            }
+        if(!acceptToken(INTO)){ return false; }
+
+        if (!acceptPlainTxt()){ return false; }
+
+        if(!acceptToken(VALUES)){ return false; }
+
+        if(!acceptToken(OPEN_BR)){ return false; }
+
+        if(valueList()){
+            return expect(CLOSE_BR);
         }
         throw new IOException("INSERT syntax failed");
     }
+
 
     private boolean alter() throws IOException{
         boolean ret =false;
@@ -268,6 +282,7 @@ public class Parser {
         throw new IOException("ALTER syntax failed");
     }
 
+
     private boolean drop() throws IOException{
         lex.getNextToken();
         if(acceptToken(TABLE) || acceptToken(DATABASE)){
@@ -275,6 +290,7 @@ public class Parser {
         }
         throw new IOException("DROP syntax failed");
     }
+
 
     private boolean create() throws IOException{
         boolean ret =false;
@@ -294,6 +310,7 @@ public class Parser {
         }
         throw new IOException("CREATE syntax failed");
     }
+
 
     private boolean use() throws IOException{
         lex.getNextToken();

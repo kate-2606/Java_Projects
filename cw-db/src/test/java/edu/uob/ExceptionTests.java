@@ -124,7 +124,6 @@ public class ExceptionTests {
         sendCommandToServer("USE " + randomName + ";");
         String response = sendCommandToServer("CREATE TABLE false (yellow, green, purple, blue);");
         assertTrue(response.contains("CREATE syntax failed"));
-        System.out.println(response);
     }
 
     @Test
@@ -134,7 +133,6 @@ public class ExceptionTests {
         sendCommandToServer("USE " + randomName + ";");
         String response = sendCommandToServer("CREATE TABLE colours (colours.select, green, purple, blue);");
         assertTrue(response.contains("[ERROR]"));
-        System.out.println(response);
     }
 
 
@@ -146,7 +144,6 @@ public class ExceptionTests {
         sendCommandToServer("USE " + randomName + ";");
         String response = sendCommandToServer("CREATE TABLE paint (like, green, purple, blue);");
         assertTrue(response.contains("[ERROR]"));
-        System.out.println(response);
     }
 
 

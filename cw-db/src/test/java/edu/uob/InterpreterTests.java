@@ -308,13 +308,40 @@ public class InterpreterTests {
                 "(hairColour=='pink' AND email LIKE 'example')) AND (height>=150 AND hairColour!='brown')) OR name=='Quentin';");
         assertFalse(response.contains("Steve"));
         assertFalse(response.contains("Paul"));
-        assertTrue(response.contains("Fran"));
+        assertFalse(response.contains("Fran"));
         assertTrue(response.contains("Quentin"));
         assertFalse(response.contains("Pete"));
     }
 
     @Test
-    public void testSelectCommandGTE() {
+    public void testSelectCommandGTE2() {
+        sendCommandToServer("USE " + "students" + ";");
+        sendCommandToServer("INSERT INTO details VALUES ('Kate', null, 'brown', null);");
+        String response = sendCommandToServer("SELECT * FROM details WHERE email==null;");
+        assertFalse(response.contains("Steve"));
+        assertFalse(response.contains("Paul"));
+        assertFalse(response.contains("Fran"));
+        assertFalse(response.contains("Quentin"));
+        assertFalse(response.contains("Pete"));
+        assertTrue(response.contains("Kate"));
+    }
+
+    @Test
+    public void testSelectCommandGTE3() {
+        sendCommandToServer("USE " + "students" + ";");
+        sendCommandToServer("INSERT INTO details VALUES ('Kate', null, 'brown', null);");
+        String response = sendCommandToServer("SELECT * FROM details WHERE height==null;");
+        assertFalse(response.contains("Steve"));
+        assertFalse(response.contains("Paul"));
+        assertFalse(response.contains("Fran"));
+        assertFalse(response.contains("Quentin"));
+        assertFalse(response.contains("Pete"));
+        assertTrue(response.contains("Kate"));
+    }
+
+
+    @Test
+    public void testSelectCommandGTE1() {
         sendCommandToServer("USE " + "students" + ";");
         String response = sendCommandToServer("SELECT * FROM details WHERE height>=160;");
         assertTrue(response.contains("Steve"));
@@ -401,13 +428,48 @@ public class InterpreterTests {
     @Test
     public void testUpdateJoinCommand6() {
         sendCommandToServer("USE " + "vehicles" + ";");
+        String result = sendCommandToServer("SELECT * FROM marks WHERE mark>40.0;");
+        assertFalse(result.contains("Bob"));
+        assertFalse(result.contains("Clive"));
+        assertTrue(result.contains("Steve"));
+        assertTrue(result.contains("Dave"));
+    }
+
+    @Test
+    public void testUpdateJoinCommand7() {
+        sendCommandToServer("USE " + "vehicles" + ";");
         sendCommandToServer("ALTER TABLE cars ADD iq;");
         String result = sendCommandToServer("JOIN marks AND cars ON iq AND hp;");
         assertFalse(result.contains("hp"));
         assertFalse(result.contains("toyota"));
         assertFalse(result.contains("Steve"));
+
+    }
+
+
+    @Test
+    public void testUpdateJoinCommand8() {
+        sendCommandToServer("USE " + "vehicles" + ";");
+        String result = sendCommandToServer("SELECT * FROM marks WHERE pass>=TRUE;");
+        assertFalse(result.contains("Bob"));
+        assertFalse(result.contains("Clive"));
+        assertFalse(result.contains("Steve"));
+        assertFalse(result.contains("Dave"));
+    }
+
+
+    @Test
+    public void testUpdateJoinCommand9() {
+        sendCommandToServer("USE " + "vehicles" + ";");
+        sendCommandToServer("INSERT INTO marks VALUES ('Bob', 79, FALSE 400");
+        String result = sendCommandToServer("SELECT * FROM marks WHERE name>='Bob';");
+        assertFalse(result.contains("Bob"));
+        assertFalse(result.contains("Clive"));
+        assertFalse(result.contains("Steve"));
+        assertFalse(result.contains("Dave"));
         sendCommandToServer("DROP DATABASE vehicles;");
     }
+
 
     @Test
     public void testCaseInsensitive1() {

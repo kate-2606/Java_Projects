@@ -307,7 +307,7 @@ public class Interpreter {
 
         getNextToken();
         acceptToken(WHERE);
-        
+
         HashSet<Long> deletedRows = null;
         deletedRows = conditionCommand(table, deletedRows);
         table.deleteRows(deletedRows);
@@ -463,9 +463,9 @@ public class Interpreter {
     private HashSet<Long> baseConditionEquals(int column, String target, String condition, Table table){
         HashSet<Long> setEqual = new HashSet<>();
         if (condition.equals("!="))
-            setEqual=table.getEqualHash(column-1, target, false);
+            setEqual=table.getEqualHash(column-1, target, condition);
         else
-            setEqual = table.getEqualHash(column - 1, target, true);
+            setEqual = table.getEqualHash(column - 1, target, condition);
         return setEqual;
     }
 
@@ -495,8 +495,12 @@ public class Interpreter {
 
         while (!acceptToken(SEMI_COL)){
             getNextToken();
-            if(getCurrentToken().getValue()!=null){
-                values.add(getCurrentToken().getValue());
+            String value=getCurrentToken().getValue();
+            if(getCurrentToken().getType()==NULL){
+                value="NULL";
+            }
+            if(value!=null){
+                values.add(value);
             }
         }
 

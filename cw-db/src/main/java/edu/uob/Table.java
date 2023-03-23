@@ -230,20 +230,33 @@ public class Table {
     }
 
 
-    public HashSet<Long> getEqualHash(int column, String target, Boolean equal){
+    public HashSet<Long> getEqualHash(int column, String target, String condition){
         HashSet<Long> set = new HashSet<>();
         for(Long l : dataRows.keySet()){
             Row r = dataRows.get(l);
             String data=r.getCellDataByNumber(column);
+            if((data==null && target==null)){
+                if(!condition.contains(">")&&!condition.contains("<")) {
+                    set.add(l);
+                }
+            }
             if(Lexer.isBoolLit(data) && Lexer.isBoolLit(target)){
-                data=data.toLowerCase();
-                target=target.toLowerCase();
+                if(!condition.contains(">")&&!condition.contains("<")) {
+                    data = data.toLowerCase();
+                    target = target.toLowerCase();
+                }
             }
-            if(data.equals(target) && equal){
-                set.add(l);
-            }
-            else if (!data.equals(target) && !equal){
-                set.add(l);
+            if(data!=null && target !=null) {
+                if ((data.equals("NULL") && target.equals("NULL"))) {
+                    if (!condition.contains(">") && !condition.contains("<")) {
+                        set.add(l);
+                    }
+                }
+                if (data.equals(target) && condition.equals("==")) {
+                    set.add(l);
+                } else if (!data.equals(target) && condition.equals("!=")) {
+                    set.add(l);
+                }
             }
         }
         return set;
