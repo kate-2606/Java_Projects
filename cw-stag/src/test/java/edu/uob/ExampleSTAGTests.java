@@ -3,9 +3,12 @@ package edu.uob;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.alexmerz.graphviz.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.io.IOException;
 import java.time.Duration;
@@ -16,7 +19,7 @@ class ExampleSTAGTests {
 
   // Create a new server _before_ every @Test
   @BeforeEach
-  void setup() {
+  void setup() throws FileNotFoundException, ParseException {
       File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
       File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
       server = new GameServer(entitiesFile, actionsFile);
