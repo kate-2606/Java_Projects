@@ -329,7 +329,6 @@ public class InterpreterTests {
     @Test
     public void testSelectCommandGTE3() {
         sendCommandToServer("USE " + "students" + ";");
-        sendCommandToServer("INSERT INTO details VALUES ('Kate', null, 'brown', null);");
         String response = sendCommandToServer("SELECT * FROM details WHERE height==null;");
         assertFalse(response.contains("Steve"));
         assertFalse(response.contains("Paul"));
@@ -337,6 +336,18 @@ public class InterpreterTests {
         assertFalse(response.contains("Quentin"));
         assertFalse(response.contains("Pete"));
         assertTrue(response.contains("Kate"));
+    }
+
+    @Test
+    public void testSelectCommandGTE4() {
+        sendCommandToServer("USE " + "students" + ";");
+        String response = sendCommandToServer("SELECT * FROM details WHERE height!=null;");
+        assertTrue(response.contains("Steve"));
+        assertTrue(response.contains("Paul"));
+        assertTrue(response.contains("Fran"));
+        assertTrue(response.contains("Quentin"));
+        assertTrue(response.contains("Pete"));
+        assertFalse(response.contains("Kate"));
     }
 
 
@@ -417,7 +428,7 @@ public class InterpreterTests {
 
 
     @Test
-    public void testUpdateJoinCommand5() {
+    public void testUpdateJoinCommand5() {        Long ret;
         sendCommandToServer("USE " + "vehicles" + ";");
         String result = sendCommandToServer("SELECT marks.mark FROM marks;");
         assertFalse(result.contains("Steve"));
@@ -497,11 +508,9 @@ public class InterpreterTests {
 
 
     @Test
-    public void testTranscript() {
-        String randomName = generateRandomName();
-        String result=sendCommandToServer("CREATE DATABASE "+ randomName +";");
-        assertEquals("[OK]\n", result);
-        result=sendCommandToServer("USE " + randomName +";");
+    public void testTranscript1() {
+        String result=sendCommandToServer("CREATE DATABASE  transcript;");
+        result=sendCommandToServer("USE transcript;");
         assertEquals("[OK]\n", result);
         result=sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
         assertEquals("[OK]\n", result);
@@ -520,5 +529,44 @@ public class InterpreterTests {
         assertTrue(result.contains("Clive"));
     }
 
+    @Test
+    public void testTranscript2() {
+        sendCommandToServer("USE transcript;");
+        String result=sendCommandToServer("SELECT * FROM marks WHERE name != 'Dave';");
+        assertFalse(result.contains("Dave"));
+        assertTrue(result.contains("Steve"));
+        assertTrue(result.contains("Bob"));
+        assertTrue(result.contains("Clive"));
+    }
+
+    @Test
+    public void testTranscript3() {
+        sendCommandToServer("USE transcript;");
+        String result=sendCommandToServer("SELECT * FROM marks WHERE pass == TRUE;");
+        assertTrue(result.contains("Dave"));
+        assertTrue(result.contains("Steve"));
+        assertFalse(result.contains("Bob"));
+        assertFalse(result.contains("Clive"));
+
+    }
+
+    @Test
+    public void testTranscript4() {
+        sendCommandToServer("USE transcript;");
+        String result=sendCommandToServer("CREATE TABLE coursework (task, submission);");
+        assertEquals("[OK]\n", result);
+        result = sendCommandToServer("INSERT INTO coursework VALUES ('OXO', 3);");
+        assertEquals("[OK]\n", result);
+        result = sendCommandToServer("INSERT INTO coursework VALUES ('db', 1);");
+        assertEquals("[OK]\n", result);
+        result = sendCommandToServer("INSERT INTO coursework VALUES ('OXO', 4);");
+        assertEquals("[OK]\n", result);
+        result = sendCommandToServer("INSERT INTO coursework VALUES ('STAG', 2);");
+        assertEquals("[OK]\n", result);
+        result = sendCommandToServer("SELECT * FROM coursework;");
+        result = sendCommandToServer("SELECT * FROM marks;");
+        result = sendCommandToServer("JOIN coursework AND marks ON coursework.submission AND marks.id;");
+        sendCommandToServer("DROP DATABASE transcript;");
+    }
 
 }

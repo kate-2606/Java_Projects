@@ -200,7 +200,7 @@ public class Interpreter {
         getNextToken();  acceptToken(BOOL_OP);
         String nameB = getCurrentToken().getValue();
 
-        if(nameA!=nameB && !nameB.contains(".") && !nameA.contains(".")){
+        if(nameA!=nameB && !nameB.contains(".") && !nameA.contains(".") && !nameA.equals("id") && !nameB.equals("id")){
             if(tableA.attributeExists(nameA) && tableB.attributeExists(nameA)){
                 throw new InterpreterException.ContainedInTwoTables(nameA);
             }
@@ -251,23 +251,30 @@ public class Interpreter {
         int posA = tableA.getAttributePosition(attributeA)-1;
         int posB = tableB.getAttributePosition(attributeB)-1;
 
-        String attributes = tableA.getAttributesAsString().replace(attributeA+"\t", "");
+        String attributes = tableA.getAttributesAsString();
+        if(!attributeA.equals("id")){
+            attributes.replace(attributeA+"\t", "");
+        }
 
-        attributes = attributes + tableB.getAttributesAsString().replace("id\t", "") +"\n";
+        attributes = attributes + tableB.getAttributesAsString();
+        if(!attributeB.equals("id")){
+            attributes.replace(attributeB+"\t", "");
+        }
 
-        attributes = attributes.replace(attributeB+"\t", "");
 
-
-        int i=0;
         for(Long keyA : mapA.keySet()){
-            cellA=mapA.get(keyA).getCellDataByNumber(posA);
+            if(posA!=-1) {
+                cellA = mapA.get(keyA).getCellDataByNumber(posA);
 
-            for(Long keyB : mapB.keySet()){
-               cellB=mapB.get(keyB).getCellDataByNumber(posB);
-               if(cellA.equals(cellB)){
-                   Long[] match = {keyA, keyB};
-                   joinMap.add(match);
+            for(Long keyB : mapB.keySet()) {
+                if(posB!=-1) {
+                    cellB = mapB.get(keyB).getCellDataByNumber(posB);
+                    if (cellA.equals(cellB)) {
+                        Long[] match = {keyA, keyB};
+                        joinMap.add(match);
+                    }
                 }
+            }
             }
         }
         return attributes + joinMerge(tableA, tableB, attributeA, attributeB, joinMap);
