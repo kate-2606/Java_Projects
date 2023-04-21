@@ -16,37 +16,31 @@ import java.util.HashMap;
 public class GameEntitiesParser {
 
     public GameEntitiesParser(File entitiesFile, Map inputMap) throws FileNotFoundException, ParseException {
-        this.entitiesFile = entitiesFile;
         this.gameMap = inputMap;
-        this.parser = new Parser();
-        parseEntities();
+        parseEntities(entitiesFile);
     }
 
     Map gameMap;
-    File entitiesFile;
-    Parser parser;
 
-
-    private void parseEntities() throws FileNotFoundException, ParseException {
+    private void parseEntities(File entitiesFile) throws FileNotFoundException, ParseException {
         Parser parser = new Parser();
         FileReader reader = new FileReader(entitiesFile);
         BufferedReader buffReader = new BufferedReader(reader);
         parser.parse(buffReader);
+
         Graph wholeDocument = parser.getGraphs().get(0);
         ArrayList<Graph> sections = wholeDocument.getSubgraphs();
 
         ArrayList<Graph> locations = sections.get(0).getSubgraphs();
+
         for (Graph location : locations){
             gameMap.addLocation(getLocation(location));
         }
 
-        // The paths will always be in the second subgraph
         ArrayList<Edge> paths = sections.get(1).getEdges();
-        Edge firstPath = paths.get(0);
-        Node fromLocation = firstPath.getSource().getNode();
-        String fromName = fromLocation.getId().getId();
-        Node toLocation = firstPath.getTarget().getNode();
-        String toName = toLocation.getId().getId();
+
+        addPaths(gameMap, paths);
+
     }
 
     private Location getLocation(Graph locationData){
@@ -56,34 +50,64 @@ public class GameEntitiesParser {
         String locationDescription = locationDetails.getAttributes().get("description");
 
         Location gameLocation = new Location(locationName, locationDescription);
-        getArtefacts(locationData, gameLocation);
+        addAllEntityTypes(locationData, gameLocation);
         //System.out.println("LOCATION:" + locationName + "   " + locationDescription);
         return gameLocation;
     }
 
-    private void getArtefacts(Graph locationData, Location gameLocation){
+    private void addAllEntityTypes(Graph locationData, Location gameLocation){
 
-        ArrayList<Graph> itemTypes = locationData.getSubgraphs();
-        ArrayList<Node> artifactDetails = null;
+        ArrayList<Graph> entityTypes = locationData.getSubgraphs();
 
-        for(Graph type : itemTypes){
-            String typeName = type.getId().getId();
-            if(typeName.equals("artefacts")){
-                artifactDetails = type.getNodes(false);
-            }
-        }
-
-        HashMap<String, Artifact> locationArtifacts = new HashMap<>();
-        if(artifactDetails!=null) {
-            for (Node item : artifactDetails) {
-                String name = item.getId().getId();
-                String description = item.getAttributes().get("description");
-                Artifact foundArtifact = new Artifact(name, description);
-                locationArtifacts.put(foundArtifact.getName(), foundArtifact);
-                //System.out.println(name + "   " + description);
-            }
-            gameLocation.setArtifacts(locationArtifacts);
+        for(Graph entityType : entityTypes){
+            addEntities(gameLocation, entityType);
         }
     }
 
+    private void addEntities(Location gameLocation, Graph entityType){
+
+        ArrayList<Node> entityItems = entityType.getNodes(false);
+        String typeName = entityType.getId().getId();
+
+        for (Node item : entityItems) {
+            String name = item.getId().getId();
+            String description = item.getAttributes().get("description");
+
+            if(typeName.equals("artefacts")) {
+                Artefact foundArtefact = new Artefact(name, description);
+                gameLocation.addArtifact(foundArtefact);
+                //System.out.println("Artifact -> " + name + " : " + description);
+            }
+
+            if(typeName.equals("furniture")) {
+                Furniture foundFurniture = new Furniture(name, description);
+                gameLocation.addFurniture(foundFurniture);
+                //System.out.println("Furniture -> " + name + " : " + description);
+            }
+            if(typeName.equals("characters")) {
+                Character foundCharacter = new Character(name, description);
+                gameLocation.addCharacter(foundCharacter);
+                //System.out.println("Character -> " + name + " : " + description);
+            }
+        }
+    }
+
+    private void addPaths(Map gameMap, ArrayList<Edge> paths){
+
+        for(Edge path : paths){
+            Node fromNode = path.getSource().getNode();
+            String fromName = fromNode.getId().getId();
+            //System.out.println("FROM : " + fromName);
+            Node toNode = path.getTarget().getNode();
+            String toName = toNode.getId().getId();
+            //System.out.println("TO : " + toName);
+
+            Location fromLocation = gameMap.getLocation(fromName);
+
+            Location toLocation = gameMap.getLocation(toName);
+
+            fromLocation.addPath(toLocation);
+        }
+
+    }
 }

@@ -10,7 +10,17 @@ public class Map {
 
     HashMap<String, Location> locations;
 
-    public void addLocation(Location newLocation) { locations.put(newLocation.getName(), newLocation); }
+    Location storeroom;
 
+    public void addLocation(Location newLocation) {
+        if(newLocation.getName().equals("storeroom")){
+            this.storeroom = newLocation;
+        }
+        else {
+            locations.put(newLocation.getName(), newLocation);
+        }
+    }
+
+    public Location getLocation(String name){ return locations.get(name); }
 
 }

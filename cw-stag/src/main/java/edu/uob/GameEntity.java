@@ -2,6 +2,7 @@ package edu.uob;
 
 public abstract class GameEntity
 {
+    //map is game entity?
     private String name;
     private String description;
 
