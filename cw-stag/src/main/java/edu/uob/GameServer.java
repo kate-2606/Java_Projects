@@ -13,7 +13,7 @@ public final class GameServer {
     private static final char END_OF_TRANSMISSION = 4;
 
     public static void main(String[] args) throws IOException, ParseException {
-        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
         server.blockingListenOn(8888);
@@ -30,7 +30,8 @@ public final class GameServer {
     *
     */
     public GameServer(File entitiesFile, File actionsFile) throws FileNotFoundException, ParseException {
-        GameParser entities = new GameParser(entitiesFile, actionsFile);
+        Map gameMap = new Map();
+        GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
     }
 
     /**
@@ -40,7 +41,6 @@ public final class GameServer {
     * <p>This method handles all incoming game commands and carries out the corresponding actions.
     */
     public String handleCommand(String command) {
-        // TODO implement your server logic here
         return "";
     }
 
