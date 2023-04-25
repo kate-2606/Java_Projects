@@ -1,7 +1,9 @@
 package edu.uob;
 
 import com.alexmerz.graphviz.ParseException;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,7 +14,7 @@ public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException {
         File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
@@ -29,9 +31,10 @@ public final class GameServer {
     * @param actionsFile The game configuration file containing all game actions to use in your game
     *
     */
-    public GameServer(File entitiesFile, File actionsFile) throws FileNotFoundException, ParseException {
+    public GameServer(File entitiesFile, File actionsFile) throws IOException, ParseException, ParserConfigurationException, SAXException {
         Map gameMap = new Map();
         GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
+        GameActionsParser actions = new GameActionsParser(actionsFile);
     }
 
     /**

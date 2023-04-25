@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.alexmerz.graphviz.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
@@ -19,7 +22,7 @@ class ExampleSTAGTests {
 
   // Create a new server _before_ every @Test
   @BeforeEach
-  void setup() throws FileNotFoundException, ParseException {
+  void setup() throws IOException, ParseException, ParserConfigurationException, SAXException {
       File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
       File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
       server = new GameServer(entitiesFile, actionsFile);

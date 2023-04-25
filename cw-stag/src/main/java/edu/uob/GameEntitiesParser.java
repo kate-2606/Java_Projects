@@ -100,6 +100,7 @@ public class GameEntitiesParser {
             //System.out.println("FROM : " + fromName);
             Node toNode = path.getTarget().getNode();
             String toName = toNode.getId().getId();
+            //System.out.println("toName: "+ toName);
             //System.out.println("TO : " + toName);
 
             Location fromLocation = gameMap.getLocation(fromName);

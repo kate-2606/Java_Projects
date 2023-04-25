@@ -21,17 +21,17 @@ public class GameAction
 
     String narration;
 
-    public void addTrigger(String triggerWord){ triggers.add(triggerWord); }
+    public void addTrigger(String phrase){ triggers.add(phrase); System.out.println("adding Trigger" + phrase);}
 
     public ArrayList<String> getTriggers(){ return triggers; }
 
-    public void addSubject(String subjectWord){ subjects.add(subjectWord); }
+    public void addSubject(String phrase){ subjects.add(phrase); System.out.println("adding Subject" + phrase);}
 
-    public void addConsumed(String consumedWord){ consumed.add(consumedWord); }
+    public void addConsumed(String phrase){ consumed.add(phrase); System.out.println("adding Consumed" + phrase);}
 
-    public void addProduces(String producesWord){ produced.add(producesWord); }
+    public void addProduced(String phrase){ produced.add(phrase); System.out.println("adding Produced" + phrase);}
 
-    public void addNarration(String narrationWords){ narration = narrationWords; }
+    public void addNarration(String phrase){ narration = phrase; System.out.println("adding Narration" + phrase);}
 
 
 

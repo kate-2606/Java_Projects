@@ -9,6 +9,7 @@ public class Location extends GameEntity{
         this.locationFurniture = new HashMap<>();
         this.locationArtefacts = new HashMap<>();
         this.locationCharacters = new HashMap<>();
+        this.paths = new ArrayList<>();
     }
 
     HashMap<String, Artefact> locationArtefacts;
