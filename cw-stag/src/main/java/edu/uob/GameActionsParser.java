@@ -6,37 +6,50 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import static edu.uob.ActionElement.*;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.net.URI;
-import java.nio.file.Path;
 
 public class GameActionsParser {
 
-    public GameActionsParser (File actionsFile) throws ParserConfigurationException, IOException, SAXException {
+    public GameActionsParser (File actionsFile, ActionLibrary library) throws ParserConfigurationException,
+            IOException, SAXException {
+        this.library = library;
         parseActions(actionsFile);
+
     }
 
-    private enum elementType { triggers, subjects, consumed, produced, narration }
+    ActionLibrary library;
 
+    //the action file will always be in the config folder? not in a subfolder?
+    //only odd actions are actually actions?
     private void parseActions(File actionsFile)
             throws SAXException, ParserConfigurationException, IOException {
 
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        String[] splitPath = actionsFile.toString().split(File.separator);
+        int num = splitPath.length;
+        String filePath = splitPath[num-2]+ File.separator + splitPath[num-1];
 
-        Document document = builder.parse("config" + File.separator + "basic-actions.xml");
+        Document document = builder.parse(filePath);
         Element root = document.getDocumentElement();
         NodeList actionsDetails = root.getChildNodes();
 
         //for each action in actions
         int length = actionsDetails.getLength();
+
         for (int i = 0; i < length; i++) {
             if (actionsDetails.item(i).getNodeType() == Node.ELEMENT_NODE) {
+
                 Element actionDetails = (Element) actionsDetails.item(i);
+
                 GameAction action = new GameAction();
                 logActionElements(actionDetails, action);
+                library.addAction(action);
+
             }
         }
     }
@@ -44,34 +57,32 @@ public class GameActionsParser {
     //revise this
     private void logActionElements(Element inputDetails, GameAction action){
 
-        for(elementType type : elementType.values()){
+        for(ActionElement type : ActionElement.values()){
+
             String typeName = String.valueOf(type);
             Element elementDetails = (Element) inputDetails.getElementsByTagName(typeName).item(0);
 
-            elementType element = elementType.valueOf(typeName);
-            String entityName = element == elementType.triggers? "keyphrase" : "entity";
-            NodeList entities = elementDetails.getElementsByTagName(entityName);
+            String entityName = type == triggers ? "keyphrase" : "entity";
+            NodeList words = elementDetails.getElementsByTagName(entityName);
 
-            if(entities !=null && element!=elementType.narration) {
-                System.out.println("Type: " + element);
-                logElementEntities(entities, typeName, action);
+            if(words !=null && type!=narration) {
+                logElementEntities(words, type, action);
             }
-            if(element == elementType.narration){
-
+            if(type == narration){
+                Element n = (Element) inputDetails.getElementsByTagName(narration.toString()).item(0);
+                action.addNarration(n.getTextContent());
             }
         }
     }
 
-    private void logElementEntities(NodeList entities, String elementName, GameAction action) {
+    private void logElementEntities(NodeList words, ActionElement type, GameAction action) {
 
         int i = 0;
-        if (entities.item(i) != null) {
-            String nextPhrase = entities.item(i).getTextContent();
-            elementType element = elementType.valueOf(elementName);
-            System.out.println("element: " + element);
+        if (words.item(i) != null) {
+            String nextPhrase = words.item(i).getTextContent();
 
             while (nextPhrase != null) {
-                switch (element) {
+                switch (type) {
                     case triggers:
                         action.addTrigger(nextPhrase);
                         break;
@@ -88,9 +99,7 @@ public class GameActionsParser {
                         break;
                 }
                 i++;
-
-                nextPhrase = entities.item(i) == null ? null : entities.item(i).getTextContent();
-
+                nextPhrase = words.item(i) == null ? null : words.item(i).getTextContent();
             }
         }
     }

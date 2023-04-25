@@ -31,10 +31,16 @@ public final class GameServer {
     * @param actionsFile The game configuration file containing all game actions to use in your game
     *
     */
-    public GameServer(File entitiesFile, File actionsFile) throws IOException, ParseException, ParserConfigurationException, SAXException {
-        Map gameMap = new Map();
-        GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
-        GameActionsParser actions = new GameActionsParser(actionsFile);
+    public GameServer(File entitiesFile, File actionsFile) {
+        try {
+            GameMap gameMap = new GameMap();
+            GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
+            ActionLibrary library = new ActionLibrary();
+            GameActionsParser actions = new GameActionsParser(actionsFile, library);
+        }catch(IOException | ParseException | ParserConfigurationException | SAXException e) {
+            System.out.println(e.getMessage());
+        }
+
     }
 
     /**

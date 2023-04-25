@@ -1,6 +1,10 @@
 package edu.uob;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -12,11 +16,19 @@ import com.alexmerz.graphviz.objects.Node;
 import com.alexmerz.graphviz.objects.Edge;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class EntitiesFileTests {
 
   // Test to make sure that the basic entities file is readable
+
+    GameMap testMap;
+    @BeforeEach
+    void setUpParser() throws FileNotFoundException, ParseException {
+        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
+        testMap = new GameMap();
+        GameEntitiesParser parser = new GameEntitiesParser(entitiesFile, testMap);
+    }
   @Test
   void testBasicEntitiesFileIsReadable() {
       try {
@@ -50,5 +62,22 @@ final class EntitiesFileTests {
           fail("ParseException was thrown when attempting to read basic entities file");
       }
   }
+
+  @Test
+    void locationsTest() {
+      assertEquals(3, testMap.getNumberOfLocations());
+      assertTrue(testMap.locationExists("cabin"));
+      assertTrue(testMap.locationExists("forest"));
+      assertTrue(testMap.locationExists("cellar"));
+      assertFalse(testMap.locationExists("storeroom"));
+      assertFalse(testMap.locationExists("pond"));
+      assertFalse(testMap.locationExists("pool"));
+      assertFalse(testMap.locationExists("beach"));
+      assertFalse(testMap.locationExists("church"));
+
+  }
+
+
+
 
 }

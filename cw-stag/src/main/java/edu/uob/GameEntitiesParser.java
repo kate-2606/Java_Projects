@@ -11,16 +11,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class GameEntitiesParser {
 
-    public GameEntitiesParser(File entitiesFile, Map inputMap) throws FileNotFoundException, ParseException {
-        this.gameMap = inputMap;
+    public GameEntitiesParser(File entitiesFile, GameMap inputGameMap) throws FileNotFoundException, ParseException {
+        this.gameMap = inputGameMap;
         parseEntities(entitiesFile);
     }
 
-    Map gameMap;
+    GameMap gameMap;
 
     private void parseEntities(File entitiesFile) throws FileNotFoundException, ParseException {
         Parser parser = new Parser();
@@ -43,19 +42,19 @@ public class GameEntitiesParser {
 
     }
 
-    private Location getLocation(Graph locationData){
+    private GameLocation getLocation(Graph locationData){
 
         Node locationDetails = locationData.getNodes(false).get(0);
         String locationName = locationDetails.getId().getId();
         String locationDescription = locationDetails.getAttributes().get("description");
 
-        Location gameLocation = new Location(locationName, locationDescription);
+        GameLocation gameLocation = new GameLocation(locationName, locationDescription);
         addAllEntityTypes(locationData, gameLocation);
         //System.out.println("LOCATION:" + locationName + "   " + locationDescription);
         return gameLocation;
     }
 
-    private void addAllEntityTypes(Graph locationData, Location gameLocation){
+    private void addAllEntityTypes(Graph locationData, GameLocation gameLocation){
 
         ArrayList<Graph> entityTypes = locationData.getSubgraphs();
 
@@ -64,7 +63,7 @@ public class GameEntitiesParser {
         }
     }
 
-    private void addEntities(Location gameLocation, Graph entityType){
+    private void addEntities(GameLocation gameLocation, Graph entityType){
 
         ArrayList<Node> entityItems = entityType.getNodes(false);
         String typeName = entityType.getId().getId();
@@ -74,25 +73,26 @@ public class GameEntitiesParser {
             String description = item.getAttributes().get("description");
 
             if(typeName.equals("artefacts")) {
-                Artefact foundArtefact = new Artefact(name, description);
-                gameLocation.addArtifact(foundArtefact);
+                GameArtefact foundGameArtefact = new GameArtefact(name, description);
+                gameLocation.addArtifact(foundGameArtefact);
                 //System.out.println("Artifact -> " + name + " : " + description);
             }
 
             if(typeName.equals("furniture")) {
-                Furniture foundFurniture = new Furniture(name, description);
-                gameLocation.addFurniture(foundFurniture);
+                GameFurniture foundGameFurniture = new GameFurniture(name, description);
+                gameLocation.addFurniture(foundGameFurniture);
                 //System.out.println("Furniture -> " + name + " : " + description);
             }
             if(typeName.equals("characters")) {
-                Character foundCharacter = new Character(name, description);
-                gameLocation.addCharacter(foundCharacter);
+                GameCharacter foundGameCharacter = new GameCharacter(name, description);
+                gameLocation.addCharacter(foundGameCharacter);
                 //System.out.println("Character -> " + name + " : " + description);
             }
         }
     }
 
-    private void addPaths(Map gameMap, ArrayList<Edge> paths){
+    //make sure path is valid and not to storeroom
+    private void addPaths(GameMap gameMap, ArrayList<Edge> paths){
 
         for(Edge path : paths){
             Node fromNode = path.getSource().getNode();
@@ -103,11 +103,11 @@ public class GameEntitiesParser {
             //System.out.println("toName: "+ toName);
             //System.out.println("TO : " + toName);
 
-            Location fromLocation = gameMap.getLocation(fromName);
+            GameLocation fromGameLocation = gameMap.getLocation(fromName);
 
-            Location toLocation = gameMap.getLocation(toName);
+            GameLocation toGameLocation = gameMap.getLocation(toName);
 
-            fromLocation.addPath(toLocation);
+            fromGameLocation.addPath(toGameLocation);
         }
 
     }
