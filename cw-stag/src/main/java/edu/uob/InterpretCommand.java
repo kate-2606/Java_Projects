@@ -1,10 +1,24 @@
 package edu.uob;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class InterpretCommand {
-    public InterpretCommand(GameMap map, GameCharacter currentPlayer) {
+    public InterpretCommand(GameMap map, GameCharacter currentPlayer, ActionLibrary customActions) {
         this.map = map;
         this.currentPlayer = currentPlayer;
+        this.customActions = customActions;
     }
+
+    GameMap map;
+
+    String command;
+
+    GameCharacter currentPlayer;
+
+    GameLocation currentLocation;
+
+    ActionLibrary customActions;
 
     public String handleCommand(String inpCommand){
 
@@ -16,8 +30,12 @@ public class InterpretCommand {
 
         this.command = inpCommand.toLowerCase();
 
-        if(command.contains("inv")) {
-            this.command.replace("inv","inventory");
+        if(this.command.contains("inv")) {
+            this.command = this.command.replaceAll("\\binv\\b","inventory");
+        }
+        if(this.command.contains("goto")) {
+            this.command = this.command.replaceAll("\\bgoto\\b","_goto");
+            System.out.println("got here: "+this.command);
         }
 
         BasicCommand trigger = containsBasicCommand(command);
@@ -25,18 +43,17 @@ public class InterpretCommand {
         if(trigger != null){
             response = handleBasicCommand(trigger);
         }
+        else{
+            response = handleCustomCommand();
+        }
 
         return response;
     }
 
-    GameMap map;
-    String command;
 
-    GameCharacter currentPlayer;
-
-    GameLocation currentLocation;
     private String handleBasicCommand(BasicCommand trigger) {
         String response = "";
+
         switch (trigger) {
             case inventory:
                 response = respondToInventory();
@@ -64,7 +81,9 @@ public class InterpretCommand {
         BasicCommand res = null;
 
         for(BasicCommand trigger : BasicCommand.values()) {
+            System.out.println(trigger + " " + command);
             if(command.contains(String.valueOf(trigger))){
+                System.out.println(trigger);
                 res=trigger;
             }
         }
@@ -83,7 +102,6 @@ public class InterpretCommand {
                 count++;
                 artefactName = word;
             }
-
             if(currentPlayer.getArtefact(word) != null && inventory){
                 count++;
                 artefactName = word;
@@ -92,12 +110,20 @@ public class InterpretCommand {
         if(count==1 && basic) {
             return inventory ? currentPlayer.getArtefact(artefactName) : currentLocation.getArtefact(artefactName);
         }
-
         return null;
     }
 
     private String respondToInventory(){
-        return "";
+
+        String response = "";
+
+        if(currentPlayer.getInventorySize() >0 ) {
+            response = "In your inventory, you have:\n" + currentPlayer.getInventoryAsString();
+        }
+        else{
+            response = "There is nothing in your inventory.";
+        }
+        return response;
     }
 
     private String respondToGet(){
@@ -123,14 +149,30 @@ public class InterpretCommand {
     }
 
     private String respondToGoto(){
+        String[] words = command.split(" ");
+        String locationName = "";
+        System.out.println("in goto");
+
+        int count = 0;
+        for(String word : words) {
+
+            if (currentLocation.isPath(word)) {
+                count++;
+                locationName = word;
+            }
+        }
+        if(count ==1){
+            GameLocation nextLocation = map.getLocation(locationName);
+            map.setCurrentLocation(nextLocation);
+            currentLocation = nextLocation;
+            return respondToLook();
+        }
         return "";
     }
 
     private String respondToLook(){
 
-        String response="You are in ";
-
-        response = response + currentLocation.getDescription() + ". You can see:\n";
+        String response = "You are in " + currentLocation.getDescription() + ". You can see:\n";
 
         response = response + currentLocation.getAllArtefactsAsString();
 
@@ -141,6 +183,27 @@ public class InterpretCommand {
         response = response + currentLocation.getAllPathsAsString();
 
         return response;
+    }
+
+    private String handleCustomCommand(){
+
+        String words[] = command.split(" ");
+        for(String word : words){
+            if(customActions.matchingTrigger(word) != null){
+
+            }
+        }
+        return "";
+    }
+
+    private boolean containsSubjects(GameAction action, String[] words) {
+        ArrayList<String> subjects = action.getSubjects();
+        for(String subject : subjects){
+            if(!Arrays.asList(words).contains(subject)){
+                return false;
+            }
+        }
+        return true;
     }
 
 }

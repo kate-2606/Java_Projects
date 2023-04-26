@@ -37,6 +37,7 @@ public final class GameServer {
             GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
             ActionLibrary library = new ActionLibrary();
             GameActionsParser actions = new GameActionsParser(actionsFile, library);
+            this.actionLibrary = library;
         }catch(IOException | ParseException | ParserConfigurationException | SAXException e) {
             System.out.println(e.getMessage());
         }
@@ -44,6 +45,8 @@ public final class GameServer {
     }
 
     GameMap gameMap;
+
+    ActionLibrary actionLibrary;
 
     /**
     * KEEP this signature (i.e. {@code edu.uob.GameServer.handleCommand(String)}) otherwise we won't be
@@ -64,7 +67,7 @@ public final class GameServer {
             player.setCharacterLocation(gameMap.getStartLocation());
         }
         String userCommand = command.split(":", 2)[1].trim();
-        InterpretCommand interpreter = new InterpretCommand(gameMap, player);
+        InterpretCommand interpreter = new InterpretCommand(gameMap, player, actionLibrary);
         String response = interpreter.handleCommand(userCommand);
         return response;
     }

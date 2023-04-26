@@ -9,7 +9,7 @@ public class ActionLibrary {
         this.library = new HashMap<>();
     }
 
-    HashMap<String, HashSet<GameAction>> library;
+    private HashMap<String, HashSet<GameAction>> library;
 
     public void addAction(GameAction action){
         ArrayList<String> triggers = action.getTriggers();
@@ -24,4 +24,6 @@ public class ActionLibrary {
     }
 
     public HashSet<GameAction> getActions(String trigger) { return library.get(trigger); }
+
+    public HashSet<GameAction> matchingTrigger(String trigger) { return library.get(trigger); }
 }

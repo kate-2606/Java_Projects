@@ -13,8 +13,6 @@ public class GameLocation extends GameEntity{
         this.paths = new ArrayList<>();
     }
 
-    String description;
-
     HashMap<String, GameArtefact> locationArtefacts;
 
     HashMap<String, GameFurniture> locationFurniture;
@@ -87,5 +85,5 @@ public class GameLocation extends GameEntity{
         return result;
     }
 
-    public int getNumberOfPaths() { return locationArtefacts.size(); }
+    public boolean isPath(String path) { return paths.contains(path); }
 }
