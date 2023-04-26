@@ -22,4 +22,6 @@ public class ActionLibrary {
             set.add(action);
         }
     }
+
+    public HashSet<GameAction> getActions(String trigger) { return library.get(trigger); }
 }

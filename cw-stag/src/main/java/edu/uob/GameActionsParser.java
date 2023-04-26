@@ -38,10 +38,10 @@ public class GameActionsParser {
         Element root = document.getDocumentElement();
         NodeList actionsDetails = root.getChildNodes();
 
-        //for each action in actions
         int length = actionsDetails.getLength();
 
-        for (int i = 0; i < length; i++) {
+        //for each action in actions
+        for (int i = 1; i < length; i=i+2) {
             if (actionsDetails.item(i).getNodeType() == Node.ELEMENT_NODE) {
 
                 Element actionDetails = (Element) actionsDetails.item(i);

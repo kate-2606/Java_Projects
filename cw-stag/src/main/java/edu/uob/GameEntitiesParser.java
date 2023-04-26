@@ -32,8 +32,15 @@ public class GameEntitiesParser {
 
         ArrayList<Graph> locations = sections.get(0).getSubgraphs();
 
+        boolean startingPoint = true;
         for (Graph location : locations){
-            gameMap.addLocation(getLocation(location));
+            GameLocation parsedLocation = getLocation(location);
+            gameMap.addLocation(parsedLocation);
+            if(startingPoint){
+                gameMap.setStartLocation(parsedLocation);
+                gameMap.setCurrentLocation(parsedLocation);
+                startingPoint = false;
+            }
         }
 
         ArrayList<Edge> paths = sections.get(1).getEdges();
@@ -74,7 +81,7 @@ public class GameEntitiesParser {
 
             if(typeName.equals("artefacts")) {
                 GameArtefact foundGameArtefact = new GameArtefact(name, description);
-                gameLocation.addArtifact(foundGameArtefact);
+                gameLocation.addArtefact(foundGameArtefact);
                 //System.out.println("Artifact -> " + name + " : " + description);
             }
 
@@ -105,9 +112,7 @@ public class GameEntitiesParser {
 
             GameLocation fromGameLocation = gameMap.getLocation(fromName);
 
-            GameLocation toGameLocation = gameMap.getLocation(toName);
-
-            fromGameLocation.addPath(toGameLocation);
+            fromGameLocation.addPath(toName);
         }
 
     }

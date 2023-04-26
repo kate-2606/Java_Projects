@@ -20,23 +20,24 @@ public class GameAction extends HashSet<GameAction> {
 
     String narration;
 
-    public void addTrigger(String phrase){ triggers.add(phrase); //System.out.println("adding Trigger: " + phrase);
-    }
+    public void addTrigger(String phrase){ triggers.add(phrase);}
 
     public ArrayList<String> getTriggers(){ return triggers; }
 
-    public void addSubject(String phrase){ subjects.add(phrase); //System.out.println("adding Subject: " + phrase);
-    }
+    public void addSubject(String phrase){ subjects.add(phrase); }
 
-    public void addConsumed(String phrase){ consumed.add(phrase); //System.out.println("adding Consumed: " + phrase);
-    }
+    public ArrayList<String> getSubjects(){ return subjects; }
 
-    public void addProduced(String phrase){ produced.add(phrase); //System.out.println("adding Produced: " + phrase);
-    }
+    public void addConsumed(String phrase){ consumed.add(phrase); }
 
-    public void addNarration(String phrase){ narration = phrase; //System.out.println("adding Narration: " + phrase);
-    }
+    public ArrayList<String> getConsumed(){ return consumed; }
 
+    public void addProduced(String phrase){ produced.add(phrase); }
 
+    public ArrayList<String> getProduced(){ return produced; }
+
+    public void addNarration(String phrase){ narration = phrase; }
+
+    public String getNarration(){ return narration; }
 
 }

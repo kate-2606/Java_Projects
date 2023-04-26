@@ -33,7 +33,7 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         try {
-            GameMap gameMap = new GameMap();
+            gameMap = new GameMap();
             GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
             ActionLibrary library = new ActionLibrary();
             GameActionsParser actions = new GameActionsParser(actionsFile, library);
@@ -43,14 +43,30 @@ public final class GameServer {
 
     }
 
+    GameMap gameMap;
+
     /**
     * KEEP this signature (i.e. {@code edu.uob.GameServer.handleCommand(String)}) otherwise we won't be
     * able to mark your submission correctly.
     *
     * <p>This method handles all incoming game commands and carries out the corresponding actions.
     */
+
+    //ask if its reasonable reject any command which include symbols?
     public String handleCommand(String command) {
-        return "";
+
+        String userName = command.split(":", 2)[0].trim().toLowerCase();
+        GameCharacter player = gameMap.findPlayer(userName);
+
+        if(player==null){
+            gameMap.addPlayer(userName);
+            player = gameMap.findPlayer(userName);
+            player.setCharacterLocation(gameMap.getStartLocation());
+        }
+        String userCommand = command.split(":", 2)[1].trim();
+        InterpretCommand interpreter = new InterpretCommand(gameMap, player);
+        String response = interpreter.handleCommand(userCommand);
+        return response;
     }
 
     //  === Methods below are there to facilitate server related operations. ===
