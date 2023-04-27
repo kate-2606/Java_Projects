@@ -97,7 +97,7 @@ public class CommandInterpreter {
         int count = 0;
         for(String word : words){
 
-            if(currentLocation.getArtefact(word) != null && !inventory){
+            if(currentLocation.getEntity(word) != null && !inventory){
                 count++;
                 artefactName = word;
             }
@@ -107,7 +107,7 @@ public class CommandInterpreter {
             }
         }
         if(count==1 && basic) {
-            return inventory ? currentPlayer.getArtefact(artefactName) : currentLocation.getArtefact(artefactName);
+            return inventory ? currentPlayer.getArtefact(artefactName) : (GameArtefact) currentLocation.getEntity(artefactName);
         }
         return null;
     }
@@ -129,7 +129,7 @@ public class CommandInterpreter {
 
          GameArtefact foundArtefact = findArtefact(true, false);
          if( foundArtefact != null) {
-             map.getCurrentLocation().removeArtefact(foundArtefact);
+             map.getCurrentLocation().removeEntity(foundArtefact);
              map.getCurrentPlayer().addToInventory(foundArtefact);
              return "You picked up a " + foundArtefact.getName();
          }
@@ -140,7 +140,7 @@ public class CommandInterpreter {
 
         GameArtefact foundArtefact = findArtefact(true, true);
         if( foundArtefact != null) {
-            map.getCurrentLocation().addArtefact(foundArtefact);
+            map.getCurrentLocation().addEntity(foundArtefact);
             map.getCurrentPlayer().removeFromInventory(foundArtefact);
             return "You dropped up a " + foundArtefact.getName();
         }
@@ -173,11 +173,7 @@ public class CommandInterpreter {
 
         String response = "You are in " + currentLocation.getDescription() + ". You can see:\n";
 
-        response = response + currentLocation.getAllArtefactsAsString();
-
-        response = response + currentLocation.getAllFurnitureAsString();
-
-        response = response + currentLocation.getAllCharactersAsString() + "You can access from here:\n";
+        response = response + currentLocation.getAllEntitiesAsString(null) + "You can access from here:\n";
 
         response = response + currentLocation.getAllPathsAsString();
 
@@ -207,53 +203,24 @@ public class CommandInterpreter {
 
         GameArtefact artefact;
         GameFurniture furniture;
-        ArrayList<String> consumables = action.getConsumed();
-        for(String consume : consumables) {
+        ArrayList<GameEntity> consumables = action.getConsumed();
+        for(GameEntity consume : consumables) {
 
-            artefact = currentPlayer.hasArtefact(consume)? currentPlayer.getArtefact(consume) :currentLocation.getArtefact(consume);
-
-            if(artefact!=null){
-                map.getStoreroom().addArtefact(artefact);
-                map.removeFromAllLocations(artefact, null, null);
-                currentPlayer.removeFromInventory(artefact);
-            }
-
-            furniture = currentLocation.getFurniture(consume);
-
-            if(furniture!=null){
-                map.removeFromAllLocations(null, furniture, null);
-                map.getStoreroom().addFurniture(furniture);
-            }
-
-            if(furniture!=null){
-                map.removeFromAllLocations(null, furniture, null);
-                map.getStoreroom().addFurniture(furniture);
-            }
+            map.getStoreroom().addEntity(consume);
+            map.removeFromAllLocations(consume);
+            currentPlayer.removeFromInventory((GameArtefact) consume);
         }
     }
 
     private void produceEntities(GameAction action){
 
-        GameArtefact artefact;
-        GameFurniture furniture;
+        ArrayList<GameEntity> products = action.getProduced();
 
-        ArrayList<String> products = action.getProduced();
+        for(GameEntity produce : products) {
 
-        for(String produce : products) {
+            map.getStoreroom().removeEntity(produce);
+            currentLocation.addEntity(produce);
 
-            artefact = map.getStoreroom().getArtefact(produce);
-
-            if(artefact!=null){
-                map.getStoreroom().removeArtefact(artefact);
-                currentLocation.addArtefact(artefact);
-            }
-
-            furniture = map.getStoreroom().getFurniture(produce);
-
-            if(furniture!=null){
-                currentLocation.addFurniture(furniture);
-                map.getStoreroom().removeFurniture(furniture);
-            }
         }
     }
 
@@ -275,18 +242,17 @@ public class CommandInterpreter {
 
     private boolean containsSubjects(GameAction action, String[] words) {
         System.out.println("looking for subs");
-        ArrayList<String> subjects = action.getSubjects();
+        ArrayList<GameEntity> subjects = action.getSubjects();
 
-        for(String subject : subjects){
+        for(GameEntity subject : subjects){
 
-            if(!Arrays.asList(words).contains(subject)){
+            if(!Arrays.asList(words).contains(subject.getName())){
                 return false;
             }
-            boolean artefactInLocation = currentLocation.getArtefact(subject)==null ? false : true;
-            boolean artefactInInventory = currentPlayer.getArtefact(subject)==null ? false : true;
-            boolean furnitureInLocation = currentLocation.getFurniture(subject)==null ? false : true;
+            boolean entityInLocation = currentLocation.getEntity(subject.getName())==null ? false : true;
+            boolean artefactInInventory = currentPlayer.getArtefact(subject.getName())==null ? false : true;
 
-            if(!artefactInLocation && !artefactInInventory && !furnitureInLocation ){
+            if(!entityInLocation && !artefactInInventory){
                 return false;
             }
         }

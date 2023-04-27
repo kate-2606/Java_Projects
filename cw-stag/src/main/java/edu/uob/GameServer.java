@@ -36,7 +36,7 @@ public final class GameServer {
             gameMap = new GameMap();
             GameEntitiesParser entities = new GameEntitiesParser(entitiesFile, gameMap);
             ActionLibrary library = new ActionLibrary();
-            GameActionsParser actions = new GameActionsParser(actionsFile, library);
+            GameActionsParser actions = new GameActionsParser(actionsFile, library, gameMap);
             this.actionLibrary = library;
         }catch(IOException | ParseException | ParserConfigurationException | SAXException e) {
             System.out.println(e.getMessage());

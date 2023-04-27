@@ -15,14 +15,17 @@ import java.io.*;
 
 public class GameActionsParser {
 
-    public GameActionsParser (File actionsFile, ActionLibrary library) throws ParserConfigurationException,
+    public GameActionsParser (File actionsFile, ActionLibrary library, GameMap map) throws ParserConfigurationException,
             IOException, SAXException {
         this.library = library;
+        this.map=map;
         parseActions(actionsFile);
 
     }
 
     ActionLibrary library;
+
+    GameMap map;
 
     //the action file will always be in the config folder? not in a subfolder?
     //only odd actions are actually actions?
@@ -87,13 +90,16 @@ public class GameActionsParser {
                         action.addTrigger(nextPhrase);
                         break;
                     case subjects:
-                        action.addSubject(nextPhrase);
+                        GameEntity subjectEntity = map.getEntity(nextPhrase);
+                        action.addSubject(subjectEntity);
                         break;
                     case consumed:
-                        action.addConsumed(nextPhrase);
+                        GameEntity consumedEntity = map.getEntity(nextPhrase);
+                        action.addConsumed(consumedEntity);
                         break;
                     case produced:
-                        action.addProduced(nextPhrase);
+                        GameEntity producedEntity = map.getEntity(nextPhrase);
+                        action.addProduced(producedEntity);
                         break;
                     default:
                         break;

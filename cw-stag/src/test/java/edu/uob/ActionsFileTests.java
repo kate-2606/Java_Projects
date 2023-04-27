@@ -1,5 +1,6 @@
 package edu.uob;
 
+import com.alexmerz.graphviz.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,10 +24,13 @@ final class ActionsFileTests {
   // Test to make sure that the basic actions file is readable
 
     @BeforeEach
-    void setUpParser() throws IOException, ParserConfigurationException, SAXException {
+    void setUpParser() throws IOException, ParserConfigurationException, SAXException, ParseException {
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         library = new ActionLibrary();
-        GameActionsParser parser = new GameActionsParser(actionsFile, library);
+        GameMap map = new GameMap();
+        GameEntitiesParser entitiesParser = new GameEntitiesParser(entitiesFile,  map);
+        GameActionsParser parser = new GameActionsParser(actionsFile, library, map);
     }
 
     ActionLibrary library;

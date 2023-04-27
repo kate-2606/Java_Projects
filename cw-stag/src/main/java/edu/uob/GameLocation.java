@@ -1,42 +1,45 @@
 package edu.uob;
 
+import com.sun.jdi.ClassType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.Class;
 
 public class GameLocation extends GameEntity{
     public GameLocation(String name, String description) {
         super(name, description, null);
+        /*
         this.locationFurniture = new HashMap<>();
         this.locationArtefacts = new HashMap<>();
         this.locationCharacters = new HashMap<>();
+
+         */
+        this.locationEntities = new HashMap<>();
         this.paths = new ArrayList<>();
     }
 
-
+/*
     HashMap<String, GameArtefact> locationArtefacts;
 
     HashMap<String, GameFurniture> locationFurniture;
 
     HashMap<String, GameCharacter> locationCharacters;
-
-
+ */
     HashMap<String, GameEntity> locationEntities;
     ArrayList<String> paths;
 
 
-    public void addArtefact(GameArtefact newArtifact){
-        this.locationArtefacts.put(newArtifact.getName(), newArtifact);
+    public void addEntity(GameEntity newArtifact){ this.locationEntities.put(newArtifact.getName(), newArtifact); }
+
+
+    public GameEntity getEntity(String artefact) { return locationEntities.get(artefact); }
+
+    public boolean removeEntity (GameEntity entity){
+        return locationEntities.remove(entity.getName()) ==null? false : true;
     }
-
-    public int getNumberOfArtefacts() { return locationArtefacts.size(); }
-
-    public GameArtefact getArtefact(String artefact) { return locationArtefacts.get(artefact); }
-
-    public boolean removeArtefact(GameArtefact artefact){
-        return locationArtefacts.remove(artefact.getName()) ==null? false : true;
-    }
-
+/*
     public boolean removeFurniture(GameFurniture furniture){
         return locationFurniture.remove(furniture.getName()) == null ? false : true;
     }
@@ -47,14 +50,24 @@ public class GameLocation extends GameEntity{
 
     public HashMap<String, GameArtefact> getAllArtefacts() { return locationArtefacts; }
 
-    public String getAllArtefactsAsString() {
+ */
+    public String getAllEntitiesAsString(String entityType) {
         String result = "";
-        for (Map.Entry<String, GameArtefact> artefact : locationArtefacts.entrySet()) {
-            result = result + artefact.getValue().getDescription() + "\n";
+
+        for (Map.Entry<String, GameEntity> entity : locationEntities.entrySet()) {
+            if((entityType==null || entityType.equals("GameArtifact")) && entity.getValue() instanceof GameArtefact)
+            result = result + entity.getValue().getDescription() + "\n";
+
+            if((entityType==null || entityType.equals("GameFurniture")) && entity.getValue() instanceof GameFurniture)
+                result = result + entity.getValue().getDescription() + "\n";
+
+            if((entityType==null || entityType.equals("GameCharacter")) && entity.getValue() instanceof GameCharacter)
+                result = result + entity.getValue().getDescription() + "\n";
         }
         return result;
     }
 
+    /*
     public void addFurniture(GameFurniture newGameFurniture){
         this.locationFurniture.put(newGameFurniture.getName(), newGameFurniture);
     }
@@ -86,6 +99,8 @@ public class GameLocation extends GameEntity{
     }
 
     public GameCharacter getCharacter(String character) { return locationCharacters.get(character); }
+
+     */
 
     public void addPath(String pathEnd){ paths.add(pathEnd); }
 

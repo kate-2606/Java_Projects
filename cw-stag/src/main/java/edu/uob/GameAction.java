@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class GameAction extends HashSet<GameAction> {
@@ -12,11 +13,11 @@ public class GameAction extends HashSet<GameAction> {
     }
     ArrayList<String> triggers;
 
-    ArrayList<String> subjects;
+    ArrayList<GameEntity> subjects;
 
-    ArrayList<String> consumed;
+    ArrayList<GameEntity> consumed;
 
-    ArrayList<String> produced;
+    ArrayList<GameEntity> produced;
 
     String narration;
 
@@ -24,17 +25,17 @@ public class GameAction extends HashSet<GameAction> {
 
     public ArrayList<String> getTriggers(){ return triggers; }
 
-    public void addSubject(String phrase){ subjects.add(phrase); }
+    public void addSubject(GameEntity entity){ subjects.add(entity); }
 
-    public ArrayList<String> getSubjects(){ return subjects; }
+    public ArrayList<GameEntity> getSubjects(){ return subjects; }
 
-    public void addConsumed(String phrase){ consumed.add(phrase); }
+    public void addConsumed(GameEntity entity){ subjects.add(entity); }
 
-    public ArrayList<String> getConsumed(){ return consumed; }
+   public ArrayList<GameEntity> getConsumed(){ return consumed; }
 
-    public void addProduced(String phrase){ produced.add(phrase); }
+    public void addProduced(GameEntity entity){ subjects.add(entity); }
 
-    public ArrayList<String> getProduced(){ return produced; }
+    public ArrayList<GameEntity> getProduced(){ return produced; }
 
     public void addNarration(String phrase){ narration = phrase; }
 

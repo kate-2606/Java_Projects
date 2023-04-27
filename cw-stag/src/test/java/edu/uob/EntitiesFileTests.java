@@ -83,18 +83,15 @@ final class EntitiesFileTests {
         GameLocation currentLocation = testMap.getLocation("cabin");
         assertEquals("A log cabin in the woods", currentLocation.getDescription());
 
-        assertEquals(1, currentLocation.getNumberOfArtefacts());
-        assertNotNull(currentLocation.getArtefact("potion"));
-        assertEquals("Magic potion", currentLocation.getArtefact("potion").getDescription());
-        assertNull(currentLocation.getArtefact("key"));
+        assertNotNull(currentLocation.getEntity("potion"));
+        assertEquals("Magic potion", currentLocation.getEntity("potion").getDescription());
+        assertNull(currentLocation.getEntity("key"));
 
-        assertEquals(1, currentLocation.getNumberOfFurniture());
-        assertNotNull(currentLocation.getFurniture("trapdoor"));
-        assertEquals("Wooden trapdoor", currentLocation.getFurniture("trapdoor").getDescription());
-        assertNull(currentLocation.getFurniture("door"));
+        assertNotNull(currentLocation.getEntity("trapdoor"));
+        assertEquals("Wooden trapdoor", currentLocation.getEntity("trapdoor").getDescription());
+        assertNull(currentLocation.getEntity("door"));
 
-        assertEquals(0, currentLocation.getNumberOfCharacters());
-        assertNull(currentLocation.getCharacter("elf"));
+        assertNull(currentLocation.getEntity("elf"));
         assertTrue(currentLocation.getAllPathsAsString().contains("forest"));
         assertFalse(currentLocation.getAllPathsAsString().contains("cellar"));
     }
@@ -104,18 +101,15 @@ final class EntitiesFileTests {
         GameLocation currentLocation = testMap.getLocation("forest");
         assertEquals("A dark forest", currentLocation.getDescription());
 
-        assertEquals(1, currentLocation.getNumberOfArtefacts());
-        assertNotNull(currentLocation.getArtefact("key"));
-        assertEquals("Brass key", currentLocation.getArtefact("key").getDescription());
-        assertNull(currentLocation.getArtefact("potion"));
+        assertNotNull(currentLocation.getEntity("key"));
+        assertEquals("Brass key", currentLocation.getEntity("key").getDescription());
+        assertNull(currentLocation.getEntity("potion"));
 
-        assertEquals(1, currentLocation.getNumberOfFurniture());
-        assertNotNull(currentLocation.getFurniture("tree"));
-        assertEquals("A big tree", currentLocation.getFurniture("tree").getDescription());
-        assertNull(currentLocation.getFurniture("trapdoor"));
+        assertNotNull(currentLocation.getEntity("tree"));
+        assertEquals("A big tree", currentLocation.getEntity("tree").getDescription());
+        assertNull(currentLocation.getEntity("trapdoor"));
 
-        assertEquals(0, currentLocation.getNumberOfCharacters());
-        assertNull(currentLocation.getCharacter("witch"));
+        assertNull(currentLocation.getEntity("witch"));
 
         assertTrue(currentLocation.getAllPathsAsString().contains("cabin"));
         assertFalse(currentLocation.getAllPathsAsString().contains("cellar"));
@@ -126,16 +120,12 @@ final class EntitiesFileTests {
         GameLocation currentLocation = testMap.getLocation("cellar");
         assertEquals("A dusty cellar", currentLocation.getDescription());
 
-        assertEquals(0, currentLocation.getNumberOfArtefacts());
-        assertNull(currentLocation.getArtefact("key"));
+        assertNull(currentLocation.getEntity("key"));
 
+        assertNull(currentLocation.getEntity("trapdoor"));
 
-        assertEquals(0, currentLocation.getNumberOfFurniture());
-        assertNull(currentLocation.getFurniture("trapdoor"));
-
-        assertEquals(1, currentLocation.getNumberOfCharacters());
-        assertNotNull(currentLocation.getCharacter("elf"));
-        assertEquals("Angry Elf", currentLocation.getCharacter("elf").getDescription());
+        assertNotNull(currentLocation.getEntity("elf"));
+        assertEquals("Angry Elf", currentLocation.getEntity("elf").getDescription());
 
         assertTrue(currentLocation.getAllPathsAsString().contains("cabin"));
         assertFalse(currentLocation.getAllPathsAsString().contains("forest"));
@@ -146,15 +136,20 @@ final class EntitiesFileTests {
         GameLocation currentLocation = testMap.getStoreroom();
         assertEquals("Storage for any entities not placed in the game", currentLocation.getDescription());
 
-        assertEquals(1, currentLocation.getNumberOfArtefacts());
-        assertNull(currentLocation.getArtefact("A heavy wooden log"));
-        assertEquals("A heavy wooden log", currentLocation.getArtefact("log").getDescription());
+        assertNull(currentLocation.getEntity("A heavy wooden log"));
+        assertEquals("A heavy wooden log", currentLocation.getEntity("log").getDescription());
 
-        assertEquals(0, currentLocation.getNumberOfFurniture());
-        assertNull(currentLocation.getFurniture("tree"));
+        assertNull(currentLocation.getEntity("tree"));
 
-        assertEquals(0, currentLocation.getNumberOfCharacters());
-        assertNull(currentLocation.getCharacter("elf"));
+        assertNull(currentLocation.getEntity("elf"));
+    }
+
+    void mapTest() {
+        assertNotNull(testMap.getEntity("key"));
+        assertNotNull(testMap.getEntity("potion"));
+        assertNotNull(testMap.getEntity("trapdoor"));
+        assertNotNull(testMap.getEntity("elf"));
+        assertNotNull(testMap.getEntity("tree"));
 
     }
 

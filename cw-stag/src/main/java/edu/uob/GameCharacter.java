@@ -12,7 +12,7 @@ public class GameCharacter extends GameEntity{
 
     GameLocation characterLocation;
 
-    HashMap<String, GameArtefact> inventory;
+    HashMap<String, GameEntity> inventory;
 
     public void addToInventory(GameArtefact newArtefact) { inventory.put(newArtefact.getName(), newArtefact); }
 
@@ -20,13 +20,13 @@ public class GameCharacter extends GameEntity{
 
     public void setCharacterLocation(GameLocation aLocation) { this.characterLocation = aLocation; }
 
-    public GameArtefact getArtefact(String name) { return inventory.get(name); }
+    public GameArtefact getArtefact(String name) { return (GameArtefact) inventory.get(name); }
 
     public boolean hasArtefact(String name) { return inventory.containsKey(name); }
 
     public String getInventoryAsString() {
         String result = "";
-        for (Map.Entry<String, GameArtefact> artefact : inventory.entrySet()) {
+        for (Map.Entry<String, GameEntity> artefact : inventory.entrySet()) {
             result = result + artefact.getValue().getDescription() + "\n";
         }
         return result;

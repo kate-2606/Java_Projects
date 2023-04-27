@@ -23,8 +23,9 @@ public class ActionCommandsTests {
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         library = new ActionLibrary();
-        GameActionsParser parser = new GameActionsParser(actionsFile, library);
         testMap = new GameMap();
+
+        GameActionsParser parser = new GameActionsParser(actionsFile, library, testMap);
         GameEntitiesParser entitiesParser = new GameEntitiesParser(entitiesFile, testMap);
         tester = new GameCharacter("tester", "strict tester", testMap.getStartLocation());
         interpreter = new CommandInterpreter(testMap, tester, library);

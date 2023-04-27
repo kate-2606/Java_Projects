@@ -19,6 +19,7 @@ public class GameMap {
     public GameMap(){
         this.locations = new HashMap<>();
         this.players = new HashMap<>();
+        this.allEntities = new HashMap<>();
     }
 
     private HashMap<String, GameLocation> locations;
@@ -32,13 +33,7 @@ public class GameMap {
     private GameCharacter currentPlayer;
 
 
-    private HashMap<String, GameArtefact> allArtefacts;
-
-
-    private HashMap<String, GameFurniture> allFurniture;
-
-
-    private HashMap<String, GameCharacter> allCharacters;
+    private HashMap<String, GameEntity> allEntities;
 
     private HashMap<String, GameCharacter> players;
 
@@ -50,6 +45,11 @@ public class GameMap {
             locations.put(newGameLocation.getName(), newGameLocation);
         }
     }
+
+    public void addEntity(GameEntity entity) { allEntities.put(entity.getName(), entity); }
+
+    public GameEntity getEntity(String name) { return allEntities.get(name); }
+
 
     public GameLocation getLocation(String name){ return locations.get(name); }
 
@@ -94,31 +94,14 @@ public class GameMap {
         players.put(player.getName(), player);
     }
 
-    public void removeFromAllLocations(GameArtefact artefact, GameFurniture furniture, GameCharacter character) {
+    public void removeFromAllLocations(GameEntity entity) {
 
         for (Map.Entry<String, GameLocation> location : locations.entrySet()) {
 
-            if (artefact != null &&location.getValue().removeArtefact(artefact)) {
-                return;
-            }
-            if (furniture != null && location.getValue().removeFurniture(furniture)) {
-                return;
-            }
-            if (artefact != null &&location.getValue().removeArtefact(artefact)) {
+            if (location.getValue().removeEntity(entity)) {
                 return;
             }
         }
     }
-
-    public void removeFurnitureFromAllLocations(GameArtefact artefact) {
-
-        for (Map.Entry<String, GameLocation> location : locations.entrySet()) {
-
-            if (location.getValue().removeArtefact(artefact)) {
-                return;
-            }
-        }
-    }
-
 
 }
