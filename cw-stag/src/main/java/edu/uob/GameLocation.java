@@ -6,12 +6,13 @@ import java.util.Map;
 
 public class GameLocation extends GameEntity{
     public GameLocation(String name, String description) {
-        super(name, description);
+        super(name, description, null);
         this.locationFurniture = new HashMap<>();
         this.locationArtefacts = new HashMap<>();
         this.locationCharacters = new HashMap<>();
         this.paths = new ArrayList<>();
     }
+
 
     HashMap<String, GameArtefact> locationArtefacts;
 
@@ -19,6 +20,8 @@ public class GameLocation extends GameEntity{
 
     HashMap<String, GameCharacter> locationCharacters;
 
+
+    HashMap<String, GameEntity> locationEntities;
     ArrayList<String> paths;
 
 
@@ -30,7 +33,17 @@ public class GameLocation extends GameEntity{
 
     public GameArtefact getArtefact(String artefact) { return locationArtefacts.get(artefact); }
 
-    public void removeArtefact(GameArtefact artefact){ locationArtefacts.remove(artefact.getName()); }
+    public boolean removeArtefact(GameArtefact artefact){
+        return locationArtefacts.remove(artefact.getName()) ==null? false : true;
+    }
+
+    public boolean removeFurniture(GameFurniture furniture){
+        return locationFurniture.remove(furniture.getName()) == null ? false : true;
+    }
+
+    public boolean removeCharacter(GameCharacter character){
+        return locationCharacters.remove(character.getName()) == null ? false : true;
+    }
 
     public HashMap<String, GameArtefact> getAllArtefacts() { return locationArtefacts; }
 

@@ -15,7 +15,7 @@ public final class GameServer {
     private static final char END_OF_TRANSMISSION = 4;
 
     public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException {
-        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
         server.blockingListenOn(8888);
@@ -67,7 +67,7 @@ public final class GameServer {
             player.setCharacterLocation(gameMap.getStartLocation());
         }
         String userCommand = command.split(":", 2)[1].trim();
-        InterpretCommand interpreter = new InterpretCommand(gameMap, player, actionLibrary);
+        CommandInterpreter interpreter = new CommandInterpreter(gameMap, player, actionLibrary);
         String response = interpreter.handleCommand(userCommand);
         return response;
     }

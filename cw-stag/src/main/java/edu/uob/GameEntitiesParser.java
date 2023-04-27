@@ -80,18 +80,18 @@ public class GameEntitiesParser {
             String description = item.getAttributes().get("description");
 
             if(typeName.equals("artefacts")) {
-                GameArtefact foundGameArtefact = new GameArtefact(name, description);
+                GameArtefact foundGameArtefact = new GameArtefact(name, description, gameLocation);
                 gameLocation.addArtefact(foundGameArtefact);
                 //System.out.println("Artifact -> " + name + " : " + description);
             }
 
             if(typeName.equals("furniture")) {
-                GameFurniture foundGameFurniture = new GameFurniture(name, description);
+                GameFurniture foundGameFurniture = new GameFurniture(name, description, gameLocation);
                 gameLocation.addFurniture(foundGameFurniture);
                 //System.out.println("Furniture -> " + name + " : " + description);
             }
             if(typeName.equals("characters")) {
-                GameCharacter foundGameCharacter = new GameCharacter(name, description);
+                GameCharacter foundGameCharacter = new GameCharacter(name, description, gameLocation);
                 gameLocation.addCharacter(foundGameCharacter);
                 //System.out.println("Character -> " + name + " : " + description);
             }

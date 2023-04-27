@@ -5,10 +5,15 @@ package edu.uob;
 //pass characters (this) as a reference to their location?
 //when doing look you can see other players, but not yourself--?
 //currently "looko" works like look
+//look at exceptions throw in actions file tests
+//are command case-sensitive? --no right?
+//crashes when you mispell words
 
 
 import javax.xml.stream.Location;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class GameMap {
     public GameMap(){
@@ -25,6 +30,15 @@ public class GameMap {
     private GameLocation startLocation;
 
     private GameCharacter currentPlayer;
+
+
+    private HashMap<String, GameArtefact> allArtefacts;
+
+
+    private HashMap<String, GameFurniture> allFurniture;
+
+
+    private HashMap<String, GameCharacter> allCharacters;
 
     private HashMap<String, GameCharacter> players;
 
@@ -71,13 +85,40 @@ public class GameMap {
 
     public GameCharacter getCurrentPlayer() { return this.currentPlayer; }
 
+    public void setCurrentPlayer(GameCharacter player) { this.currentPlayer = player; }
+
 
     public void addPlayer(String name) {
 
-        GameCharacter player = new GameCharacter(name, "A player called " + name);
+        GameCharacter player = new GameCharacter(name, "A player called " + name, startLocation);
         players.put(player.getName(), player);
     }
 
+    public void removeFromAllLocations(GameArtefact artefact, GameFurniture furniture, GameCharacter character) {
+
+        for (Map.Entry<String, GameLocation> location : locations.entrySet()) {
+
+            if (artefact != null &&location.getValue().removeArtefact(artefact)) {
+                return;
+            }
+            if (furniture != null && location.getValue().removeFurniture(furniture)) {
+                return;
+            }
+            if (artefact != null &&location.getValue().removeArtefact(artefact)) {
+                return;
+            }
+        }
+    }
+
+    public void removeFurnitureFromAllLocations(GameArtefact artefact) {
+
+        for (Map.Entry<String, GameLocation> location : locations.entrySet()) {
+
+            if (location.getValue().removeArtefact(artefact)) {
+                return;
+            }
+        }
+    }
 
 
 }

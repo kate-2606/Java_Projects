@@ -6,10 +6,13 @@ public abstract class GameEntity
     private String name;
     private String description;
 
-    public GameEntity(String name, String description)
+    GameLocation location;
+
+    public GameEntity(String name, String description, GameLocation location)
     {
         this.name = name;
         this.description = description;
+        this.location = location;
     }
 
     public String getName()

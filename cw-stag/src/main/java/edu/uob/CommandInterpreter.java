@@ -1,14 +1,13 @@
 package edu.uob;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
-public class InterpretCommand {
-    public InterpretCommand(GameMap map, GameCharacter currentPlayer, ActionLibrary customActions) {
+public class CommandInterpreter {
+    public CommandInterpreter(GameMap map, GameCharacter currentPlayer, ActionLibrary customActions) {
         this.map = map;
         this.currentPlayer = currentPlayer;
         this.customActions = customActions;
+        map.setCurrentPlayer(this.currentPlayer);
     }
 
     GameMap map;
@@ -21,33 +20,32 @@ public class InterpretCommand {
 
     ActionLibrary customActions;
 
-    public String handleCommand(String inpCommand){
+    public String handleCommand (String inpCommand){
 
         this.currentLocation = map.getCurrentLocation();
-
-        System.out.println("All Paths: " + currentLocation.getAllPathsAsString());
 
         String response = "";
 
         this.command = inpCommand.toLowerCase();
 
-        if(this.command.contains("inv")) {
-            this.command = this.command.replaceAll("\\binv\\b","inventory");
-        }
-        if(this.command.contains("goto")) {
-            this.command = this.command.replaceAll("\\bgoto\\b","_goto");
-            System.out.println("got here: "+this.command);
-        }
+        try {
+            if (this.command.contains("inv")) {
+                this.command = this.command.replaceAll("\\binv\\b", "inventory");
+            }
+            if (this.command.contains("goto")) {
+                this.command = this.command.replaceAll("\\bgoto\\b", "_goto");
+            }
 
-        BasicCommand trigger = containsBasicCommand(command);
+            BasicCommand trigger = containsBasicCommand(command);
 
-        if(trigger != null){
-            response = handleBasicCommand(trigger);
+            if (trigger != null) {
+                response = handleBasicCommand(trigger);
+            } else {
+                response = handleCustomCommand();
+            }
+        }catch(GameExceptions.ActionIsNull e){
+            System.out.println(e);
         }
-        else{
-            response = handleCustomCommand();
-        }
-
         return response;
     }
 
@@ -82,9 +80,9 @@ public class InterpretCommand {
         BasicCommand res = null;
 
         for(BasicCommand trigger : BasicCommand.values()) {
-            System.out.println(trigger + " " + command);
+
             if(command.contains(String.valueOf(trigger))){
-                System.out.println(trigger);
+
                 res=trigger;
             }
         }
@@ -186,25 +184,29 @@ public class InterpretCommand {
         return response;
     }
 
-    private String handleCustomCommand(){
+    private String handleCustomCommand() throws GameExceptions.ActionIsNull{
         int count=0;
         GameAction action = null;
         String words[] = command.split(" ");
         for(String word : words){
+
             if(customActions.matchingTrigger(word)){
+                System.out.println(word);
                 count++;
                 action = findCustomAction(word, words);
-                }
             }
+        }
         if(count==1){
-            consumeAndProduceAction(action);
+            consumeEntities(action);
+            produceEntities(action);
         }
         return "";
     }
 
-    private void consumeAndProduceAction(GameAction action){
+    private void consumeEntities(GameAction action){
 
-        GameArtefact artefact = null;
+        GameArtefact artefact;
+        GameFurniture furniture;
         ArrayList<String> consumables = action.getConsumed();
         for(String consume : consumables) {
 
@@ -212,10 +214,29 @@ public class InterpretCommand {
 
             if(artefact!=null){
                 map.getStoreroom().addArtefact(artefact);
-                currentLocation.removeArtefact(artefact);
+                map.removeFromAllLocations(artefact, null, null);
                 currentPlayer.removeFromInventory(artefact);
             }
+
+            furniture = currentLocation.getFurniture(consume);
+
+            if(furniture!=null){
+                map.removeFromAllLocations(null, furniture, null);
+                map.getStoreroom().addFurniture(furniture);
+            }
+
+            if(furniture!=null){
+                map.removeFromAllLocations(null, furniture, null);
+                map.getStoreroom().addFurniture(furniture);
+            }
         }
+    }
+
+    private void produceEntities(GameAction action){
+
+        GameArtefact artefact;
+        GameFurniture furniture;
+
         ArrayList<String> products = action.getProduced();
 
         for(String produce : products) {
@@ -226,16 +247,25 @@ public class InterpretCommand {
                 map.getStoreroom().removeArtefact(artefact);
                 currentLocation.addArtefact(artefact);
             }
+
+            furniture = map.getStoreroom().getFurniture(produce);
+
+            if(furniture!=null){
+                currentLocation.addFurniture(furniture);
+                map.getStoreroom().removeFurniture(furniture);
+            }
         }
     }
 
     private GameAction findCustomAction(String word, String[] words){
     GameAction res=null;
-        HashSet<GameAction> actions = customActions.getActions(word);
-        GameAction action = actions.iterator().next();
+        Iterator<GameAction> actions = customActions.getActions(word).iterator();
         int count = 0;
-        while(action!=null) {
+        for (Iterator<GameAction> it = actions; it.hasNext(); ) {
+            GameAction action = it.next();
+            System.out.print("action name: "+action.getNarration());
             if (containsSubjects(action, words)) {
+                System.out.println("contains sub");
                 count++;
                 res=action;
             }
@@ -244,12 +274,19 @@ public class InterpretCommand {
     }
 
     private boolean containsSubjects(GameAction action, String[] words) {
+        System.out.println("looking for subs");
         ArrayList<String> subjects = action.getSubjects();
+
         for(String subject : subjects){
+
             if(!Arrays.asList(words).contains(subject)){
                 return false;
             }
-            if(currentLocation.getArtefact(subject) ==null && currentPlayer.getArtefact(subject)==null){
+            boolean artefactInLocation = currentLocation.getArtefact(subject)==null ? false : true;
+            boolean artefactInInventory = currentPlayer.getArtefact(subject)==null ? false : true;
+            boolean furnitureInLocation = currentLocation.getFurniture(subject)==null ? false : true;
+
+            if(!artefactInLocation && !artefactInInventory && !furnitureInLocation ){
                 return false;
             }
         }

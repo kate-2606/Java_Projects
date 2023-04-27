@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class GameCharacter extends GameEntity{
 
-    public GameCharacter(String name, String description) {
-        super(name, description);
+    public GameCharacter(String name, String description, GameLocation location) {
+        super(name, description, location);
         this.inventory = new HashMap<>();
     }
 
