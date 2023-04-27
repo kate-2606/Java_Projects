@@ -25,5 +25,5 @@ public class ActionLibrary {
 
     public HashSet<GameAction> getActions(String trigger) { return library.get(trigger); }
 
-    public HashSet<GameAction> matchingTrigger(String trigger) { return library.get(trigger); }
+    public boolean matchingTrigger(String trigger) { return library.containsKey(trigger); }
 }

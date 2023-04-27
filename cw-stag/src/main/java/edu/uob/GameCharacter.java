@@ -22,6 +22,8 @@ public class GameCharacter extends GameEntity{
 
     public GameArtefact getArtefact(String name) { return inventory.get(name); }
 
+    public boolean hasArtefact(String name) { return inventory.containsKey(name); }
+
     public String getInventoryAsString() {
         String result = "";
         for (Map.Entry<String, GameArtefact> artefact : inventory.entrySet()) {

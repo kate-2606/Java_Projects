@@ -2,6 +2,7 @@ package edu.uob;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 public class InterpretCommand {
     public InterpretCommand(GameMap map, GameCharacter currentPlayer, ActionLibrary customActions) {
@@ -186,20 +187,69 @@ public class InterpretCommand {
     }
 
     private String handleCustomCommand(){
-
+        int count=0;
+        GameAction action = null;
         String words[] = command.split(" ");
         for(String word : words){
-            if(customActions.matchingTrigger(word) != null){
-
+            if(customActions.matchingTrigger(word)){
+                count++;
+                action = findCustomAction(word, words);
+                }
             }
+        if(count==1){
+            consumeAndProduceAction(action);
         }
         return "";
+    }
+
+    private void consumeAndProduceAction(GameAction action){
+
+        GameArtefact artefact = null;
+        ArrayList<String> consumables = action.getConsumed();
+        for(String consume : consumables) {
+
+            artefact = currentPlayer.hasArtefact(consume)? currentPlayer.getArtefact(consume) :currentLocation.getArtefact(consume);
+
+            if(artefact!=null){
+                map.getStoreroom().addArtefact(artefact);
+                currentLocation.removeArtefact(artefact);
+                currentPlayer.removeFromInventory(artefact);
+            }
+        }
+        ArrayList<String> products = action.getProduced();
+
+        for(String produce : products) {
+
+            artefact = map.getStoreroom().getArtefact(produce);
+
+            if(artefact!=null){
+                map.getStoreroom().removeArtefact(artefact);
+                currentLocation.addArtefact(artefact);
+            }
+        }
+    }
+
+    private GameAction findCustomAction(String word, String[] words){
+    GameAction res=null;
+        HashSet<GameAction> actions = customActions.getActions(word);
+        GameAction action = actions.iterator().next();
+        int count = 0;
+        while(action!=null) {
+            if (containsSubjects(action, words)) {
+                count++;
+                res=action;
+            }
+        }
+        return count==1? res : null;
     }
 
     private boolean containsSubjects(GameAction action, String[] words) {
         ArrayList<String> subjects = action.getSubjects();
         for(String subject : subjects){
             if(!Arrays.asList(words).contains(subject)){
+                return false;
+            }
+            if(currentLocation.getArtefact(subject) ==null && currentPlayer.getArtefact(subject)==null){
                 return false;
             }
         }
