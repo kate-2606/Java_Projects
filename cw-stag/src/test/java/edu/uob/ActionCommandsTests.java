@@ -14,10 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ActionCommandsTests {
 
-
-    // Test to make sure that the basic actions file is readable
-
-
     @BeforeEach
     void setUpParser() throws IOException, ParserConfigurationException, SAXException, ParseException {
         File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
@@ -147,4 +143,31 @@ public class ActionCommandsTests {
         String response = interpreter.handleCommand("look");
         assertTrue(response.contains("A heavy wooden log"));
     }
+
+    @Test
+    void testCapitalisation1() {
+        interpreter.handleCommand("GET POTION");
+        String response  = interpreter.handleCommand("look");
+        assertFalse(response.contains("A bottle of magic potion"));
+        response  = interpreter.handleCommand("iNv");
+        assertTrue(response.contains("A bottle of magic potion"));
+        interpreter.handleCommand("dRINK pOTiON");
+        System.out.println(testMap.getCurrentPlayer().health);
+        assertEquals(3, testMap.getCurrentPlayer().health);
+    }
+
+    @Test
+    void testWordOrdering1() {
+        interpreter.handleCommand(" axe          GET");
+        interpreter.handleCommand("forest goto");
+        String response  = interpreter.handleCommand("look");
+        assertTrue(response.contains("A tall pine tree"));
+        response  = interpreter.handleCommand("iNv");
+        assertTrue(response.contains("axe"));
+        interpreter.handleCommand("tree cut down axe");
+        response  = interpreter.handleCommand("look");
+        System.out.println(response);
+        assertTrue(response.contains("A heavy wooden log"));
+    }
+
 }

@@ -83,18 +83,19 @@ public class GameEntitiesParser {
             if(typeName.equals("artefacts")) {
                 GameArtefact foundGameArtefact = new GameArtefact(name, description, gameLocation);
                 gameMap.addEntity(foundGameArtefact, gameLocation);
-                //System.out.println("Artifact -> " + name + " : " + description);
             }
 
             if(typeName.equals("furniture")) {
                 GameFurniture foundGameFurniture = new GameFurniture(name, description, gameLocation);
                 gameMap.addEntity(foundGameFurniture, gameLocation);
-                //System.out.println("Furniture -> " + name + " : " + description);
             }
             if(typeName.equals("characters")) {
                 GameCharacter foundGameCharacter = new GameCharacter(name, description, gameLocation);
                 gameMap.addEntity(foundGameCharacter, gameLocation);
-                //System.out.println("Character -> " + name + " : " + description);
+            }
+            if(typeName.equals("health")) {
+                GameEntity healthEntity = new GameEntity("health", "Characters health", null){};
+                gameMap.addEntity(healthEntity, gameLocation);
             }
         }
     }

@@ -1,5 +1,6 @@
 package edu.uob;
 
+import java.io.IOException;
 import java.util.*;
 
 public class CommandInterpreter {
@@ -40,14 +41,14 @@ public class CommandInterpreter {
             } else {
                 response = handleCustomCommand();
             }
-        }catch(GameExceptions.ActionIsNull e){
-            System.out.println(e);
+        }catch(GameExceptions e){
+            response = String.valueOf(e);
         }
         return response;
     }
 
 
-    private String handleBasicCommand(BasicCommand trigger) {
+    private String handleBasicCommand(BasicCommand trigger) throws GameExceptions {
         String response = "";
 
         switch (trigger) {
@@ -86,45 +87,48 @@ public class CommandInterpreter {
         return res;
     }
 
-    private GameArtefact findArtefact(boolean basic, boolean inventory){
+    private GameArtefact findArtefact(boolean inventory) throws GameExceptions {
 
         String[] words = command.split(" ");
-        String artefactName = "";
-
+        GameArtefact res=null;
         int count = 0;
+
         for(String word : words){
 
             if(currentLocation.getEntity(word) != null && !inventory){
                 count++;
-                artefactName = word;
+
+                if(currentLocation.getEntity(word) instanceof GameArtefact){
+                    res = (GameArtefact) currentLocation.getEntity(word);
+                }
+                else{ throw new GameExceptions.CannotGetOrDropItem(word); }
             }
             if(currentPlayer.getArtefact(word) != null && inventory){
+
                 count++;
-                artefactName = word;
+                res = currentPlayer.getArtefact(word);
             }
         }
-        if(count==1 && basic) {
-            return inventory ? currentPlayer.getArtefact(artefactName) : (GameArtefact) currentLocation.getEntity(artefactName);
-        }
-        return null;
+        if (count != 1){ throw new GameExceptions.CannotGetOrDropMultiple(); }
+
+        if(count == 0){ throw new GameExceptions.CannotGetOrDropNothing(); }
+
+        return res;
     }
 
     private String respondToInventory(){
 
-        String response = "";
-
         if(currentPlayer.getInventorySize() >0 ) {
-            response = "In your inventory, you have:\n" + currentPlayer.getInventoryAsString();
+            return "In your inventory, you have:\n" + currentPlayer.getInventoryAsString();
         }
         else{
-            response = "There is nothing in your inventory.";
+            return  "There is nothing in your inventory.";
         }
-        return response;
     }
 
-    private String respondToGet(){
+    private String respondToGet() throws GameExceptions {
 
-         GameArtefact foundArtefact = findArtefact(true, false);
+         GameArtefact foundArtefact = findArtefact(false);
          if( foundArtefact != null) {
              map.getCurrentLocation().removeEntity(foundArtefact);
              map.getCurrentPlayer().addToInventory(foundArtefact);
@@ -133,9 +137,9 @@ public class CommandInterpreter {
         return "";
     }
 
-    private String respondToDrop(){
+    private String respondToDrop() throws GameExceptions {
 
-        GameArtefact foundArtefact = findArtefact(true, true);
+        GameArtefact foundArtefact = findArtefact(true);
         if( foundArtefact != null) {
             map.getCurrentLocation().addEntity(foundArtefact);
             map.getCurrentPlayer().removeFromInventory(foundArtefact);
@@ -176,7 +180,7 @@ public class CommandInterpreter {
         return response;
     }
 
-    private String handleCustomCommand() throws GameExceptions.ActionIsNull {
+    private String handleCustomCommand() throws GameExceptions.ActionIsNull, GameExceptions {
         int count = 0;
 
         GameAction action = null;
@@ -189,11 +193,12 @@ public class CommandInterpreter {
                 action = findCustomAction(word, words);
             }
         }
+        if(count>1){ throw new GameExceptions.MultipleTriggerWords(); }
         if (count == 1 && action!=null) {
             consumeEntities(action);
             produceEntities(action);
         }
-        return action==null? "Action could not be preformed" : action.getNarration();
+        return action==null? "No action performed." : action.getNarration();
     }
 
     private void consumeEntities(GameAction action){
@@ -228,7 +233,7 @@ public class CommandInterpreter {
         }
     }
 
-    private GameAction findCustomAction(String word, String[] words){
+    private GameAction findCustomAction(String word, String[] words) throws GameExceptions {
     GameAction res=null;
         Set<GameAction> actions = customActions.getActions(word);
         int count = 0;
@@ -241,7 +246,8 @@ public class CommandInterpreter {
         return count==1? res : null;
     }
 
-    private boolean containsSubjects(GameAction action, String[] words) {
+    //change this so the command can not contain other entities which aren't in the action
+    private boolean containsSubjects(GameAction action, String[] words) throws GameExceptions {
 
         ArrayList<GameEntity> subjects = action.getSubjects();
         int count=0;
@@ -252,10 +258,7 @@ public class CommandInterpreter {
             boolean entityInLocation = currentLocation.getEntity(subject.getName())==null ? false : true;
             boolean artefactInInventory = currentPlayer.getArtefact(subject.getName())==null ? false : true;
 
-            if(!entityInLocation && !artefactInInventory){
-                System.out.println("got here");
-                return false;
-            }
+            if(!entityInLocation && !artefactInInventory){ throw new GameExceptions.SubjectsNotInVicinity(); }
         }
         System.out.println(action.getActionAsString("subjects") +" "+ count);
         return count>0? true : false;

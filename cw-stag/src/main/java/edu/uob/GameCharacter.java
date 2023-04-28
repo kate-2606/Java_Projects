@@ -39,7 +39,7 @@ public class GameCharacter extends GameEntity{
 
     public void removeHealth() {
         if (health > 0)
-            health--;
+            health = health-1;
         //if (health == 0)
 
     }
