@@ -11,14 +11,11 @@ public class CommandInterpreter {
     }
 
     GameMap map;
-
     String command;
-
     GameCharacter currentPlayer;
-
     GameLocation currentLocation;
-
     ActionLibrary customActions;
+
 
     public String handleCommand (String inpCommand){
 
@@ -150,7 +147,6 @@ public class CommandInterpreter {
     private String respondToGoto(){
         String[] words = command.split(" ");
         String locationName = "";
-        System.out.println("in goto");
 
         int count = 0;
         for(String word : words) {
@@ -166,7 +162,7 @@ public class CommandInterpreter {
             currentLocation = nextLocation;
             return respondToLook();
         }
-        return "";
+        return "You enter the "+currentLocation;
     }
 
     private String respondToLook(){
@@ -180,23 +176,24 @@ public class CommandInterpreter {
         return response;
     }
 
-    private String handleCustomCommand() throws GameExceptions.ActionIsNull{
-        int count=0;
+    private String handleCustomCommand() throws GameExceptions.ActionIsNull {
+        int count = 0;
+
         GameAction action = null;
         String words[] = command.split(" ");
-        for(String word : words){
+        for (String word : words) {
 
-            if(customActions.matchingTrigger(word)){
+            if (customActions.matchingTrigger(word)) {
                 System.out.println(word);
                 count++;
                 action = findCustomAction(word, words);
             }
         }
-        if(count==1){
+        if (count == 1 && action!=null) {
             consumeEntities(action);
             produceEntities(action);
         }
-        return "";
+        return action==null? "Action could not be preformed" : action.getNarration();
     }
 
     private void consumeEntities(GameAction action){
@@ -204,11 +201,16 @@ public class CommandInterpreter {
         ArrayList<GameEntity> consumables = action.getConsumed();
         for(GameEntity consume : consumables) {
 
-            map.getStoreroom().addEntity(consume);
             map.removeFromAllLocations(consume);
-            currentPlayer.removeFromInventory((GameArtefact) consume);
+            if(consume instanceof GameArtefact) {
+                currentPlayer.removeFromInventory((GameArtefact) consume);
+            }
             if(consume.getName().equals("health")){
                 currentPlayer.removeHealth();
+                //check if player dies
+            }
+            if(consume instanceof GameLocation){
+                currentLocation.removePath(consume.getName());
             }
         }
     }
@@ -216,24 +218,22 @@ public class CommandInterpreter {
     private void produceEntities(GameAction action){
 
         ArrayList<GameEntity> products = action.getProduced();
-
         for(GameEntity produce : products) {
-
             map.getStoreroom().removeEntity(produce);
-            currentLocation.addEntity(produce);
+            map.addEntity(produce, currentLocation);
+            if(produce instanceof GameLocation){
 
+                currentLocation.addPath(produce.getName());
+            }
         }
     }
 
     private GameAction findCustomAction(String word, String[] words){
     GameAction res=null;
-        Iterator<GameAction> actions = customActions.getActions(word).iterator();
+        Set<GameAction> actions = customActions.getActions(word);
         int count = 0;
-        for (Iterator<GameAction> it = actions; it.hasNext(); ) {
-            GameAction action = it.next();
-            System.out.print("action name: "+action.getNarration());
+        for (GameAction action : actions) {
             if (containsSubjects(action, words)) {
-                System.out.println("contains sub");
                 count++;
                 res=action;
             }
@@ -244,19 +244,21 @@ public class CommandInterpreter {
     private boolean containsSubjects(GameAction action, String[] words) {
 
         ArrayList<GameEntity> subjects = action.getSubjects();
-
+        int count=0;
         for(GameEntity subject : subjects){
-            if(!Arrays.asList(words).contains(subject.getName())){
-                return false;
+            if(Arrays.asList(words).contains(subject.getName())){
+                count++;
             }
             boolean entityInLocation = currentLocation.getEntity(subject.getName())==null ? false : true;
             boolean artefactInInventory = currentPlayer.getArtefact(subject.getName())==null ? false : true;
 
             if(!entityInLocation && !artefactInInventory){
+                System.out.println("got here");
                 return false;
             }
         }
-        return true;
+        System.out.println(action.getActionAsString("subjects") +" "+ count);
+        return count>0? true : false;
     }
 
 }

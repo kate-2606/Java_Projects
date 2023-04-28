@@ -26,8 +26,8 @@ public class GameLocation extends GameEntity{
 
     public GameEntity getEntity(String artefact) { return locationEntities.get(artefact); }
 
+
     public boolean removeEntity (GameEntity entity){
-        entity.setLocation(null);
         return locationEntities.remove(entity.getName()) ==null? false : true;
     }
 
@@ -35,13 +35,13 @@ public class GameLocation extends GameEntity{
         String result = "";
 
         for (Map.Entry<String, GameEntity> entity : locationEntities.entrySet()) {
-            if((entityType==null || entityType.equals("GameArtifact")) && entity.getValue() instanceof GameArtefact)
+            if((entityType==null || entityType.equals("artefacts")) && entity.getValue() instanceof GameArtefact)
             result = result + entity.getValue().getDescription() + "\n";
 
-            if((entityType==null || entityType.equals("GameFurniture")) && entity.getValue() instanceof GameFurniture)
+            if((entityType==null || entityType.equals("furniture")) && entity.getValue() instanceof GameFurniture)
                 result = result + entity.getValue().getDescription() + "\n";
 
-            if((entityType==null || entityType.equals("GameCharacter")) && entity.getValue() instanceof GameCharacter)
+            if((entityType==null || entityType.equals("characters")) && entity.getValue() instanceof GameCharacter)
                 result = result + entity.getValue().getDescription() + "\n";
         }
         return result;
@@ -49,6 +49,9 @@ public class GameLocation extends GameEntity{
 
 
     public void addPath(String pathEnd){ paths.add(pathEnd); }
+
+    public void removePath(String pathEnd){ paths.remove(pathEnd); }
+
 
     public String getAllPathsAsString() {
 

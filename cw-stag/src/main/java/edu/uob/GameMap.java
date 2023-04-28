@@ -1,15 +1,16 @@
 package edu.uob;
 
 /* -------------------------NOTES----------------------------*/
-//if command contains two valid actions perform neither
+//if command contains two valid actions perform neither -- or if contains trigger word from two actions
 //when doing look you can see other players, but not yourself--?
 //currently "looko" works like look
 //look at exceptions throw in actions file tests
 //are command case-sensitive? --no right?
-//crashes when you mispell words
+//crashes when you misspell words
 //can health be a subject?
 //open door with key and hammer? if key and hammer are entities, will this work?
-//cant have two trigger words in command
+// look into .foreach
+//remeber triggers can have spaces in them
 
 
 import javax.xml.stream.Location;
@@ -48,7 +49,12 @@ public class GameMap {
         }
     }
 
-    public void addEntity(GameEntity entity) { allEntities.put(entity.getName(), entity); }
+    public void addEntity(GameEntity entity, GameLocation location) {
+        allEntities.put(entity.getName(), entity);
+        entity.setLocation(location);
+        if(location !=null )
+            location.addEntity(entity);
+    }
 
     public GameEntity getEntity(String name) { return allEntities.get(name); }
 
@@ -99,8 +105,8 @@ public class GameMap {
     public void removeFromAllLocations(GameEntity entity) {
 
         for (Map.Entry<String, GameLocation> location : locations.entrySet()) {
-
             if (location.getValue().removeEntity(entity)) {
+                entity.setLocation(storeroom);
                 return;
             }
         }

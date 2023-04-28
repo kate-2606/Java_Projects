@@ -26,8 +26,10 @@ public class GameAction extends HashSet<GameAction> {
     public ArrayList<String> getTriggers(){ return triggers; }
 
     public void addSubject(GameEntity entity){
-        if(entity!=null)
+
+        if(entity!=null) {
             subjects.add(entity);
+        }
     }
 
     public ArrayList<GameEntity> getSubjects(){ return subjects; }
