@@ -84,10 +84,13 @@ final class EntitiesFileTests {
         assertEquals("A log cabin in the woods", currentLocation.getDescription());
 
         assertNotNull(currentLocation.getEntity("potion"));
+        assertNotNull(testMap.getEntity("potion"));
         assertEquals("Magic potion", currentLocation.getEntity("potion").getDescription());
         assertNull(currentLocation.getEntity("key"));
 
+
         assertNotNull(currentLocation.getEntity("trapdoor"));
+        assertNotNull(testMap.getEntity("trapdoor"));
         assertEquals("Wooden trapdoor", currentLocation.getEntity("trapdoor").getDescription());
         assertNull(currentLocation.getEntity("door"));
 
@@ -102,6 +105,7 @@ final class EntitiesFileTests {
         assertEquals("A dark forest", currentLocation.getDescription());
 
         assertNotNull(currentLocation.getEntity("key"));
+        assertNotNull(testMap.getEntity("key"));
         assertEquals("Brass key", currentLocation.getEntity("key").getDescription());
         assertNull(currentLocation.getEntity("potion"));
 

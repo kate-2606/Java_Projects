@@ -25,15 +25,47 @@ public class GameAction extends HashSet<GameAction> {
 
     public ArrayList<String> getTriggers(){ return triggers; }
 
-    public void addSubject(GameEntity entity){ subjects.add(entity); }
+    public void addSubject(GameEntity entity){
+        if(entity!=null)
+            subjects.add(entity);
+    }
 
     public ArrayList<GameEntity> getSubjects(){ return subjects; }
 
-    public void addConsumed(GameEntity entity){ subjects.add(entity); }
+    public ArrayList<String> getActionAsString(String elementType){
+
+        ArrayList<String> elementsAsString = new ArrayList<>();
+        switch(elementType){
+            case "subjects":
+            for(GameEntity subject : subjects){
+                elementsAsString.add(subject.getName());
+            }
+            break;
+            case"consumed":
+                for(GameEntity consume: consumed){
+                    elementsAsString.add(consume.getName());
+                }
+                break;
+            case "produced":
+                for(GameEntity product: produced){
+                    elementsAsString.add(product.getName());
+                }
+                break;
+        }
+        return elementsAsString;
+    }
+
+    public void addConsumed(GameEntity entity){
+        if(entity!=null)
+            consumed.add(entity);
+    }
 
    public ArrayList<GameEntity> getConsumed(){ return consumed; }
 
-    public void addProduced(GameEntity entity){ subjects.add(entity); }
+    public void addProduced(GameEntity entity){
+        if(entity!=null)
+            produced.add(entity);
+    }
 
     public ArrayList<GameEntity> getProduced(){ return produced; }
 

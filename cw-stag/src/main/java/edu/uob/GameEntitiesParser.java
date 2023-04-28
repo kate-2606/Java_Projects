@@ -55,7 +55,8 @@ public class GameEntitiesParser {
         String locationName = locationDetails.getId().getId();
         String locationDescription = locationDetails.getAttributes().get("description");
 
-        GameLocation gameLocation = new GameLocation(locationName, locationDescription);
+        GameLocation gameLocation = new GameLocation(locationName, locationDescription, null);
+        gameMap.addEntity(gameLocation);
         addAllEntityTypes(locationData, gameLocation);
         //System.out.println("LOCATION:" + locationName + "   " + locationDescription);
         return gameLocation;
@@ -82,23 +83,20 @@ public class GameEntitiesParser {
             if(typeName.equals("artefacts")) {
                 GameArtefact foundGameArtefact = new GameArtefact(name, description, gameLocation);
                 gameLocation.addEntity(foundGameArtefact);
-                if(!gameLocation.getName().equals("storeroom"))
-                        gameMap.addEntity(foundGameArtefact);
+                gameMap.addEntity(foundGameArtefact);
                 //System.out.println("Artifact -> " + name + " : " + description);
             }
 
             if(typeName.equals("furniture")) {
                 GameFurniture foundGameFurniture = new GameFurniture(name, description, gameLocation);
                 gameLocation.addEntity(foundGameFurniture);
-                if(!gameLocation.getName().equals("storeroom"))
-                    gameMap.addEntity(foundGameFurniture);
+                gameMap.addEntity(foundGameFurniture);
                 //System.out.println("Furniture -> " + name + " : " + description);
             }
             if(typeName.equals("characters")) {
                 GameCharacter foundGameCharacter = new GameCharacter(name, description, gameLocation);
                 gameLocation.addEntity(foundGameCharacter);
-                if(!gameLocation.getName().equals("storeroom"))
-                    gameMap.addEntity(foundGameCharacter);
+                gameMap.addEntity(foundGameCharacter);
                 //System.out.println("Character -> " + name + " : " + description);
             }
 

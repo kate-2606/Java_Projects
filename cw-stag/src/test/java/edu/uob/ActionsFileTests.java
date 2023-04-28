@@ -29,11 +29,14 @@ final class ActionsFileTests {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         library = new ActionLibrary();
         GameMap map = new GameMap();
+        this.map=map;
         GameEntitiesParser entitiesParser = new GameEntitiesParser(entitiesFile,  map);
         GameActionsParser parser = new GameActionsParser(actionsFile, library, map);
     }
 
     ActionLibrary library;
+
+    GameMap map;
   @Test
   void testBasicActionsFileIsReadable() {
       try {
@@ -63,12 +66,12 @@ final class ActionsFileTests {
       assertEquals(1, actions.size());
       ArrayList<String> triggers = action.getTriggers();
       assertEquals(triggers.get(1), "unlock");
-      ArrayList<String> subjects = action.getSubjects();
+      ArrayList<String> subjects = action.getActionAsString("subjects");
       assertEquals(subjects.get(0), "trapdoor");
       assertEquals(subjects.get(1), "key");
-      ArrayList<String> consumed = action.getConsumed();
+      ArrayList<String> consumed = action.getActionAsString("consumed");
       assertEquals(consumed.get(0), "key");
-      ArrayList<String> produced = action.getProduced();
+      ArrayList<String> produced = action.getActionAsString("produced");
       assertEquals(produced.get(0), "cellar");
       assertEquals(action.getNarration(), "You unlock the trapdoor and see steps leading down into a cellar");
   }
@@ -81,12 +84,12 @@ final class ActionsFileTests {
         ArrayList<String> triggers = action.getTriggers();
         assertEquals(triggers.get(1), "cut");
         assertEquals(triggers.get(2), "cutdown");
-        ArrayList<String> subjects = action.getSubjects();
+        ArrayList<String> subjects = action.getActionAsString("subjects");
         assertEquals(subjects.get(0), "tree");
-        assertEquals(subjects.get(1), "axe");
-        ArrayList<String> consumed = action.getConsumed();
+        assertEquals("forest", map.getEntity("tree").getLocation().getName());
+        ArrayList<String> consumed = action.getActionAsString("consumed");
         assertEquals(consumed.get(0), "tree");
-        ArrayList<String> produced = action.getProduced();
+        ArrayList<String> produced = action.getActionAsString("produced");
         assertEquals(produced.get(0), "log");
         assertEquals(action.getNarration(), "You cut down the tree with the axe");
     }
@@ -96,12 +99,11 @@ final class ActionsFileTests {
         HashSet<GameAction> actions= library.getActions("drink");
         GameAction action = actions.iterator().next();
         assertEquals(1, actions.size());
-        ArrayList<String> subjects = action.getSubjects();
+        ArrayList<String> subjects = action.getActionAsString("subjects");
         assertEquals(subjects.get(0), "potion");
-        ArrayList<String> consumed = action.getConsumed();
+        ArrayList<String> consumed = action.getActionAsString("consumed");
         assertEquals(consumed.get(0), "potion");
-        ArrayList<String> produced = action.getProduced();
-        assertEquals(produced.get(0), "health");
+        ArrayList<String> produced = action.getActionAsString("produced");
         assertEquals(action.getNarration(), "You drink the potion and your health improves");
     }
 
@@ -113,11 +115,10 @@ final class ActionsFileTests {
         ArrayList<String> triggers = action.getTriggers();
         assertEquals(triggers.get(1), "hit");
         assertEquals(triggers.get(2), "attack");
-        ArrayList<String> subjects = action.getSubjects();
+        ArrayList<String> subjects = action.getActionAsString("subjects");
         assertEquals(subjects.get(0), "elf");
-        ArrayList<String> consumed = action.getConsumed();
-        assertEquals(consumed.get(0), "health");
-        ArrayList<String> produced = action.getProduced();
+        ArrayList<String> consumed = action.getActionAsString("consumed");
+        ArrayList<String> produced = action.getActionAsString("produced");
         assertEquals(action.getNarration(), "You attack the elf, but he fights back and you lose some health");
     }
 

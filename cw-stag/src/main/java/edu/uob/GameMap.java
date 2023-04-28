@@ -2,12 +2,14 @@ package edu.uob;
 
 /* -------------------------NOTES----------------------------*/
 //if command contains two valid actions perform neither
-//pass characters (this) as a reference to their location?
 //when doing look you can see other players, but not yourself--?
 //currently "looko" works like look
 //look at exceptions throw in actions file tests
 //are command case-sensitive? --no right?
 //crashes when you mispell words
+//can health be a subject?
+//open door with key and hammer? if key and hammer are entities, will this work?
+//cant have two trigger words in command
 
 
 import javax.xml.stream.Location;

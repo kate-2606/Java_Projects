@@ -8,11 +8,14 @@ public class GameCharacter extends GameEntity{
     public GameCharacter(String name, String description, GameLocation location) {
         super(name, description, location);
         this.inventory = new HashMap<>();
+        this.health=3;
     }
 
     GameLocation characterLocation;
 
     HashMap<String, GameEntity> inventory;
+
+    int health;
 
     public void addToInventory(GameArtefact newArtefact) { inventory.put(newArtefact.getName(), newArtefact); }
 
@@ -33,5 +36,17 @@ public class GameCharacter extends GameEntity{
     }
 
     public int getInventorySize() { return inventory.size(); }
+
+    public void removeHealth() {
+        if (health > 0)
+            health--;
+        //if (health == 0)
+
+    }
+
+    public void addHealth(){
+        if(health<3)
+            health++;
+    }
 
 }

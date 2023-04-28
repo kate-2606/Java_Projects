@@ -25,4 +25,8 @@ public abstract class GameEntity
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public void setLocation(GameLocation location) { this.location = location; }
+
+    public GameLocation getLocation() { return this.location; }
 }

@@ -201,14 +201,15 @@ public class CommandInterpreter {
 
     private void consumeEntities(GameAction action){
 
-        GameArtefact artefact;
-        GameFurniture furniture;
         ArrayList<GameEntity> consumables = action.getConsumed();
         for(GameEntity consume : consumables) {
 
             map.getStoreroom().addEntity(consume);
             map.removeFromAllLocations(consume);
             currentPlayer.removeFromInventory((GameArtefact) consume);
+            if(consume.getName().equals("health")){
+                currentPlayer.removeHealth();
+            }
         }
     }
 
@@ -241,11 +242,10 @@ public class CommandInterpreter {
     }
 
     private boolean containsSubjects(GameAction action, String[] words) {
-        System.out.println("looking for subs");
+
         ArrayList<GameEntity> subjects = action.getSubjects();
 
         for(GameEntity subject : subjects){
-
             if(!Arrays.asList(words).contains(subject.getName())){
                 return false;
             }
