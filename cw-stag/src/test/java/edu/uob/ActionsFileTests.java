@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.io.File;
 import java.util.HashSet;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -25,8 +26,8 @@ final class ActionsFileTests {
 
     @BeforeEach
     void setUpParser() throws IOException, ParserConfigurationException, SAXException, ParseException {
-        File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
-        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
+        File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
         library = new ActionLibrary();
         GameMap map = new GameMap();
         this.map=map;
@@ -61,7 +62,7 @@ final class ActionsFileTests {
 
   @Test
     void firstAction(){
-      HashSet<GameAction> actions= library.getActions("open");
+      Set<GameAction> actions= library.getActions("open");
       GameAction action = actions.iterator().next();
       assertEquals(1, actions.size());
       ArrayList<String> triggers = action.getTriggers();
@@ -73,17 +74,17 @@ final class ActionsFileTests {
       assertEquals(consumed.get(0), "key");
       ArrayList<String> produced = action.getActionAsString("produced");
       assertEquals(produced.get(0), "cellar");
-      assertEquals(action.getNarration(), "You unlock the trapdoor and see steps leading down into a cellar");
+      assertEquals(action.getNarration(), "You unlock the door and see steps leading down into a cellar");
   }
 
     @Test
     void secondAction(){
-        HashSet<GameAction> actions= library.getActions("chop");
+        Set<GameAction> actions= library.getActions("chop");
         GameAction action = actions.iterator().next();
         assertEquals(1, actions.size());
         ArrayList<String> triggers = action.getTriggers();
         assertEquals(triggers.get(1), "cut");
-        assertEquals(triggers.get(2), "cutdown");
+        assertEquals(triggers.get(2), "cut down");
         ArrayList<String> subjects = action.getActionAsString("subjects");
         assertEquals(subjects.get(0), "tree");
         assertEquals("forest", map.getEntity("tree").getLocation().getName());
@@ -96,7 +97,7 @@ final class ActionsFileTests {
 
     @Test
     void thirdAction(){
-        HashSet<GameAction> actions= library.getActions("drink");
+        Set<GameAction> actions= library.getActions("drink");
         GameAction action = actions.iterator().next();
         assertEquals(1, actions.size());
         ArrayList<String> subjects = action.getActionAsString("subjects");
@@ -109,7 +110,7 @@ final class ActionsFileTests {
 
     @Test
     void fourthAction(){
-        HashSet<GameAction> actions= library.getActions("fight");
+        Set<GameAction> actions= library.getActions("fight");
         GameAction action = actions.iterator().next();
         assertEquals(1, actions.size());
         ArrayList<String> triggers = action.getTriggers();

@@ -3,27 +3,29 @@ package edu.uob;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class ActionLibrary {
     public ActionLibrary(){
         this.library = new HashMap<>();
     }
 
-    private HashMap<String, HashSet<GameAction>> library;
+    public HashMap<String, Set<GameAction>> library;
 
     public void addAction(GameAction action){
         ArrayList<String> triggers = action.getTriggers();
+
         for (String trigger : triggers){
             if(library.get(trigger)==null){
                 HashSet<GameAction> set = new HashSet<>();
                 library.put(trigger, set);
             }
-            HashSet set = library.get(trigger);
-            set.add(action);
+            Set actions = library.get(trigger);
+            actions.add(action);
         }
     }
 
-    public HashSet<GameAction> getActions(String trigger) { return library.get(trigger); }
+    public Set<GameAction> getActions(String trigger) { return library.get(trigger); }
 
     public boolean matchingTrigger(String trigger) { return library.containsKey(trigger); }
 }

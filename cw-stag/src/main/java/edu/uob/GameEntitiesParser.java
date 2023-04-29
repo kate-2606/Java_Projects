@@ -56,7 +56,7 @@ public class GameEntitiesParser {
         String locationDescription = locationDetails.getAttributes().get("description");
 
         GameLocation gameLocation = new GameLocation(locationName, locationDescription, null);
-        gameMap.addEntity(gameLocation);
+        gameMap.addEntity(gameLocation, null);
         addAllEntityTypes(locationData, gameLocation);
         //System.out.println("LOCATION:" + locationName + "   " + locationDescription);
         return gameLocation;
@@ -82,24 +82,21 @@ public class GameEntitiesParser {
 
             if(typeName.equals("artefacts")) {
                 GameArtefact foundGameArtefact = new GameArtefact(name, description, gameLocation);
-                gameLocation.addEntity(foundGameArtefact);
-                gameMap.addEntity(foundGameArtefact);
-                //System.out.println("Artifact -> " + name + " : " + description);
+                gameMap.addEntity(foundGameArtefact, gameLocation);
             }
 
             if(typeName.equals("furniture")) {
                 GameFurniture foundGameFurniture = new GameFurniture(name, description, gameLocation);
-                gameLocation.addEntity(foundGameFurniture);
-                gameMap.addEntity(foundGameFurniture);
-                //System.out.println("Furniture -> " + name + " : " + description);
+                gameMap.addEntity(foundGameFurniture, gameLocation);
             }
             if(typeName.equals("characters")) {
                 GameCharacter foundGameCharacter = new GameCharacter(name, description, gameLocation);
-                gameLocation.addEntity(foundGameCharacter);
-                gameMap.addEntity(foundGameCharacter);
-                //System.out.println("Character -> " + name + " : " + description);
+                gameMap.addEntity(foundGameCharacter, gameLocation);
             }
-
+            if(typeName.equals("health")) {
+                GameEntity healthEntity = new GameEntity("health", "Characters health", null){};
+                gameMap.addEntity(healthEntity, gameLocation);
+            }
         }
     }
 
