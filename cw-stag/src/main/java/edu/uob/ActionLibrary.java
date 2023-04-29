@@ -10,10 +10,11 @@ public class ActionLibrary {
         this.library = new HashMap<>();
     }
 
-    private HashMap<String, Set<GameAction>> library;
+    public HashMap<String, Set<GameAction>> library;
 
     public void addAction(GameAction action){
         ArrayList<String> triggers = action.getTriggers();
+
         for (String trigger : triggers){
             if(library.get(trigger)==null){
                 HashSet<GameAction> set = new HashSet<>();

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import static edu.uob.BasicCommand.get;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExceptionTests {
@@ -36,9 +37,32 @@ public class ExceptionTests {
     CommandInterpreter interpreter;
 
     @Test
-    void testCannotDropMultiple(){
-        assertThrows(GameExceptions.CannotGetOrDropMultiple.class, ()-> interpreter.handleCommand("get potion axe"));
+    void testCannotGetOrDropMultiple1() {
+        assertThrows(GameExceptions.CannotGetOrDropMultiple.class, ()-> interpreter.handleBasicCommand(get, "get potion axe"));
     }
+    @Test
+    void testCannotGetOrDropMultiple2(){
+        assertThrows(GameExceptions.CannotGetOrDropMultiple.class, ()-> interpreter.handleBasicCommand(get, "get potion potion"));
+    }
+
+    @Test
+    void testCannotGetOrDropMultiple3() {
+        interpreter.handleCommand("goto forest");
+        interpreter.handleCommand("goto riverbank");
+        assertThrows(GameExceptions.CannotGetOrDropMultiple.class, ()-> interpreter.handleBasicCommand(get, "horn get horn"));
+    }
+
+    @Test
+    void testCannotGetOrDropNothing1() {
+        interpreter.handleCommand("goto forest");
+        assertThrows(GameExceptions.CannotGetOrDropNothing.class, ()-> interpreter.handleBasicCommand(get, "get"));
+    }
+
+    @Test
+    void testMultipleTriggerWords() {
+        assertThrows(GameExceptions.CannotGetOrDropNothing.class, ()-> interpreter.handleBasicCommand(get, "look inv"));
+    }
+
 
 
 }

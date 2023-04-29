@@ -11,6 +11,8 @@ package edu.uob;
 //open door with key and hammer? if key and hammer are entities, will this work?
 // look into .foreach
 //remeber triggers can have spaces in them
+//goto forest forest
+
 
 
 import javax.xml.stream.Location;
