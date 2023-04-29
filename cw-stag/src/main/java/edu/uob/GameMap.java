@@ -10,6 +10,7 @@ package edu.uob;
 //can health be a subject?
 //open door with key and hammer? if key and hammer are entities, will this work?
 //cant have two trigger words in command
+//is a command vaild if the action consumes a location but there is not path to it form your current location?
 
 
 import javax.xml.stream.Location;

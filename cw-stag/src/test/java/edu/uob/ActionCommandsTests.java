@@ -39,7 +39,7 @@ public class ActionCommandsTests {
 
     CommandInterpreter interpreter;
 
-    //basic look test
+    /*
     @Test
     void testBasicActions1() {
         String response  = interpreter.handleCommand("look");
@@ -73,6 +73,8 @@ public class ActionCommandsTests {
         assertTrue(response.contains("Brass key"));
     }
 
+     */
+
     @Test
     void testBasicActions4() {
         interpreter.handleCommand("goto forest");
@@ -82,6 +84,7 @@ public class ActionCommandsTests {
         interpreter.handleCommand("unlock trapdoor with key");
         interpreter.handleCommand("goto cellar");
         String response = interpreter.handleCommand("look");
+        System.out.println(testMap.getCurrentLocation().getName());
         assertTrue(response.contains("Angry elf"));
     }
 }

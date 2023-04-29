@@ -150,16 +150,17 @@ public class CommandInterpreter {
     private String respondToGoto(){
         String[] words = command.split(" ");
         String locationName = "";
-        System.out.println("in goto");
+
 
         int count = 0;
         for(String word : words) {
-
+            System.out.println(word);
             if (currentLocation.isPath(word)) {
                 count++;
                 locationName = word;
             }
         }
+        System.out.println("in goto "+count);
         if(count ==1){
             GameLocation nextLocation = map.getLocation(locationName);
             map.setCurrentLocation(nextLocation);
@@ -192,6 +193,7 @@ public class CommandInterpreter {
                 action = findCustomAction(word, words);
             }
         }
+        System.out.println("action count = " + count);
         if(count==1){
             consumeEntities(action);
             produceEntities(action);
@@ -238,13 +240,13 @@ public class CommandInterpreter {
                 res=action;
             }
         }
+        System.out.println("count= "+count);
         return count==1? res : null;
     }
 
     private boolean containsSubjects(GameAction action, String[] words) {
 
         ArrayList<GameEntity> subjects = action.getSubjects();
-
         for(GameEntity subject : subjects){
             if(!Arrays.asList(words).contains(subject.getName())){
                 return false;
