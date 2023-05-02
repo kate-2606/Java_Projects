@@ -240,8 +240,6 @@ class ExampleSTAGTests {
         sendCommandToServer("sion: get key");
         sendCommandToServer("sion: goto cabin");
         sendCommandToServer("sion: unlock trapdoor");
-        String response =
-                assertTrue(response.contains("You cannot access the riverbank from the cabin"));
     }
 
 
