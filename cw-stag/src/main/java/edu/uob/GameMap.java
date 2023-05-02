@@ -2,18 +2,13 @@ package edu.uob;
 
 /* -------------------------NOTES----------------------------*/
 //if command contains two valid actions perform neither -- or if contains trigger word from two actions
-//when doing look you can see other players, but not yourself--?
-//currently "looko" works like look
-//look at exceptions throw in actions file tests
 //are command case-sensitive? --no right?
 //crashes when you misspell words
 //can health be a subject?
-//open door with key and hammer? if key and hammer are entities, will this work?
-//cant have two trigger words in command
-//is a command vaild if the action consumes a location but there is not path to it form your current location?
+//is a command is invalid if the action consumes a location but there is not path to it form your current location?
 // look into .foreach
-//remeber triggers can have spaces in them
-//goto forest forest
+//basic commands should have the trigger word first -- not tested
+// there are no tests with punctuation
 
 
 
@@ -39,10 +34,17 @@ public class GameMap {
 
     private GameCharacter currentPlayer;
 
-
     private HashMap<String, GameEntity> allEntities;
 
     private HashMap<String, GameCharacter> players;
+
+
+    public void instantiatePlayer(GameCharacter player){
+        player.setAsPlayer();
+        moveEntity(player, startLocation);
+        currentPlayer=player;
+        currentLocation=startLocation;
+    }
 
     public void addLocation(GameLocation newGameLocation) {
         if(newGameLocation.getName().equals("storeroom")){
@@ -53,12 +55,15 @@ public class GameMap {
         }
     }
 
+
     public void addEntity(GameEntity entity, GameLocation location) {
+
         allEntities.put(entity.getName(), entity);
-        entity.setLocation(location);
-        if(location !=null )
+
+        if(!entity.getName().equals("health"))
             location.addEntity(entity);
     }
+
 
     public GameEntity getEntity(String name) { return allEntities.get(name); }
 
@@ -75,12 +80,10 @@ public class GameMap {
     public void setCurrentLocation(GameLocation currentLocation) { this.currentLocation = currentLocation; }
 
 
-    public void setStartLocation(GameLocation startLocation) { this.startLocation = startLocation; }
+    public void setStartLocation(GameLocation startLocation) { this.startLocation = startLocation; System.out.println(startLocation.getName());}
 
 
     public GameLocation getStartLocation() { return this.startLocation; }
-
-    public void setStoreroom (GameLocation storeroomLocation) { this.storeroom = storeroomLocation; }
 
 
     public GameLocation getCurrentLocation() {return currentLocation; }
@@ -95,7 +98,9 @@ public class GameMap {
         return player;
     }
 
+
     public GameCharacter getCurrentPlayer() { return this.currentPlayer; }
+
 
     public void setCurrentPlayer(GameCharacter player) { this.currentPlayer = player; }
 
@@ -106,14 +111,27 @@ public class GameMap {
         players.put(player.getName(), player);
     }
 
-    public void removeFromAllLocations(GameEntity entity) {
 
-        for (Map.Entry<String, GameLocation> location : locations.entrySet()) {
-            if (location.getValue().removeEntity(entity)) {
-                entity.setLocation(storeroom);
-                return;
+
+    public void moveEntity (GameEntity entity, GameLocation newLocation) {
+
+        if (!entity.getName().equals("health") && !(entity instanceof GameLocation)) {
+            if(entity.getLocation() !=null){
+                entity.getLocation().removeEntity(entity.getName());
+            }
+
+            entity.setLocation(newLocation);
+
+            if (newLocation != null) {
+                newLocation.addEntity(entity);
+            }
+
+            if (newLocation == null) {
+                currentPlayer.addToInventory((GameArtefact) entity);
             }
         }
     }
+
+
 
 }

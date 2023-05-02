@@ -85,6 +85,10 @@ public class GameActionsParser {
             String nextPhrase = words.item(i).getTextContent();
 
             while (nextPhrase != null) {
+                if(nextPhrase.toLowerCase().equals("health")){
+                    GameEntity health = new GameArtefact("health", "character health", null);
+                    map.addEntity(health, null);
+                }
                 switch (type) {
                     case triggers:
                         action.addTrigger(nextPhrase);

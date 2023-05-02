@@ -29,22 +29,14 @@ public class GameExceptions extends Exception {
         }
     }
 
-    public static class CannotGetOrDropNothing extends GameExceptions {
-        @Serial
-        private static final long serialVersionUID = 1;
-
-        public CannotGetOrDropNothing() {
-            super("you cannot GET/DROP zero items.");
-        }
-    }
 
     public static class CannotGetOrDropItem extends GameExceptions {
         @Serial
         private static final long serialVersionUID = 1;
 
-        public CannotGetOrDropItem(String item) {
-            super("you cannot GET/DROP the " + item);
-        }
+        public CannotGetOrDropItem(String entityName) {
+
+            super("you cannot GET/DROP the "+(entityName.equals("")? "unknown item" : entityName)); }
     }
 
     public static class ExeraneousEntities extends GameExceptions {
@@ -71,6 +63,24 @@ public class GameExceptions extends Exception {
 
         public SubjectsNotInVicinity() {
             super("The subjects of the action are not in your current vecinity");
+        }
+    }
+
+    public static class CannotAccessThisLocation extends GameExceptions {
+        @Serial
+        private static final long serialVersionUID = 1;
+
+        public CannotAccessThisLocation(GameLocation current, GameLocation next) {
+            super("You cannot access the "+next.getName()+ " from the " + current.getName());
+        }
+    }
+
+    public static class CannotPerformActionInLocation  extends GameExceptions {
+        @Serial
+        private static final long serialVersionUID = 1;
+
+        public CannotPerformActionInLocation(GameLocation current) {
+            super("You cannot perform this action in the " + current);
         }
     }
 }

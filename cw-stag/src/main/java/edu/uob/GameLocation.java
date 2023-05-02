@@ -20,37 +20,36 @@ public class GameLocation extends GameEntity{
 
     public void addEntity(GameEntity newArtifact){
         this.locationEntities.put(newArtifact.getName(), newArtifact);
-        newArtifact.setLocation(this);
     }
 
 
     public GameEntity getEntity(String artefact) { return locationEntities.get(artefact); }
 
+    public void removeEntity(String entity) { locationEntities.remove(entity); }
 
-    public boolean removeEntity (GameEntity entity){
-        return locationEntities.remove(entity.getName()) ==null? false : true;
-    }
+    public String getAllEntitiesAsString(GameEntity currentPlayer) {
 
-    public String getAllEntitiesAsString(String entityType) {
-        String result = "";
+        String artefacts = "";
+        String furniture = "";
+        String characters= "";
 
         for (Map.Entry<String, GameEntity> entity : locationEntities.entrySet()) {
-            if((entityType==null || entityType.equals("artefacts")) && entity.getValue() instanceof GameArtefact)
-            result = result + entity.getValue().getDescription() + "\n";
+            if(entity.getValue() instanceof GameArtefact)
+                artefacts = artefacts + entity.getValue().getDescription() + "\n";
 
-            if((entityType==null || entityType.equals("furniture")) && entity.getValue() instanceof GameFurniture)
-                result = result + entity.getValue().getDescription() + "\n";
+            if(entity.getValue() instanceof GameFurniture)
+                furniture = furniture + entity.getValue().getDescription() + "\n";
 
-            if((entityType==null || entityType.equals("characters")) && entity.getValue() instanceof GameCharacter)
-                result = result + entity.getValue().getDescription() + "\n";
+            if(entity.getValue() instanceof GameCharacter && entity.getValue()!=currentPlayer)
+                characters = characters + entity.getValue().getDescription() + "\n";
         }
-        return result;
+        return artefacts + furniture + characters;
     }
 
 
     public void addPath(String pathEnd){ paths.add(pathEnd); }
 
-    public void removePath(String pathEnd){ paths.remove(pathEnd); }
+    public boolean removePath(String pathEnd){ return paths.remove(pathEnd); }
 
 
     public String getAllPathsAsString() {

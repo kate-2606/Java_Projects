@@ -56,7 +56,7 @@ public class GameEntitiesParser {
         String locationDescription = locationDetails.getAttributes().get("description");
 
         GameLocation gameLocation = new GameLocation(locationName, locationDescription, null);
-        gameMap.addEntity(gameLocation, null);
+        gameMap.addEntity(gameLocation, gameLocation);
         addAllEntityTypes(locationData, gameLocation);
         //System.out.println("LOCATION:" + locationName + "   " + locationDescription);
         return gameLocation;

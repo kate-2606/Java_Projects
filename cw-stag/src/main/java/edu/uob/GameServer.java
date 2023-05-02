@@ -56,19 +56,24 @@ public final class GameServer {
     */
 
     //ask if its reasonable reject any command which include symbols?
-    public String handleCommand(String command) {
+    public String handleCommand(String command) throws GameExceptions {
 
+        String response="";
         String userName = command.split(":", 2)[0].trim().toLowerCase();
         GameCharacter player = gameMap.findPlayer(userName);
 
         if(player==null){
             gameMap.addPlayer(userName);
             player = gameMap.findPlayer(userName);
-            player.setCharacterLocation(gameMap.getStartLocation());
+            gameMap.instantiatePlayer(player);
         }
         String userCommand = command.split(":", 2)[1].trim();
         CommandInterpreter interpreter = new CommandInterpreter(gameMap, player, actionLibrary);
-        String response = interpreter.handleCommand(userCommand);
+        try{
+        response = interpreter.handleCommand(userCommand);
+        }catch(GameExceptions e){
+            response = String.valueOf(e);
+        }
         return response;
     }
 
@@ -119,6 +124,8 @@ public final class GameServer {
                 writer.write("\n" + END_OF_TRANSMISSION + "\n");
                 writer.flush();
             }
+        } catch (GameExceptions e) {
+            throw new RuntimeException(e);
         }
     }
 }

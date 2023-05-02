@@ -148,6 +148,7 @@ final class EntitiesFileTests {
         assertNull(currentLocation.getEntity("elf"));
     }
 
+    @Test
     void mapTest() {
         assertNotNull(testMap.getEntity("key"));
         assertNotNull(testMap.getEntity("potion"));

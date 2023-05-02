@@ -4,53 +4,67 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static edu.uob.BasicCommand._goto;
+
 public class CommandInterpreter {
     public CommandInterpreter(GameMap map, GameCharacter currentPlayer, ActionLibrary customActions) {
         this.map = map;
-        this.currentPlayer = currentPlayer;
         this.customActions = customActions;
-        map.setCurrentPlayer(this.currentPlayer);
     }
 
     GameMap map;
-    GameCharacter currentPlayer;
-    GameLocation currentLocation;
+
     ActionLibrary customActions;
 
 
-    public String handleCommand (String inpCommand){
-
-        this.currentLocation = map.getCurrentLocation();
+    public String handleCommand (String inpCommand) throws GameExceptions {
 
         String response = "";
+        String command = formatCommand(inpCommand);
 
-        String command = " "+inpCommand.toLowerCase()+" ";
+        BasicCommand trigger = containsBasicCommand(command);
 
-        try {
-            if (command.contains("inv")) {
-                command = command.replaceAll("\\binv\\b", "inventory");
-            }
-            if (command.contains("goto")) {
-                command = command.replaceAll("\\bgoto\\b", "_goto");
-            }
+        if (trigger != null) {
 
-            BasicCommand trigger = containsBasicCommand(command);
-
-            if (trigger != null) {
+            if(!containsCustomTrigger(command))
                 response = handleBasicCommand(trigger, command);
-            } else {
-                response = handleCustomCommand(command);
+
+            if(containsCustomTrigger(command)){
+                throw new GameExceptions.MultipleTriggerWords();
             }
-        }catch(GameExceptions e){
-            response = String.valueOf(e);
         }
+        else{
+            response = handleCustomCommand(command);
+        }
+
         return response;
     }
 
+    private String formatCommand(String command){
+
+        command = " "+command.toLowerCase()+" ";
+
+        if (command.contains(" inv ")) {
+            command = command.replaceAll("\\binv\\b", "inventory");
+        }
+        if (command.contains(" goto ")) {
+            command = command.replaceAll("\\bgoto\\b", "_goto");
+        }
+        return command;
+    }
+
+    private boolean containsCustomTrigger(String command){
+
+        String[] words = command.trim().split(" ");
+        for(String word : words){
+            if(customActions.getActions(word)!=null){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public String handleBasicCommand(BasicCommand trigger, String command) throws GameExceptions {
-
-        this.currentLocation = map.getCurrentLocation();
 
         String response = "";
 
@@ -76,19 +90,21 @@ public class CommandInterpreter {
         return response;
     }
 
-    private BasicCommand containsBasicCommand(String command){
+    private BasicCommand containsBasicCommand(String command) throws GameExceptions {
 
-        BasicCommand res = null;
+        int count=0;
+        BasicCommand res=null;
 
-        for(BasicCommand trigger : BasicCommand.values()) {
-
-            if(command.contains(String.valueOf(trigger))){
-
-                res=trigger;
+        for (BasicCommand basic : BasicCommand.values()){
+            if (command.contains(" " + basic.name() + " ")) {
+                count++;
+                res = basic;
             }
-        }
-        return res;
     }
+    if(count >1) { throw new GameExceptions.MultipleTriggerWords(); }
+
+    return res;
+}
 
     private GameArtefact findArtefact(boolean inventory, String command) throws GameExceptions {
 
@@ -98,31 +114,27 @@ public class CommandInterpreter {
 
         for(String word : words){
 
-            if(currentLocation.getEntity(word) != null && !inventory){
+            if(map.getCurrentLocation().getEntity(word) instanceof GameArtefact && !inventory){
                 count++;
-
-                if(currentLocation.getEntity(word) instanceof GameArtefact){
-                    res = (GameArtefact) currentLocation.getEntity(word);
-                }
-                else{ throw new GameExceptions.CannotGetOrDropItem(word); }
+                res = (GameArtefact) map.getCurrentLocation().getEntity(word);
             }
-            if(currentPlayer.getArtefact(word) != null && inventory){
+            if(map.getCurrentPlayer().getArtefact(word) != null && inventory){
 
                 count++;
-                res = currentPlayer.getArtefact(word);
+                res = map.getCurrentPlayer().getArtefact(word);
             }
         }
         if (count > 1){ throw new GameExceptions.CannotGetOrDropMultiple(); }
 
-        if(count == 0){ throw new GameExceptions.CannotGetOrDropNothing(); }
+        if(count == 0){ throw new GameExceptions.CannotGetOrDropItem(""); }
 
         return res;
     }
 
     private String respondToInventory(){
 
-        if(currentPlayer.getInventorySize() >0 ) {
-            return "In your inventory, you have:\n" + currentPlayer.getInventoryAsString();
+        if(map.getCurrentPlayer().getInventorySize() >0 ) {
+            return "In your inventory, you have:\n" + map.getCurrentPlayer().getInventoryAsString();
         }
         else{
             return  "There is nothing in your inventory.";
@@ -132,8 +144,9 @@ public class CommandInterpreter {
     private String respondToGet(String command) throws GameExceptions {
 
          GameArtefact foundArtefact = findArtefact(false, command);
-         if( foundArtefact != null) {
-             map.getCurrentLocation().removeEntity(foundArtefact);
+
+         if(foundArtefact != null) {
+             map.moveEntity(foundArtefact, null);
              map.getCurrentPlayer().addToInventory(foundArtefact);
              return "You picked up a " + foundArtefact.getName();
          }
@@ -143,7 +156,8 @@ public class CommandInterpreter {
     private String respondToDrop(String command) throws GameExceptions {
 
         GameArtefact foundArtefact = findArtefact(true, command);
-        if( foundArtefact != null) {
+
+        if(foundArtefact != null) {
             map.getCurrentLocation().addEntity(foundArtefact);
             map.getCurrentPlayer().removeFromInventory(foundArtefact);
             return "You dropped up a " + foundArtefact.getName();
@@ -151,132 +165,172 @@ public class CommandInterpreter {
         return "";
     }
 
-    private String respondToGoto(String command){
-        String[] words = command.split(" ");
+    private String respondToGoto(String command) throws GameExceptions {
+
+        String[] words = command.replace(" "+_goto.name()+" ", "").split(" ");
         String locationName = "";
 
         int count = 0;
         for(String word : words) {
-            System.out.println(word);
-            if (currentLocation.isPath(word)) {
+
+            if (map.getCurrentLocation().isPath(word)) {
                 count++;
                 locationName = word;
             }
+            if(map.getEntity(word) != null && !(map.getEntity(word) instanceof  GameLocation)) {
+                throw new GameExceptions.ExeraneousEntities();
+            }
+
+            if(map.getEntity(word) instanceof  GameLocation && count!=1) {
+                throw new GameExceptions.CannotAccessThisLocation(map.getCurrentLocation(), map.getLocation(word));
+            }
         }
-        System.out.println("in goto "+count);
+
         if(count ==1){
             GameLocation nextLocation = map.getLocation(locationName);
             map.setCurrentLocation(nextLocation);
-            currentLocation = nextLocation;
-            return respondToLook();
+            map.moveEntity(map.getCurrentPlayer(), nextLocation);
         }
-        return "You enter the "+currentLocation;
+        return "You enter the "+map.getCurrentLocation();
     }
 
     private String respondToLook(){
 
+        GameLocation currentLocation = map.getCurrentLocation();
+
         String response = "You are in " + currentLocation.getDescription() + ". You can see:\n";
 
-        response = response + currentLocation.getAllEntitiesAsString(null) + "You can access from here:\n";
+        response = response + currentLocation.getAllEntitiesAsString(map.getCurrentPlayer()) + "You can access from here:\n";
 
         response = response + currentLocation.getAllPathsAsString();
 
         return response;
     }
 
-    private String handleCustomCommand(String command) throws GameExceptions.ActionIsNull, GameExceptions {
-        int count = 0;
+    private String handleCustomCommand(String command) throws GameExceptions {
+        int countTriggers = 0;
 
         GameAction action = null;
 
         for(String key :customActions.library.keySet()){
             if (command.contains(key)) {
-                count++;
-                if(findCustomAction(key, command)!=null) {
+
+                if(findCustomAction(key, command)!=null && findCustomAction(key, command)!=action) {
+                    countTriggers++;
                     action=findCustomAction(key, command);
                 }
             }
         }
+        if(countTriggers >1){ throw new GameExceptions.MultipleTriggerWords(); }
 
-        if(count >1){ throw new GameExceptions.MultipleTriggerWords(); }
-        if (count == 1 && action !=null) {
-            consumeEntities(action);
-            produceEntities(action);
+        if (countTriggers == 1 && action !=null) {
+           updateEntities(action);
         }
         return action ==null? "No action performed." : action.getNarration();
     }
 
-    private void consumeEntities(GameAction action){
-
-        ArrayList<GameEntity> consumables = action.getConsumed();
-        for(GameEntity consume : consumables) {
-
-            map.removeFromAllLocations(consume);
-            if(consume instanceof GameArtefact) {
-                currentPlayer.removeFromInventory((GameArtefact) consume);
-            }
-            if(consume.getName().equals("health")){
-                currentPlayer.removeHealth();
-                //check if player dies
-            }
-            if(consume instanceof GameLocation){
-                currentLocation.removePath(consume.getName());
-            }
-        }
-    }
-
-    private void produceEntities(GameAction action){
-
-        ArrayList<GameEntity> products = action.getProduced();
-        for(GameEntity produce : products) {
-            map.getStoreroom().removeEntity(produce);
-            map.addEntity(produce, currentLocation);
-            if(produce instanceof GameLocation){
-
-                currentLocation.addPath(produce.getName());
-            }
-        }
-    }
 
     private GameAction findCustomAction(String word, String command) throws GameExceptions {
-    GameAction res=null;
+
+        GameAction res=null;
         Set<GameAction> actions = customActions.getActions(word);
         int count = 0;
+
         for (GameAction action : actions) {
             if (containsSubjects(action, command)) {
                 count++;
                 res=action;
             }
         }
-        System.out.println("count= "+count);
+        //else throw multiple possible actions in command
         return count==1? res : null;
     }
 
-    //change this so the command can not contain other entities which aren't in the action
-    private boolean containsSubjects(GameAction action, String command) throws GameExceptions {
 
-        ArrayList<GameEntity> subjects = action.getSubjects();
+    private boolean containsSubjects(GameAction action, String command) throws GameExceptions {
 
         int subjectCount=0;
         int entityCount=0;
 
-        String[] words = command.split(" ");
-        for(String word : words){
-            if(subjects.contains(word)){
-                subjectCount++;
-            }
-            if(map.getEntity(word)!=null){
-                entityCount++;
-            }
-            boolean entityInLocation = currentLocation.getEntity(word)==null ? false : true;
-            boolean artefactInInventory = currentPlayer.getArtefact(word)==null ? false : true;
+        ArrayList<String> subjects = action.getSubjectsAsStrings();
+        String[] words = command.trim().split(" ");
 
-            if((!entityInLocation && !artefactInInventory) || entityCount>subjectCount) {
+        for(String word : words){
+
+            if(subjects.contains(word))
+                subjectCount++;
+
+            if(map.getEntity(word)!=null)
+                entityCount++;
+
+            boolean entityExists = map.getEntity(word) == null ? false : true;
+            boolean entityInLocation = map.getCurrentLocation().getEntity(word)==null ? false : true;
+            boolean artefactInInventory = map.getCurrentPlayer().getArtefact(word)==null ? false : true;
+
+            if(!entityInLocation && !artefactInInventory && entityExists) {
                 throw new GameExceptions.SubjectsNotInVicinity();
             }
         }
 
-        return subjectCount>0? true : false;
+        if(entityCount>subjectCount) { throw  new GameExceptions.ExeraneousEntities(); }
+
+        return (subjectCount>0 && subjectCount==entityCount) ? true : false;
+    }
+
+
+    private void updateEntities(GameAction action) throws GameExceptions {
+
+        ArrayList<GameEntity> products = action.getProduced();
+
+        for(GameEntity produce : products) {
+            produceEntity(produce);
+        }
+
+        ArrayList<GameEntity> consumables = action.getConsumed();
+
+        for(GameEntity consume : consumables) {
+            consumeEntity(consume);
+        }
+    }
+
+    private void consumeEntity(GameEntity consume) throws GameExceptions {
+
+        GameCharacter currentPlayer = map.getCurrentPlayer();
+        if (consume instanceof GameArtefact && consume.getLocation()==null) {
+            if(!currentPlayer.removeFromInventory((GameArtefact) consume) && !consume.getName().equals("health")){
+                throw  new GameExceptions.CannotGetOrDropItem(consume.getName());
+            }
+        }
+        map.moveEntity(consume, map.getStoreroom());
+
+        if (consume.getName().equals("health")) {
+
+            if (!currentPlayer.removeHealth()) {
+
+                currentPlayer.reincarnatePlayer(map.getStartLocation());
+
+                map.moveEntity(currentPlayer, map.getStartLocation());
+                map.setCurrentLocation(map.getStartLocation());
+            }
+        }
+
+        if (consume instanceof GameLocation) {
+            if (!map.getCurrentLocation().removePath(consume.getName())) {
+                throw new GameExceptions.CannotPerformActionInLocation(map.getCurrentLocation());
+            }
+        }
+    }
+
+
+    private void produceEntity(GameEntity produce) {
+
+        map.moveEntity(produce, map.getCurrentLocation());
+
+        if (produce instanceof GameLocation) {
+            map.getCurrentLocation().addPath(produce.getName());
+        } else {
+            map.addEntity(produce, map.getCurrentLocation());
+        }
     }
 
 }

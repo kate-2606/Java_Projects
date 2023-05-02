@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ActionCommandsTests {
+public class ActionCommandTests {
 
     @BeforeEach
     void setUpParser() throws IOException, ParserConfigurationException, SAXException, ParseException {
@@ -24,6 +24,7 @@ public class ActionCommandsTests {
         GameEntitiesParser entitiesParser = new GameEntitiesParser(entitiesFile, testMap);
         GameActionsParser parser = new GameActionsParser(actionsFile, library, testMap);
         tester = new GameCharacter("tester", "strict tester", testMap.getStartLocation());
+        testMap.instantiatePlayer(tester);
         interpreter = new CommandInterpreter(testMap, tester, library);
     }
 
@@ -36,9 +37,8 @@ public class ActionCommandsTests {
 
     CommandInterpreter interpreter;
 
-
     @Test
-    void testBasicActions1() {
+    void testBasicActions1() throws GameExceptions {
         String response  = interpreter.handleCommand("look");
         assertTrue(response.contains("A log cabin in the woods"));
         assertTrue(response.contains("A bottle of magic potion"));
@@ -51,7 +51,7 @@ public class ActionCommandsTests {
 
     //basic get test
     @Test
-    void testBasicActions2() {
+    void testBasicActions2() throws GameExceptions {
         interpreter.handleCommand("get potion");
         String response  = interpreter.handleCommand("look");
         assertFalse(response.contains("A bottle of magic potion"));
@@ -61,7 +61,7 @@ public class ActionCommandsTests {
 
     //basic goto test
     @Test
-    void testBasicActions3() {
+    void testBasicActions3() throws GameExceptions {
         interpreter.handleCommand("goto forest");
         String response  = interpreter.handleCommand("look");
         assertTrue(response.contains("A deep dark forest"));
@@ -72,8 +72,10 @@ public class ActionCommandsTests {
         assertTrue(response.contains("A rusty old key"));
     }
 
+
+
     @Test
-    void testBasicActions4() {
+    void testBasicActions4() throws GameExceptions {
         GameAction action = library.getActions("unlock").iterator().next();
         interpreter.handleCommand("goto forest");
         interpreter.handleCommand("get key");
@@ -86,7 +88,7 @@ public class ActionCommandsTests {
     }
 
     @Test
-    void testBasicActions5() {
+    void testBasicActions5() throws GameExceptions {
         interpreter.handleCommand("get axe");
         interpreter.handleCommand("goto forest");
         assertNotNull(testMap.getCurrentLocation().getEntity("tree"));
@@ -97,7 +99,7 @@ public class ActionCommandsTests {
     }
 
     @Test
-    void testBasicActions6() {
+    void testBasicActions6() throws GameExceptions {
         interpreter.handleCommand("goto forest");
         interpreter.handleCommand("goto riverbank");
         assertNotNull(testMap.getCurrentLocation().getEntity("horn"));
@@ -107,12 +109,13 @@ public class ActionCommandsTests {
         assertNotNull(testMap.getCurrentLocation().getEntity("lumberjack"));
     }
 
+
+
     @Test
-    void testBasicActions7() {
+    void testBasicActions7() throws GameExceptions {
         interpreter.handleCommand("goto forest");
         interpreter.handleCommand("goto riverbank");
         interpreter.handleCommand("get horn");
-        interpreter.handleCommand("goto riverbank");
         interpreter.handleCommand("goto forest");
         interpreter.handleCommand("goto cabin");
         assertNull(testMap.getCurrentLocation().getEntity("horn"));
@@ -124,7 +127,37 @@ public class ActionCommandsTests {
     }
 
     @Test
-    void testPartialCommand1() {
+    void testBasicActions8() throws GameExceptions {
+        interpreter.handleCommand("get coin");
+        interpreter.handleCommand("get axe");
+        interpreter.handleCommand("goto forest");
+        interpreter.handleCommand("get key");
+        interpreter.handleCommand("goto cabin");
+        interpreter.handleCommand("unlock trapdoor");
+        interpreter.handleCommand("goto cellar");
+        interpreter.handleCommand("pay elf");
+        interpreter.handleCommand("get shovel");
+        interpreter.handleCommand("goto cabin");
+        interpreter.handleCommand("goto forest");
+        interpreter.handleCommand("cut down axe");
+        interpreter.handleCommand("get log");
+        interpreter.handleCommand("goto riverbank");
+        interpreter.handleCommand("drop axe");
+        String response = interpreter.handleCommand("inv");
+        assertTrue(response.contains("log"));
+        assertTrue(response.contains("shovel"));
+        assertFalse(response.contains("axe"));
+        response = interpreter.handleCommand("look");
+        assertTrue(response.contains("river"));
+        assertTrue(response.contains("axe"));
+        interpreter.handleCommand("bridge river");
+        interpreter.handleCommand("dig shovel");
+        response = interpreter.handleCommand("look");
+        assertTrue(response.contains("hole"));
+    }
+
+    @Test
+    void testPartialCommand1() throws GameExceptions {
         interpreter.handleCommand("get axe");
         interpreter.handleCommand("goto forest");
         interpreter.handleCommand("chop tree");
@@ -133,32 +166,32 @@ public class ActionCommandsTests {
     }
 
     @Test
-    void testDecoratedCommand1() {
+    void testDecoratedCommand1() throws GameExceptions {
         interpreter.handleCommand("get the shiny axe");
         assertTrue(testMap.getCurrentPlayer().getInventoryAsString().contains("axe"));
         interpreter.handleCommand("goto the scary forest");
-        assertTrue(testMap.getCurrentLocation().getAllEntitiesAsString("furniture").contains("tree"));
-        assertTrue(testMap.getCurrentLocation().getAllEntitiesAsString("artefacts").contains("key"));
+        assertTrue(testMap.getCurrentLocation().getAllEntitiesAsString(testMap.getCurrentPlayer()).contains("tree"));
+        assertTrue(testMap.getCurrentLocation().getAllEntitiesAsString(testMap.getCurrentPlayer()).contains("key"));
         interpreter.handleCommand("the beautiful tree chop");
         String response = interpreter.handleCommand("look");
         assertTrue(response.contains("A heavy wooden log"));
     }
 
     @Test
-    void testCapitalisation1() {
+    void testCapitalisation1() throws GameExceptions {
         interpreter.handleCommand("GET POTION");
         String response  = interpreter.handleCommand("look");
         assertFalse(response.contains("A bottle of magic potion"));
         response  = interpreter.handleCommand("iNv");
         assertTrue(response.contains("A bottle of magic potion"));
         interpreter.handleCommand("dRINK pOTiON");
-        System.out.println(testMap.getCurrentPlayer().health);
+
         assertEquals(3, testMap.getCurrentPlayer().health);
     }
 
     @Test
-    void testWordOrdering1() {
-        interpreter.handleCommand(" axe          GET");
+    void testWordOrdering1() throws GameExceptions {
+        interpreter.handleCommand(" GET axe");
         interpreter.handleCommand("forest goto");
         String response  = interpreter.handleCommand("look");
         assertTrue(response.contains("A tall pine tree"));
@@ -166,8 +199,15 @@ public class ActionCommandsTests {
         assertTrue(response.contains("axe"));
         interpreter.handleCommand("tree cut down axe");
         response  = interpreter.handleCommand("look");
-        System.out.println(response);
         assertTrue(response.contains("A heavy wooden log"));
+    }
+
+    @Test
+    void testInvalidWords() throws GameExceptions {
+        String response = interpreter.handleCommand("looks");
+        assertFalse(response.contains("A silver coin"));
+        response = interpreter.handleCommand("I look around");
+        assertTrue(response.contains("A silver coin"));
     }
 
 }

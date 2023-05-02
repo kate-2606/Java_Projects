@@ -34,6 +34,15 @@ public class GameAction extends HashSet<GameAction> {
 
     public ArrayList<GameEntity> getSubjects(){ return subjects; }
 
+    public ArrayList<String> getSubjectsAsStrings(){
+        ArrayList<String> allSubjects = new ArrayList<>();
+        for (GameEntity subject : subjects){
+            allSubjects.add(subject.getName());
+        }
+        return allSubjects;
+    }
+
+
     public ArrayList<String> getActionAsString(String elementType){
 
         ArrayList<String> elementsAsString = new ArrayList<>();
