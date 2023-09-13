@@ -1,4 +1,4 @@
-#Java Projects
+# Java Projects
 
 This repo contains the following object oriented Java assignments I completed during univeristy:
 
