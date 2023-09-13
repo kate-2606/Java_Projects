@@ -1,3 +1,5 @@
+#Java Projects
+
 This repo contains the following object oriented Java assignments I completed during univeristy:
 
 1) **Shapes** - introduction to Java object classes and inheritence.
