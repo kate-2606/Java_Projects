@@ -2,10 +2,10 @@
 
 This repo contains the following object-oriented Java assignments I completed during university:
 
-1) **Shapes** - introduction to Java object classes and inheritance.
+1) **Shapes** - An introduction exercise to Java object classes and inheritance.
    
-2) **OXO** - naughts and crosses multiplayer game, the board can be resized, win threshold changed and new players add to the game. The game includes a GUI.
+2) **OXO** - A multiplayer naughts and crosses game, the board can be resized, win threshold changed and new players add to the game. GUI included.
    
-3) **Databases** - parsing and implementing a bespoke db query language, functionalities include: creating, joining, searching and deleting tables.
+3) **Databases** - Parses and interprets a bespoke db query language, functionalities include: creating, joining, searching and deleting tables.
    
-4) **STAG** - Simple Text Adventure Game based on input .xml and .dot files, users perform actions in the game to interact with objects. Objects can be consumed or put into players' inventories, the game map and game objects update accordingly. Players have a health property and the game can host multiple players. The game is played via the terminal.
+4) **STAG** - A "Simple Text Adventure Game" based on custom input .xml and .dot files. Users perform actions to interact with objects in the game. Objects can be consumed or stored inplayers' inventories. The game can host multiple players all players have an assosiated health attribute. The game is played via the terminal.
